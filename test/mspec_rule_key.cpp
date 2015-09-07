@@ -1,0 +1,52 @@
+/*
+ * Test the mspec_rule_key class.
+ *
+ * $Id: mspec_rule_key.cpp 1711 2015-09-03 21:59:00 amarentes $
+ * $HeadURL: https://./test/mspec_rule_key.cpp $
+ */
+#include <cppunit/TestCase.h>
+#include <cppunit/extensions/HelperMacros.h>
+
+#include <ext/hash_map>
+#include "mspec_rule_key.h"
+#include <string>
+#include <iostream>
+
+using namespace anslp;
+
+
+class MspecRuleKeyTest : public CppUnit::TestCase {
+
+	CPPUNIT_TEST_SUITE( MspecRuleKeyTest );
+
+	CPPUNIT_TEST( general_test );
+
+	CPPUNIT_TEST_SUITE_END();
+
+  public:
+  
+	void general_test() 
+	{
+		std::string keyStr1, keyStr3;
+		mspec_rule_key key1;
+		mspec_rule_key key2(key1);
+		mspec_rule_key key3;
+		mspec_rule_key key4;
+		
+		CPPUNIT_ASSERT( key1 == key2 );
+		
+		CPPUNIT_ASSERT( key1 != key3 );
+		
+		key4 = key1;
+		
+		CPPUNIT_ASSERT( key1 == key4 );
+		
+		keyStr1 = key1.to_string();
+		
+		keyStr3 = key3.to_string();
+				
+	}
+
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION( MspecRuleKeyTest );

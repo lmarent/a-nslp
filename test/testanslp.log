@@ -1,0 +1,942 @@
+2015-09-07 14:19:42.347-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.347-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.347-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.347-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.347-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.347-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.347-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.347-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.361-24292**ERROR**4: IE              IE::check_ser_args() for IE anslp_ipap_mspec, error: IE is in invalid state.
+2015-09-07 14:19:42.364-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.364-24292- DEBUG /4: anslp_object    Ending deserialize 80 Object type:249
+2015-09-07 14:19:42.365-24292**ERROR**4: IE              IE::check_ser_args() for IE information_code, error: IE is in invalid state.
+2015-09-07 14:19:42.365-24292- DEBUG /4: infomation_code Starting  check_body
+2015-09-07 14:19:42.365-24292- DEBUG /4: infomation_code Ending check_body1
+2015-09-07 14:19:42.366-24292- DEBUG /4: infomation_code Starting  check_body
+2015-09-07 14:19:42.366-24292- DEBUG /4: infomation_code Ending check_body1
+2015-09-07 14:19:42.366-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.366-24292- DEBUG /4: infomation_code Starting  check_body
+2015-09-07 14:19:42.366-24292- DEBUG /4: infomation_code Ending check_body1
+2015-09-07 14:19:42.366-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:244
+2015-09-07 14:19:42.366-24292**ERROR**4: IE              IE::check_ser_args() for IE message_hop_count, error: IE is in invalid state.
+2015-09-07 14:19:42.366-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.366-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:246
+2015-09-07 14:19:42.366-24292**ERROR**4: IE              IE::check_ser_args() for IE msg_sequence_number, error: IE is in invalid state.
+2015-09-07 14:19:42.366-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.366-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:247
+2015-09-07 14:19:42.366-24292**ERROR**4: IE              IE::check_ser_args() for IE session_lifetime, error: IE is in invalid state.
+2015-09-07 14:19:42.366-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.366-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:248
+2015-09-07 14:19:42.367-24292- DEBUG /4: ANSLP_IEManager Starting register_known_ies
+2015-09-07 14:19:42.367-24292- DEBUG /4: ANSLP_IEManager To create ANSLP_IEManager singleton 
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE session_lifetime for 0x7fffa669abe8
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE information_code for 0x7fffa669abe8
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE message_hop_count for 0x7fffa669abe8
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE selection_auctioning_entities for 0x7fffa669abe8
+2015-09-07 14:19:42.367-24292- DEBUG /4: IEManager       Registered IE msg_sequence_number for 0x7fffa669abe8
+2015-09-07 14:19:42.368-24292- DEBUG /4: IEManager       Registered IE anslp_ipap_mspec for 0x7fffa669abe8
+2015-09-07 14:19:42.368-24292- DEBUG /4: ANSLP_IEManager registered known IEs
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:112
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Begin serialize
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start serialize
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Ending serialize
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Ending serialize object8
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Ending serialize object8
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Ending serialize object8
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Ending serialize object8
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Serialize anslp messages:1
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Serialize object:1
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Ending serialize object76
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_create    Ending serialize
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:112
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:247
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Deserializing object247Unique1
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:248
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Deserializing object248Unique1
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:245
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Deserializing object245Unique1
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:246
+2015-09-07 14:19:42.369-24292- DEBUG /4: ANSLP_MSG       Deserializing object246Unique1
+2015-09-07 14:19:42.369-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.370-24292- DEBUG /4: anslp_object    Ending deserialize 76 Object type:249
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_MSG       Deserializing object249Unique0
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:112
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Deleted 10 IEs
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_IEManager deleted ANSLP_IEManager singleton
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_IEManager Starting register_known_ies
+2015-09-07 14:19:42.370-24292- DEBUG /4: ANSLP_IEManager To create ANSLP_IEManager singleton 
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE session_lifetime for 0x7fffa669abe8
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE information_code for 0x7fffa669abe8
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE message_hop_count for 0x7fffa669abe8
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE selection_auctioning_entities for 0x7fffa669abe8
+2015-09-07 14:19:42.370-24292- DEBUG /4: IEManager       Registered IE msg_sequence_number for 0x7fffa669abe8
+2015-09-07 14:19:42.371-24292- DEBUG /4: IEManager       Registered IE anslp_ipap_mspec for 0x7fffa669abe8
+2015-09-07 14:19:42.371-24292- DEBUG /4: ANSLP_IEManager registered known IEs
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:188
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Begin serialize
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start serialize
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Ending serialize
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Ending serialize object8
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Ending serialize object8
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Ending serialize object8
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Ending serialize object8
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Serialize anslp messages:2
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Serialize object:1
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Ending serialize object76
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Serialize object:2
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Starting serialize object
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Ending serialize object76
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_create    Ending serialize
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:188
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:247
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Deserializing object247Unique1
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:248
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Deserializing object248Unique1
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:245
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Deserializing object245Unique1
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:246
+2015-09-07 14:19:42.372-24292- DEBUG /4: ANSLP_MSG       Deserializing object246Unique1
+2015-09-07 14:19:42.372-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.373-24292- DEBUG /4: anslp_object    Ending deserialize 76 Object type:249
+2015-09-07 14:19:42.373-24292- DEBUG /4: ANSLP_MSG       Deserializing object249Unique0
+2015-09-07 14:19:42.373-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.374-24292- DEBUG /4: anslp_object    Ending deserialize 76 Object type:249
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Deserializing object249Unique0
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:188
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Deleted 10 IEs
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_IEManager deleted ANSLP_IEManager singleton
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_IEManager Starting register_known_ies
+2015-09-07 14:19:42.374-24292- DEBUG /4: ANSLP_IEManager To create ANSLP_IEManager singleton 
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE session_lifetime for 0x7fffa669abe8
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE information_code for 0x7fffa669abe8
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE message_hop_count for 0x7fffa669abe8
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE selection_auctioning_entities for 0x7fffa669abe8
+2015-09-07 14:19:42.374-24292- DEBUG /4: IEManager       Registered IE msg_sequence_number for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE anslp_ipap_mspec for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_IEManager registered known IEs
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:12
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Start serialize
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Ending serialize
+2015-09-07 14:19:42.375-24292- DEBUG /4: infomation_code Starting  check_body
+2015-09-07 14:19:42.375-24292- DEBUG /4: infomation_code Ending check_body1
+2015-09-07 14:19:42.375-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.375-24292- DEBUG /4: infomation_code Starting  check_body
+2015-09-07 14:19:42.375-24292- DEBUG /4: infomation_code Ending check_body1
+2015-09-07 14:19:42.375-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:244
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Deserializing object244Unique1
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:12
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Deleted 10 IEs
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_IEManager deleted ANSLP_IEManager singleton
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_IEManager Starting register_known_ies
+2015-09-07 14:19:42.375-24292- DEBUG /4: ANSLP_IEManager To create ANSLP_IEManager singleton 
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE session_lifetime for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE information_code for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE message_hop_count for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE selection_auctioning_entities for 0x7fffa669abe8
+2015-09-07 14:19:42.375-24292- DEBUG /4: IEManager       Registered IE msg_sequence_number for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE anslp_ipap_mspec for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_IEManager registered known IEs
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:20
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Start serialize
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Ending serialize
+2015-09-07 14:19:42.376-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.376-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:247
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Deserializing object247Unique1
+2015-09-07 14:19:42.376-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.376-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:248
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Deserializing object248Unique1
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:20
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Deleted 10 IEs
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_IEManager deleted ANSLP_IEManager singleton
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_IEManager Starting register_known_ies
+2015-09-07 14:19:42.376-24292- DEBUG /4: ANSLP_IEManager To create ANSLP_IEManager singleton 
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE session_lifetime for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE information_code for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE message_hop_count for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE selection_auctioning_entities for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE msg_sequence_number for 0x7fffa669abe8
+2015-09-07 14:19:42.376-24292- DEBUG /4: IEManager       Registered IE anslp_ipap_mspec for 0x7fffa669abe8
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_IEManager registered known IEs
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:20
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start serialize
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Ending serialize
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:20
+2015-09-07 14:19:42.377-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.377-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:247
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Deserializing object247Unique1
+2015-09-07 14:19:42.377-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.377-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:248
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Deserializing object248Unique1
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:20
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Deleted 10 IEs
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_IEManager deleted ANSLP_IEManager singleton
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_IEManager Starting register_known_ies
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_IEManager To create ANSLP_IEManager singleton 
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE anslp_msg for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE session_lifetime for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE information_code for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE message_hop_count for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE selection_auctioning_entities for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE msg_sequence_number for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: IEManager       Registered IE anslp_ipap_mspec for 0x7fffa669a968
+2015-09-07 14:19:42.377-24292- DEBUG /4: ANSLP_IEManager registered known IEs
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:96
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start serialize
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Ending serialize
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:96
+2015-09-07 14:19:42.378-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.378-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:247
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Deserializing object247Unique1
+2015-09-07 14:19:42.378-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.378-24292- DEBUG /4: anslp_object    Ending deserialize 8 Object type:248
+2015-09-07 14:19:42.378-24292- DEBUG /4: ANSLP_MSG       Deserializing object248Unique1
+2015-09-07 14:19:42.378-24292- DEBUG /4: anslp_object    Begin deserialize
+2015-09-07 14:19:42.379-24292- DEBUG /4: anslp_object    Ending deserialize 76 Object type:249
+2015-09-07 14:19:42.379-24292- DEBUG /4: ANSLP_MSG       Deserializing object249Unique0
+2015-09-07 14:19:42.379-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.379-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.379-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.379-24292- DEBUG /4: ANSLP_MSG       Start get_serialized_size
+2015-09-07 14:19:42.379-24292- DEBUG /4: ANSLP_MSG       Ending get_serialized_size:96
+2015-09-07 14:19:42.379-24292- DEBUG /4: IEManager       Deleted 10 IEs
+2015-09-07 14:19:42.379-24292- DEBUG /4: ANSLP_IEManager deleted ANSLP_IEManager singleton
+2015-09-07 14:19:42.379-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.379-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.379-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.379-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.379-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.379-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.379-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.379-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.382-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=E9199D8D_B3550992_2A32972A_33D04A43, state=CLOSE]
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      Initiating state handle_state_close 
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      using lifetime: 30 seconds
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      using refresh interval: 6 seconds
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      using response timeout: 6 seconds
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      Ending state handle_state_close - New State PENDING 
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=E9199D8D_B3550992_2A32972A_33D04A43, state=PENDING]
+2015-09-07 14:19:42.382-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=A02C36BE_2331EFF8_55B81D37_E707D968, state=CLOSE]
+2015-09-07 14:19:42.382-24292- DEBUG /4: ni_session      Initiating state handle_state_close 
+2015-09-07 14:19:42.382-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.382-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.382-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.384-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.384-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.384-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.385-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.385-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.385-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.386-24292- DEBUG /4: ni_session      using lifetime: 30 seconds
+2015-09-07 14:19:42.386-24292- DEBUG /4: ni_session      using refresh interval: 6 seconds
+2015-09-07 14:19:42.386-24292- DEBUG /4: ni_session      using response timeout: 9 seconds
+2015-09-07 14:19:42.386-24292- DEBUG /4: ni_session      Ending state handle_state_close - New State PENDING 
+2015-09-07 14:19:42.386-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=A02C36BE_2331EFF8_55B81D37_E707D968, state=PENDING]
+2015-09-07 14:19:42.386-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.386-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.386-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.386-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.386-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.386-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.387-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.387-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.387-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.387-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.389-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.390-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=DC87697E_6E160FD0_B6D3FAA4_E9F55B31, state=PENDING]
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      Initiating state pending 
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      received response [anslp_msg: msg_type=2, objects={
+   [information_code: type=244, treatment=0, severity=2, response_code=1, obj_type=0]
+   [msg_sequence_number: type=247, treatment=0, value=77]
+}]
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      initiated session DC87697E_6E160FD0_B6D3FAA4_E9F55B31
+2015-09-07 14:19:42.390-24292- INFO  /4: dispatcher      reporting async event to user: CONFIGURE session initiated
+2015-09-07 14:19:42.390-24292**ERROR**8: dispatcher      report_async_event() not implemented at ../src/dispatcher.cpp:303
+2015-09-07 14:19:42.390-24292- DEBUG /4: dispatcher      installing ANSLP policy rule 
+2015-09-07 14:19:42.390-24292- DEBUG /4: nop_auction_rule_installer NOP: installing policy rule 
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      Ending state handle pending - New State METERING 
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=DC87697E_6E160FD0_B6D3FAA4_E9F55B31, state=METERING]
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.390-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=E039AD8F_54447219_D4D21758_CBC9BF24, state=PENDING]
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      Initiating state pending 
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      received response [anslp_msg: msg_type=2, objects={
+   [information_code: type=244, treatment=0, severity=5, response_code=0, obj_type=0]
+   [msg_sequence_number: type=247, treatment=0, value=77]
+}]
+2015-09-07 14:19:42.390-24292- INFO  /4: dispatcher      reporting async event to user: cannot initiate Configure session
+2015-09-07 14:19:42.390-24292**ERROR**8: dispatcher      report_async_event() not implemented at ../src/dispatcher.cpp:303
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=E039AD8F_54447219_D4D21758_CBC9BF24, state=CLOSE]
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=1959B931_D9956E3B_CCE3FAB7_3573AC8D, state=PENDING]
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      Initiating state pending 
+2015-09-07 14:19:42.390-24292-WARNING/4: ni_session      response timeout, restarting timer.
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=1959B931_D9956E3B_CCE3FAB7_3573AC8D, state=PENDING]
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=31EA8EC1_01C4695D_9D5A5B7A_84D209E8, state=PENDING]
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      Initiating state pending 
+2015-09-07 14:19:42.390-24292- INFO  /4: dispatcher      reporting async event to user: got no response for our Configure
+2015-09-07 14:19:42.390-24292**ERROR**8: dispatcher      report_async_event() not implemented at ../src/dispatcher.cpp:303
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=31EA8EC1_01C4695D_9D5A5B7A_84D209E8, state=CLOSE]
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=3CB36B0A_F2A38DBE_653D0342_47D4E864, state=PENDING]
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      Initiating state pending 
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      received API teardown event
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=3CB36B0A_F2A38DBE_653D0342_47D4E864, state=CLOSE]
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=B2C71F45_4BC14670_3888F3BC_CE6F0323, state=PENDING]
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      Initiating state pending 
+2015-09-07 14:19:42.390-24292- INFO  /4: ni_session      cannot reach destination
+2015-09-07 14:19:42.390-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=B2C71F45_4BC14670_3888F3BC_CE6F0323, state=CLOSE]
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.390-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.390-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.390-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.390-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.390-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.390-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.390-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.390-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.393-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=8770A7B9_DF0E3D9F_A657F171_BE90E9F7, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      Initiating state metering
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      received RESPONSE: [anslp_msg: msg_type=2, objects={
+   [information_code: type=244, treatment=0, severity=2, response_code=1, obj_type=0]
+   [msg_sequence_number: type=247, treatment=0, value=77]
+}]
+2015-09-07 14:19:42.393-24292- INFO  /4: dispatcher      reporting async event to user: REFRESH successful
+2015-09-07 14:19:42.393-24292**ERROR**8: dispatcher      report_async_event() not implemented at ../src/dispatcher.cpp:303
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=8770A7B9_DF0E3D9F_A657F171_BE90E9F7, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.393-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=F444420F_01489726_80D41F9A_208E3CBB, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      Initiating state metering
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      received RESPONSE: [anslp_msg: msg_type=2, objects={
+   [information_code: type=244, treatment=0, severity=5, response_code=0, obj_type=0]
+   [msg_sequence_number: type=247, treatment=0, value=77]
+}]
+2015-09-07 14:19:42.393-24292- INFO  /4: dispatcher      reporting async event to user: REFRESH session died
+2015-09-07 14:19:42.393-24292**ERROR**8: dispatcher      report_async_event() not implemented at ../src/dispatcher.cpp:303
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=F444420F_01489726_80D41F9A_208E3CBB, state=CLOSE]
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=20B4BE0F_054ABD5D_FB372019_7E36C4B9, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      Initiating state metering
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      received response timeout timer
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=20B4BE0F_054ABD5D_FB372019_7E36C4B9, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=D5A8A91F_9ABBE6A7_1654BCD5_DAD78FC9, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      Initiating state metering
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      received response timeout timer
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      no response to our REFRESH message
+2015-09-07 14:19:42.393-24292- INFO  /4: dispatcher      reporting async event to user: got no response to our REFRESH message
+2015-09-07 14:19:42.393-24292**ERROR**8: dispatcher      report_async_event() not implemented at ../src/dispatcher.cpp:303
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=D5A8A91F_9ABBE6A7_1654BCD5_DAD78FC9, state=CLOSE]
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=D2512FFF_9551A1E3_04D3B34F_47E514BE, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      Initiating state metering
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      received API teardown event
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      Ending state metering - api teardown
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=D2512FFF_9551A1E3_04D3B34F_47E514BE, state=CLOSE]
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=92C468E5_2041FB67_FBA7157E_2D8DF52D, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      Initiating state metering
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      received refresh timer
+2015-09-07 14:19:42.393-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=92C468E5_2041FB67_FBA7157E_2D8DF52D, state=METERING]
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.393-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.393-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.393-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.393-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.393-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.393-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.393-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.393-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.396-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.396-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=BB19D550_1C3B17A9_818B2D20_D29407B6, state=CLOSE]
+2015-09-07 14:19:42.396-24292- DEBUG /4: ni_session      Initiating state handle_state_close 
+2015-09-07 14:19:42.396-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.396-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.396-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.398-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.398-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.398-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.399-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.399-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.399-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.399-24292- DEBUG /4: ni_session      using lifetime: 30 seconds
+2015-09-07 14:19:42.399-24292- DEBUG /4: ni_session      using refresh interval: 6 seconds
+2015-09-07 14:19:42.399-24292- DEBUG /4: ni_session      using response timeout: 8 seconds
+2015-09-07 14:19:42.399-24292- DEBUG /4: ni_session      Ending state handle_state_close - New State PENDING 
+2015-09-07 14:19:42.399-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=BB19D550_1C3B17A9_818B2D20_D29407B6, state=PENDING]
+2015-09-07 14:19:42.400-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=BB19D550_1C3B17A9_818B2D20_D29407B6, state=PENDING]
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      Initiating state pending 
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      received response [anslp_msg: msg_type=2, objects={
+   [information_code: type=244, treatment=0, severity=2, response_code=1, obj_type=0]
+   [msg_sequence_number: type=247, treatment=0, value=2147648213]
+}]
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      initiated session BB19D550_1C3B17A9_818B2D20_D29407B6
+2015-09-07 14:19:42.400-24292- INFO  /4: dispatcher      reporting async event to user: CONFIGURE session initiated
+2015-09-07 14:19:42.400-24292**ERROR**8: dispatcher      report_async_event() not implemented at ../src/dispatcher.cpp:303
+2015-09-07 14:19:42.400-24292- DEBUG /4: dispatcher      installing ANSLP policy rule 
+2015-09-07 14:19:42.400-24292- DEBUG /4: nop_auction_rule_installer NOP: installing policy rule 
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      Ending state handle pending - New State METERING 
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=BB19D550_1C3B17A9_818B2D20_D29407B6, state=METERING]
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      begin process_event(): [ni_session: id=BB19D550_1C3B17A9_818B2D20_D29407B6, state=METERING]
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      Initiating state metering
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      received API teardown event
+2015-09-07 14:19:42.400-24292- DEBUG /4: dispatcher      removing ANSLP policy rule 
+2015-09-07 14:19:42.400-24292- DEBUG /4: nop_auction_rule_installer NOP: removing auction rule 
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      Ending state metering - api teardown
+2015-09-07 14:19:42.400-24292- DEBUG /4: ni_session      end process_event(): [ni_session: id=BB19D550_1C3B17A9_818B2D20_D29407B6, state=CLOSE]
+2015-09-07 14:19:42.400-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.400-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.400-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.400-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.400-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.400-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.400-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.400-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.401-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.403-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.403-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=4BAB5FEE_FA6E57BE_9F048DCB_BA089F6D, state=CLOSE]
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      begin handle_state_close(): [nf_session: id=4BAB5FEE_FA6E57BE_9F048DCB_BA089F6D, state=CLOSE]
+2015-09-07 14:19:42.403-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      forwarder session initiated, waiting for a response
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      Begin process State Close
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      Begin set_pc_mri()
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      begin create_mri_with_dest(): [nf_session: id=4BAB5FEE_FA6E57BE_9F048DCB_BA089F6D, state=CLOSE]
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      End create_mri_with_dest(): [nf_session: id=4BAB5FEE_FA6E57BE_9F048DCB_BA089F6D, state=CLOSE]
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      begin create_mri_inverted(): [nf_session: id=4BAB5FEE_FA6E57BE_9F048DCB_BA089F6D, state=CLOSE]
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      end create_mri_inverted(): [nf_session: id=4BAB5FEE_FA6E57BE_9F048DCB_BA089F6D, state=CLOSE]
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      End set_pc_mri()
+2015-09-07 14:19:42.403-24292- DEBUG /4: nf_session      Begin set_auction_rule()
+2015-09-07 14:19:42.403-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.403-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.403-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.403-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.403-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.404-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.404-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.404-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.404-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      End set_auction_rule() 
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      Begin build_create_message
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      End build_create_message
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      Ending process State Close New state PENDING
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=4BAB5FEE_FA6E57BE_9F048DCB_BA089F6D, state=PENDING]
+2015-09-07 14:19:42.404-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.404-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=EE6B15D6_B90ECE5B_108B9FE5_8603DDA4, state=CLOSE]
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      begin handle_state_close(): [nf_session: id=EE6B15D6_B90ECE5B_108B9FE5_8603DDA4, state=CLOSE]
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      forwarder session initiated, waiting for a response
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      Begin process State Close
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      Begin set_pc_mri()
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      begin create_mri_with_dest(): [nf_session: id=EE6B15D6_B90ECE5B_108B9FE5_8603DDA4, state=CLOSE]
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      End create_mri_with_dest(): [nf_session: id=EE6B15D6_B90ECE5B_108B9FE5_8603DDA4, state=CLOSE]
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      begin create_mri_inverted(): [nf_session: id=EE6B15D6_B90ECE5B_108B9FE5_8603DDA4, state=CLOSE]
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      end create_mri_inverted(): [nf_session: id=EE6B15D6_B90ECE5B_108B9FE5_8603DDA4, state=CLOSE]
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      End set_pc_mri()
+2015-09-07 14:19:42.404-24292- DEBUG /4: nf_session      Begin set_auction_rule()
+2015-09-07 14:19:42.404-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.404-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.405-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.405-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.405-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.405-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.405-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.405-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.405-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.405-24292- DEBUG /4: nf_session      End set_auction_rule() 
+2015-09-07 14:19:42.405-24292- DEBUG /4: nf_session      Begin build_create_message
+2015-09-07 14:19:42.405-24292- DEBUG /4: nf_session      End build_create_message
+2015-09-07 14:19:42.405-24292- DEBUG /4: nf_session      Ending process State Close New state PENDING
+2015-09-07 14:19:42.405-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=EE6B15D6_B90ECE5B_108B9FE5_8603DDA4, state=PENDING]
+2015-09-07 14:19:42.405-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.405-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.405-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.405-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.405-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.405-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.405-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.405-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.405-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.405-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.407-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.407-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.407-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.407-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=ECC81E45_3772ECF8_FC9D90B7_43E94591, state=PENDING]
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      begin handle_state_pending(): [nf_session: id=ECC81E45_3772ECF8_FC9D90B7_43E94591, state=PENDING]
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      initiated session ECC81E45_3772ECF8_FC9D90B7_43E94591
+2015-09-07 14:19:42.408-24292- DEBUG /4: dispatcher      installing ANSLP policy rule 
+2015-09-07 14:19:42.408-24292- DEBUG /4: nop_auction_rule_installer NOP: installing policy rule 
+2015-09-07 14:19:42.408-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.408-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.408-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=ECC81E45_3772ECF8_FC9D90B7_43E94591, state=METERING]
+2015-09-07 14:19:42.408-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.408-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.408-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=29F6B2C8_48ED0F84_CC971097_7923AC4E, state=PENDING]
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      begin handle_state_pending(): [nf_session: id=29F6B2C8_48ED0F84_CC971097_7923AC4E, state=PENDING]
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      forwarding error msg from upstream peer
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=29F6B2C8_48ED0F84_CC971097_7923AC4E, state=CLOSE]
+2015-09-07 14:19:42.408-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.408-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.408-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=CE5AB12A_169577FF_A4F0ED67_4092AE5B, state=PENDING]
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      begin handle_state_pending(): [nf_session: id=CE5AB12A_169577FF_A4F0ED67_4092AE5B, state=PENDING]
+2015-09-07 14:19:42.408-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.408-24292- DEBUG /4: nf_session      terminating session.
+2015-09-07 14:19:42.409-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=CE5AB12A_169577FF_A4F0ED67_4092AE5B, state=CLOSE]
+2015-09-07 14:19:42.409-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.409-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.409-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.409-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=1BF3381C_9EBE2FA0_773D2C1D_DB3DDFDF, state=PENDING]
+2015-09-07 14:19:42.409-24292- DEBUG /4: nf_session      begin handle_state_pending(): [nf_session: id=1BF3381C_9EBE2FA0_773D2C1D_DB3DDFDF, state=PENDING]
+2015-09-07 14:19:42.409-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.409-24292-WARNING/4: nf_session      NI resent the initial CREATE. Passing it on.
+2015-09-07 14:19:42.409-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=1BF3381C_9EBE2FA0_773D2C1D_DB3DDFDF, state=PENDING]
+2015-09-07 14:19:42.409-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.409-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.410-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.410-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=455EA304_9D65AAB0_F94CD4EA_094EF513, state=PENDING]
+2015-09-07 14:19:42.410-24292- DEBUG /4: nf_session      begin handle_state_pending(): [nf_session: id=455EA304_9D65AAB0_F94CD4EA_094EF513, state=PENDING]
+2015-09-07 14:19:42.410-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.410-24292-WARNING/4: nf_session      Replacing CREATE message.
+2015-09-07 14:19:42.410-24292- DEBUG /4: nf_session      Begin process State Close
+2015-09-07 14:19:42.411-24292- DEBUG /4: nf_session      Begin set_pc_mri()
+2015-09-07 14:19:42.411-24292- DEBUG /4: nf_session      begin create_mri_with_dest(): [nf_session: id=455EA304_9D65AAB0_F94CD4EA_094EF513, state=PENDING]
+2015-09-07 14:19:42.411-24292- DEBUG /4: nf_session      End create_mri_with_dest(): [nf_session: id=455EA304_9D65AAB0_F94CD4EA_094EF513, state=PENDING]
+2015-09-07 14:19:42.411-24292- DEBUG /4: nf_session      begin create_mri_inverted(): [nf_session: id=455EA304_9D65AAB0_F94CD4EA_094EF513, state=PENDING]
+2015-09-07 14:19:42.411-24292- DEBUG /4: nf_session      end create_mri_inverted(): [nf_session: id=455EA304_9D65AAB0_F94CD4EA_094EF513, state=PENDING]
+2015-09-07 14:19:42.411-24292- DEBUG /4: nf_session      End set_pc_mri()
+2015-09-07 14:19:42.411-24292- DEBUG /4: nf_session      Begin set_auction_rule()
+2015-09-07 14:19:42.411-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.411-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.411-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.411-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.411-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.411-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.411-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.411-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.412-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.412-24292- DEBUG /4: nf_session      End set_auction_rule() 
+2015-09-07 14:19:42.412-24292- DEBUG /4: nf_session      Begin build_create_message
+2015-09-07 14:19:42.412-24292- DEBUG /4: nf_session      End build_create_message
+2015-09-07 14:19:42.412-24292- DEBUG /4: nf_session      Ending process State Close New state PENDING
+2015-09-07 14:19:42.412-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=455EA304_9D65AAB0_F94CD4EA_094EF513, state=PENDING]
+2015-09-07 14:19:42.412-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.412-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.412-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=B83273D4_11975E14_AA592EA3_9F60FDA7, state=PENDING]
+2015-09-07 14:19:42.412-24292- DEBUG /4: nf_session      begin handle_state_pending(): [nf_session: id=B83273D4_11975E14_AA592EA3_9F60FDA7, state=PENDING]
+2015-09-07 14:19:42.412-24292- INFO  /4: nf_session      cannot reach destination
+2015-09-07 14:19:42.412-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=B83273D4_11975E14_AA592EA3_9F60FDA7, state=CLOSE]
+2015-09-07 14:19:42.412-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.412-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.412-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.412-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.412-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.412-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.413-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.413-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.413-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.413-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.413-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.413-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.413-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.413-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.415-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=3E9A6E81_B732693E_07EBB864_99DF30F2, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=3E9A6E81_B732693E_07EBB864_99DF30F2, state=METERING]
+2015-09-07 14:19:42.415-24292-WARNING/4: nf_session      downstream peer did not respond
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=3E9A6E81_B732693E_07EBB864_99DF30F2, state=CLOSE]
+2015-09-07 14:19:42.415-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.415-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=B5BF1B5C_972DF8D2_C695062B_D654CDCF, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=B5BF1B5C_972DF8D2_C695062B_D654CDCF, state=METERING]
+2015-09-07 14:19:42.415-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      forwarder session refreshed lifetime 0.
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=B5BF1B5C_972DF8D2_C695062B_D654CDCF, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=4F445A16_F615E0C3_64B82AB6_3E322C1B, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=4F445A16_F615E0C3_64B82AB6_3E322C1B, state=METERING]
+2015-09-07 14:19:42.415-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      forwarder session refreshed lifetime 0.
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=4F445A16_F615E0C3_64B82AB6_3E322C1B, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=ED0EA811_A0B8B6B1_46D7FD5E_FF1D4111, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=ED0EA811_A0B8B6B1_46D7FD5E_FF1D4111, state=METERING]
+2015-09-07 14:19:42.415-24292-WARNING/4: nf_session      session timed out
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=ED0EA811_A0B8B6B1_46D7FD5E_FF1D4111, state=CLOSE]
+2015-09-07 14:19:42.415-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.415-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=7666BEF9_A890D84B_78D949BF_8AFE5343, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=7666BEF9_A890D84B_78D949BF_8AFE5343, state=METERING]
+2015-09-07 14:19:42.415-24292-WARNING/4: nf_session      session timed out
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=7666BEF9_A890D84B_78D949BF_8AFE5343, state=CLOSE]
+2015-09-07 14:19:42.415-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.415-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=00D17623_E582C0E2_BCF19607_F0D9F983, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=00D17623_E582C0E2_BCF19607_F0D9F983, state=METERING]
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      upstream peer sent successful response.
+2015-09-07 14:19:42.415-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=00D17623_E582C0E2_BCF19607_F0D9F983, state=METERING]
+2015-09-07 14:19:42.416-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.416-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.416-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=98B7BBD3_220A6C3C_77F88414_981F220E, state=METERING]
+2015-09-07 14:19:42.416-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=98B7BBD3_220A6C3C_77F88414_981F220E, state=METERING]
+2015-09-07 14:19:42.416-24292- DEBUG /4: nf_session      upstream peer sent successful response.
+2015-09-07 14:19:42.416-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=98B7BBD3_220A6C3C_77F88414_981F220E, state=CLOSE]
+2015-09-07 14:19:42.416-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.416-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.416-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.416-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.416-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.416-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.416-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.416-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.416-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.416-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.416-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.416-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.416-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.416-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.416-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.418-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.418-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=CLOSE]
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      begin handle_state_close(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=CLOSE]
+2015-09-07 14:19:42.418-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      forwarder session initiated, waiting for a response
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      Begin process State Close
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      Begin set_pc_mri()
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      begin create_mri_with_dest(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=CLOSE]
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      End create_mri_with_dest(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=CLOSE]
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      begin create_mri_inverted(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=CLOSE]
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      end create_mri_inverted(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=CLOSE]
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      End set_pc_mri()
+2015-09-07 14:19:42.418-24292- DEBUG /4: nf_session      Begin set_auction_rule()
+2015-09-07 14:19:42.419-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.419-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.419-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      End set_auction_rule() 
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      Begin build_create_message
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      End build_create_message
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      Ending process State Close New state PENDING
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=PENDING]
+2015-09-07 14:19:42.419-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=PENDING]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      begin handle_state_pending(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=PENDING]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      initiated session 1CE346F0_317D4394_9E718211_096B7C96
+2015-09-07 14:19:42.419-24292- DEBUG /4: dispatcher      installing ANSLP policy rule 
+2015-09-07 14:19:42.419-24292- DEBUG /4: nop_auction_rule_installer NOP: installing policy rule 
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=METERING]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=METERING]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=METERING]
+2015-09-07 14:19:42.419-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      forwarder session refreshed lifetime 0.
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=METERING]
+2015-09-07 14:19:42.419-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      begin process_event(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=METERING]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      Begining handle_STATE_AUCTIONING(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=METERING]
+2015-09-07 14:19:42.419-24292- DEBUG /4: nf_session      upstream peer sent successful response.
+2015-09-07 14:19:42.419-24292- DEBUG /4: dispatcher      removing ANSLP policy rule 
+2015-09-07 14:19:42.419-24292- DEBUG /4: nop_auction_rule_installer NOP: removing auction rule 
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.419-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.420-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.420-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.420-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.420-24292- DEBUG /4: nf_session      end process_event(): [nf_session: id=1CE346F0_317D4394_9E718211_096B7C96, state=CLOSE]
+2015-09-07 14:19:42.420-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.420-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.420-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.420-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.420-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.420-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.420-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.420-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.420-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.422-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.422-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.422-24292- DEBUG /4: nr_session      begin process_event(): [nr_session: id=42145DE4_4F8DCDFD_4FF1A377_0897A728, state=CLOSE]
+2015-09-07 14:19:42.422-24292- DEBUG /4: nr_session      Starting handle_state_close 
+2015-09-07 14:19:42.422-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.422-24292- DEBUG /4: nr_session      responder session initiated.
+2015-09-07 14:19:42.422-24292- DEBUG /4: nr_session      Starting save_mt_policy_rule 
+2015-09-07 14:19:42.422-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.422-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.423-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.423-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.423-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.423-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.424-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.424-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.424-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.424-24292- DEBUG /4: nr_session      The auction rule has been established: 
+2015-09-07 14:19:42.424-24292- DEBUG /4: dispatcher      installing ANSLP policy rule 
+2015-09-07 14:19:42.424-24292- DEBUG /4: nop_auction_rule_installer NOP: installing policy rule 
+2015-09-07 14:19:42.424-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.424-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.424-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.424-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.424-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.424-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.424-24292- DEBUG /4: nr_session      end process_event(): [nr_session: id=42145DE4_4F8DCDFD_4FF1A377_0897A728, state=AUCTIONING]
+2015-09-07 14:19:42.424-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.424-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.424-24292- DEBUG /4: nr_session      begin process_event(): [nr_session: id=D5F3B149_B526C62F_91296A74_6E2778FE, state=CLOSE]
+2015-09-07 14:19:42.424-24292- DEBUG /4: nr_session      Starting handle_state_close 
+2015-09-07 14:19:42.424-24292- DEBUG /4: nr_session      responder session initiated.
+2015-09-07 14:19:42.424-24292- DEBUG /4: nr_session      Starting save_mt_policy_rule 
+2015-09-07 14:19:42.424-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.424-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.425-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.425-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.425-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.425-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.425-24292- DEBUG /4: nr_session      The auction rule has been established: 
+2015-09-07 14:19:42.425-24292- DEBUG /4: dispatcher      installing ANSLP policy rule 
+2015-09-07 14:19:42.425-24292- DEBUG /4: nop_auction_rule_installer NOP: installing policy rule 
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.425-24292- DEBUG /4: nr_session      end process_event(): [nr_session: id=D5F3B149_B526C62F_91296A74_6E2778FE, state=AUCTIONING]
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.425-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.425-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.425-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.425-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.425-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.425-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.425-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.425-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.425-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.428-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      begin process_event(): [nr_session: id=0DE29FC8_13DE9A9A_F8124CE3_605EA75A, state=AUCTIONING]
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      Starting handle_STATE_AUCTIONING 
+2015-09-07 14:19:42.428-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      authentication succesful.
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      end process_event(): [nr_session: id=0DE29FC8_13DE9A9A_F8124CE3_605EA75A, state=AUCTIONING]
+2015-09-07 14:19:42.428-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      begin process_event(): [nr_session: id=4165328A_8399D533_30A17C5A_B0FF10CB, state=AUCTIONING]
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      Starting handle_STATE_AUCTIONING 
+2015-09-07 14:19:42.428-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      authentication succesful.
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      end process_event(): [nr_session: id=4165328A_8399D533_30A17C5A_B0FF10CB, state=AUCTIONING]
+2015-09-07 14:19:42.428-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      begin process_event(): [nr_session: id=43A0F9D0_2256F601_A6AE0ECF_095C9984, state=AUCTIONING]
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      Starting handle_STATE_AUCTIONING 
+2015-09-07 14:19:42.428-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.428-24292- INFO  /4: nr_session      terminating session on NI request.
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      end process_event(): [nr_session: id=43A0F9D0_2256F601_A6AE0ECF_095C9984, state=CLOSE]
+2015-09-07 14:19:42.428-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      begin process_event(): [nr_session: id=931E6580_428487E8_AD993624_3C1564D6, state=AUCTIONING]
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      Starting handle_STATE_AUCTIONING 
+2015-09-07 14:19:42.428-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.428-24292-WARNING/4: nr_session      duplicate response received.
+2015-09-07 14:19:42.428-24292- DEBUG /4: nr_session      end process_event(): [nr_session: id=931E6580_428487E8_AD993624_3C1564D6, state=AUCTIONING]
+2015-09-07 14:19:42.428-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.428-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.428-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.428-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.429-24292- DEBUG /4: anslp_config    start - creating configuration parameter singleton
+2015-09-07 14:19:42.429-24292- DEBUG /4: configpar_repository instance() - creating instance
+2015-09-07 14:19:42.429-24292- DEBUG /4: anslp_config    registered mnslp realm with realm id 6
+2015-09-07 14:19:42.429-24292- DEBUG /4: anslp_config::registerAllPars starting registering anslp parameters.
+2015-09-07 14:19:42.429-24292- DEBUG /4: anslp_config::registerAllPars finished registering mnslp parameters.
+2015-09-07 14:19:42.429-24292- DEBUG /4: gistconf        registered gist realm with realm id 2
+2015-09-07 14:19:42.429-24292- DEBUG /4: gistconf::registerAllPars starting registering gist parameters.
+2015-09-07 14:19:42.429-24292- DEBUG /4: gistconf::registerAllPars finished registering gist parameters.
+2015-09-07 14:19:42.431-24292- DEBUG /4: Auction_Rule    Starting constructor auction_rule
+2015-09-07 14:19:42.431-24292**ERROR**4: Threadsafe_DB   Tried to access tsdb although not initialized.
+2015-09-07 14:19:42.431-24292- DEBUG /4: nr_session      begin process_event(): [nr_session: id=B6A24B11_2D680AF3_7F77DFDF_BB5E9110, state=CLOSE]
+2015-09-07 14:19:42.431-24292- DEBUG /4: nr_session      Starting handle_state_close 
+2015-09-07 14:19:42.431-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.431-24292- DEBUG /4: nr_session      responder session initiated.
+2015-09-07 14:19:42.431-24292- DEBUG /4: nr_session      Starting save_mt_policy_rule 
+2015-09-07 14:19:42.431-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.431-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.431-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.432-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.432-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.432-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.432-24292- DEBUG /4: dispatcher      Checking mspec object [anslp_ipap_mspec: type=249, treatment=0]
+2015-09-07 14:19:42.432-24292- DEBUG /4: nop_auction_rule_installer NOP: check()
+2015-09-07 14:19:42.432-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: object
+2015-09-07 14:19:42.432-24292- DEBUG /4: nr_session      The auction rule has been established: 
+2015-09-07 14:19:42.432-24292- DEBUG /4: dispatcher      installing ANSLP policy rule 
+2015-09-07 14:19:42.432-24292- DEBUG /4: nop_auction_rule_installer NOP: installing policy rule 
+2015-09-07 14:19:42.432-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.432-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.432-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.432-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.432-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.432-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule
+2015-09-07 14:19:42.432-24292- DEBUG /4: nr_session      end process_event(): [nr_session: id=B6A24B11_2D680AF3_7F77DFDF_BB5E9110, state=AUCTIONING]
+2015-09-07 14:19:42.432-24292- DEBUG /4: nr_session      begin process_event(): [nr_session: id=B6A24B11_2D680AF3_7F77DFDF_BB5E9110, state=AUCTIONING]
+2015-09-07 14:19:42.432-24292- DEBUG /4: nr_session      Starting handle_STATE_AUCTIONING 
+2015-09-07 14:19:42.432-24292**ERROR**8: dispatcher      implement dispatcher::is_authorized()! at ../src/dispatcher.cpp:368
+2015-09-07 14:19:42.432-24292- INFO  /4: nr_session      terminating session on NI request.
+2015-09-07 14:19:42.433-24292- DEBUG /4: dispatcher      removing ANSLP policy rule 
+2015-09-07 14:19:42.433-24292- DEBUG /4: nop_auction_rule_installer NOP: removing auction rule 
+2015-09-07 14:19:42.433-24292- DEBUG /4: Auction_Rule    Starting copy
+2015-09-07 14:19:42.433-24292- DEBUG /4: Auction_Rule    Starting constructor from another instance
+2015-09-07 14:19:42.433-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.433-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.433-24292- DEBUG /4: Auction_Rule    Starting set_object - Params: key, object
+2015-09-07 14:19:42.433-24292- DEBUG /4: nr_session      end process_event(): [nr_session: id=B6A24B11_2D680AF3_7F77DFDF_BB5E9110, state=CLOSE]
+2015-09-07 14:19:42.433-24292- DEBUG /4: Auction_Rule    Starting destructor auction_rule

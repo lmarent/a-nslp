@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=/usr/local
+libdir=${exec_prefix}/lib/a-nslp
+includedir=${prefix}/include/libanslp_msg
+
+Name:libipap
+Description: Auction processing protocol message library
+Version: 0.0.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -lanslp_msg

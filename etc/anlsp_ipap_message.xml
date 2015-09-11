@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE AGENT SYSTEM "bidfile.dtd"> 
+<AGENT>
+   <BID ID="B001">
+	<ELEMENT ID="R001" TEMPLATE_ID="256">
+     <FIELD NAME="MaxUnitValuation">0.150000</FIELD>
+     <FIELD NAME="UnitValue">0.130000</FIELD>
+     <FIELD NAME="IdBid">B001</FIELD>
+     <FIELD NAME="IdRecord">R001</FIELD>
+     <FIELD NAME="Quantity">0.70</FIELD>
+	</ELEMENT>
+	<ELEMENT ID="R002" TEMPLATE_ID="256">
+	 <FIELD NAME="MaxUnitValuation">0.150000</FIELD>
+	 <FIELD NAME="UnitValue">0.130000</FIELD>
+	 <FIELD NAME="IdBid">B001</FIELD>
+	 <FIELD NAME="IdRecord">R002</FIELD>
+	 <FIELD NAME="Quantity">0.70</FIELD>
+	</ELEMENT>
+	<ELEMENT ID="R003" TEMPLATE_ID="256">
+	 <FIELD NAME="MaxUnitValuation">0.150000</FIELD>
+	 <FIELD NAME="UnitValue">0.130000</FIELD>
+	 <FIELD NAME="IdBid">B001</FIELD>
+	 <FIELD NAME="IdRecord">R003</FIELD>
+	 <FIELD NAME="Quantity">0.70</FIELD>
+	</ELEMENT>
+	<AUCTION ID="R001" TEMPLATE_ID="257">
+	 <PREF NAME="IdAuction">A001</PREF>
+	 <PREF NAME="IdBid">B001</PREF>
+	 <PREF NAME="StartSeconds">100</PREF>
+	 <PREF NAME="EndSeconds">200</PREF>
+	 <PREF NAME="IdRecord">R001</PREF>
+	</AUCTION>
+	<AUCTION ID="R003" TEMPLATE_ID="257">
+	 <PREF NAME="IdAuction">A002</PREF>
+	 <PREF NAME="IdBid">B001</PREF>
+	 <PREF NAME="StartSeconds">100</PREF>
+	 <PREF NAME="EndSeconds">200</PREF>
+	 <PREF NAME="IdRecord">R003</PREF>
+	</AUCTION>
+  </BID>
+   <TEMPLATE ID="256" TYPE="1">
+      <TFIELD ENO="0" FTYPE="25" CODING="4" LENGTH="128" XML_NAME="IdBid">idBid</TFIELD>
+      <TFIELD ENO="0" FTYPE="32" CODING="4" LENGTH="128" XML_NAME="IdRecord">idRecord</TFIELD>
+      <TFIELD ENO="0" FTYPE="1" CODING="8" LENGTH="8" XML_NAME="MaxUnitValuation">auctionMaxUnitValuation</TFIELD>
+      <TFIELD ENO="0" FTYPE="2" CODING="8" LENGTH="8" XML_NAME="UnitValue">auctionUnitValue</TFIELD>
+      <TFIELD ENO="0" FTYPE="33" CODING="5" LENGTH="4" XML_NAME="Quantity">quantity</TFIELD>
+   </TEMPLATE>
+   <TEMPLATE ID="257" TYPE="4">
+     <TFIELD ENO="0" FTYPE="25" CODING="4" LENGTH="128" XML_NAME="IdBid">idBid</TFIELD>
+     <TFIELD ENO="0" FTYPE="24" CODING="4" LENGTH="128" XML_NAME="IdAuction">idAuction</TFIELD>
+     <TFIELD ENO="0" FTYPE="32" CODING="4" LENGTH="128" XML_NAME="IdRecord">idRecord</TFIELD>
+     <TFIELD ENO="0" FTYPE="27" CODING="2" LENGTH="4" XML_NAME="StartSeconds">startSeconds</TFIELD>
+     <TFIELD ENO="0" FTYPE="28" CODING="2" LENGTH="4" XML_NAME="EndSeconds">endSeconds</TFIELD>
+   </TEMPLATE>
+</AGENT>

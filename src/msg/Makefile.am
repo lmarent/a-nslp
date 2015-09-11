@@ -12,7 +12,7 @@
 #
 ACLOCAL_AMFLAGS = -I m4
 
-LDADD = $(PROTLIB_LIB)
+LDADD = $(PROTLIB_LIB) @XMLLIB@
 
 lib_LTLIBRARIES 	= libanslp_msg.la
 
@@ -34,7 +34,9 @@ libanslp_msg_la_SOURCES = ie_object_key.cpp \
 						  session_lifetime.cpp \
 						  ntlp_msg.cpp \
 					      anslp_msg.cpp	\
+					      xml_object_key.cpp \
 					      anslp_ipap_message.cpp \
+					      anslp_ipap_xml_message.cpp \
 						  anslp_create.cpp \
 						  anslp_notify.cpp \
 						  anslp_refresh.cpp \
@@ -63,10 +65,10 @@ pkginclude_HEADERS = 	$(INC_DIR)/anslp_create.h \
 
 if ENABLE_DEBUG
   AM_CXXFLAGS = -I$(top_srcdir)/include \
-				-g  -fno-inline -DDEBUG -D_GLIBCXX_DEBUG
+				-g  -fno-inline -DDEBUG -D_GLIBCXX_DEBUG @LIBXML2_CFLAGS@
 else
   AM_CXXFLAGS = -I$(top_srcdir)/include \
-				-O2 
+				-O2 @LIBXML2_CFLAGS@
 endif
 
 

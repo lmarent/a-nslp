@@ -132,7 +132,9 @@ am_libanslp_msg_la_OBJECTS = libanslp_msg_la-ie_object_key.lo \
 	libanslp_msg_la-message_hop_count.lo \
 	libanslp_msg_la-session_lifetime.lo \
 	libanslp_msg_la-ntlp_msg.lo libanslp_msg_la-anslp_msg.lo \
+	libanslp_msg_la-xml_object_key.lo \
 	libanslp_msg_la-anslp_ipap_message.lo \
+	libanslp_msg_la-anslp_ipap_xml_message.lo \
 	libanslp_msg_la-anslp_create.lo \
 	libanslp_msg_la-anslp_notify.lo \
 	libanslp_msg_la-anslp_refresh.lo \
@@ -361,7 +363,7 @@ top_srcdir = ../..
 #
 #
 ACLOCAL_AMFLAGS = -I m4
-LDADD = $(PROTLIB_LIB)
+LDADD = $(PROTLIB_LIB) @XMLLIB@
 lib_LTLIBRARIES = libanslp_msg.la
 API_INC = $(top_srcdir)/include
 INC_DIR = $(top_srcdir)/include/msg
@@ -379,7 +381,9 @@ libanslp_msg_la_SOURCES = ie_object_key.cpp \
 						  session_lifetime.cpp \
 						  ntlp_msg.cpp \
 					      anslp_msg.cpp	\
+					      xml_object_key.cpp \
 					      anslp_ipap_message.cpp \
+					      anslp_ipap_xml_message.cpp \
 						  anslp_create.cpp \
 						  anslp_notify.cpp \
 						  anslp_refresh.cpp \
@@ -405,10 +409,10 @@ pkginclude_HEADERS = $(INC_DIR)/anslp_create.h \
 						$(INC_DIR)/session_lifetime.h
 
 #AM_CXXFLAGS = -I$(top_srcdir)/include \
-#				-O2 
+#				-O2 -I/usr/include/libxml2  
 
 AM_CXXFLAGS = -I$(top_srcdir)/include \
-				-g  -fno-inline -DDEBUG -D_GLIBCXX_DEBUG
+				-g  -fno-inline -DDEBUG -D_GLIBCXX_DEBUG -I/usr/include/libxml2  
 
 all: all-am
 
@@ -492,6 +496,7 @@ distclean-compile:
 include ./$(DEPDIR)/libanslp_msg_la-anslp_create.Plo
 include ./$(DEPDIR)/libanslp_msg_la-anslp_ie.Plo
 include ./$(DEPDIR)/libanslp_msg_la-anslp_ipap_message.Plo
+include ./$(DEPDIR)/libanslp_msg_la-anslp_ipap_xml_message.Plo
 include ./$(DEPDIR)/libanslp_msg_la-anslp_msg.Plo
 include ./$(DEPDIR)/libanslp_msg_la-anslp_mspec_object.Plo
 include ./$(DEPDIR)/libanslp_msg_la-anslp_notify.Plo
@@ -506,6 +511,7 @@ include ./$(DEPDIR)/libanslp_msg_la-msg_sequence_number.Plo
 include ./$(DEPDIR)/libanslp_msg_la-ntlp_msg.Plo
 include ./$(DEPDIR)/libanslp_msg_la-selection_auctioning_entities.Plo
 include ./$(DEPDIR)/libanslp_msg_la-session_lifetime.Plo
+include ./$(DEPDIR)/libanslp_msg_la-xml_object_key.Plo
 
 .cpp.o:
 	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -608,12 +614,26 @@ libanslp_msg_la-anslp_msg.lo: anslp_msg.cpp
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_msg_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_msg_la-anslp_msg.lo `test -f 'anslp_msg.cpp' || echo '$(srcdir)/'`anslp_msg.cpp
 
+libanslp_msg_la-xml_object_key.lo: xml_object_key.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_msg_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_msg_la-xml_object_key.lo -MD -MP -MF $(DEPDIR)/libanslp_msg_la-xml_object_key.Tpo -c -o libanslp_msg_la-xml_object_key.lo `test -f 'xml_object_key.cpp' || echo '$(srcdir)/'`xml_object_key.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_msg_la-xml_object_key.Tpo $(DEPDIR)/libanslp_msg_la-xml_object_key.Plo
+#	$(AM_V_CXX)source='xml_object_key.cpp' object='libanslp_msg_la-xml_object_key.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_msg_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_msg_la-xml_object_key.lo `test -f 'xml_object_key.cpp' || echo '$(srcdir)/'`xml_object_key.cpp
+
 libanslp_msg_la-anslp_ipap_message.lo: anslp_ipap_message.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_msg_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_msg_la-anslp_ipap_message.lo -MD -MP -MF $(DEPDIR)/libanslp_msg_la-anslp_ipap_message.Tpo -c -o libanslp_msg_la-anslp_ipap_message.lo `test -f 'anslp_ipap_message.cpp' || echo '$(srcdir)/'`anslp_ipap_message.cpp
 	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_msg_la-anslp_ipap_message.Tpo $(DEPDIR)/libanslp_msg_la-anslp_ipap_message.Plo
 #	$(AM_V_CXX)source='anslp_ipap_message.cpp' object='libanslp_msg_la-anslp_ipap_message.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_msg_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_msg_la-anslp_ipap_message.lo `test -f 'anslp_ipap_message.cpp' || echo '$(srcdir)/'`anslp_ipap_message.cpp
+
+libanslp_msg_la-anslp_ipap_xml_message.lo: anslp_ipap_xml_message.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_msg_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_msg_la-anslp_ipap_xml_message.lo -MD -MP -MF $(DEPDIR)/libanslp_msg_la-anslp_ipap_xml_message.Tpo -c -o libanslp_msg_la-anslp_ipap_xml_message.lo `test -f 'anslp_ipap_xml_message.cpp' || echo '$(srcdir)/'`anslp_ipap_xml_message.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_msg_la-anslp_ipap_xml_message.Tpo $(DEPDIR)/libanslp_msg_la-anslp_ipap_xml_message.Plo
+#	$(AM_V_CXX)source='anslp_ipap_xml_message.cpp' object='libanslp_msg_la-anslp_ipap_xml_message.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_msg_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_msg_la-anslp_ipap_xml_message.lo `test -f 'anslp_ipap_xml_message.cpp' || echo '$(srcdir)/'`anslp_ipap_xml_message.cpp
 
 libanslp_msg_la-anslp_create.lo: anslp_create.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_msg_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_msg_la-anslp_create.lo -MD -MP -MF $(DEPDIR)/libanslp_msg_la-anslp_create.Tpo -c -o libanslp_msg_la-anslp_create.lo `test -f 'anslp_create.cpp' || echo '$(srcdir)/'`anslp_create.cpp

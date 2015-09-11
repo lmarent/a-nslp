@@ -25,10 +25,21 @@
 */
 
 #include "anslp_ipap_message.h"
+#include "anslp_ipap_exception.h"
 
 using namespace anslp::msg;
 
 const char *const anslp_ipap_message::ie_name = "anslp_ipap_mspec";
+
+
+char *anslp_ipap_message::OBJECT_HEADER_XML_TAGS[] = { "AUCTIONSET", 
+														"AGENT",
+														"ALLOCATIONSET" };
+
+char *anslp_ipap_message::OBJECT_LINE_XML_TAGS[] = { "AUCTION", 
+													 "BID",
+													 "ALLOCATION" };
+														
 
 anslp_ipap_message::anslp_ipap_message():
 	anslp_mspec_object(OBJECT_TYPE, tr_mandatory, false), 
@@ -37,6 +48,9 @@ anslp_ipap_message::anslp_ipap_message():
 
     log = Logger::getInstance();
     ch = log->createChannel("ANSLP_IPAP_MESSAGE");
+
+	load_template_keys();
+	load_record_keys();
 
 #ifdef DEBUG
     log->dlog(ch, "in anslp_ipap_message constructor without parameters");
@@ -53,6 +67,8 @@ anslp_ipap_message::anslp_ipap_message( int ipap_version,
     log = Logger::getInstance();
     ch = log->createChannel("ANSLP_IPAP_MESSAGE");
 
+	load_template_keys();
+	load_record_keys();
 #ifdef DEBUG
     log->dlog(ch, "in anslp_ipap_message constructor parameters ip_version, encode");
 #endif 
@@ -67,7 +83,9 @@ anslp_ipap_message::anslp_ipap_message(uchar * param,
 {
     log = Logger::getInstance();
     ch = log->createChannel("ANSLP_IPAP_MESSAGE");
-
+	
+	load_template_keys();
+	load_record_keys();
 #ifdef DEBUG
     log->dlog(ch, "in anslp_ipap_message constructor parameters message,lenght encode" );
 #endif 	
@@ -80,6 +98,8 @@ anslp_ipap_message::anslp_ipap_message(const anslp_ipap_message &rhs):
     log = Logger::getInstance();
     ch = log->createChannel("ANSLP_IPAP_MESSAGE");
 
+	load_template_keys();
+	load_record_keys();
 #ifdef DEBUG
     log->dlog(ch, "in anslp_ipap_message constructor parameters another instance" );
 #endif 	
@@ -346,3 +366,97 @@ anslp_ipap_message::serialize_body(NetMsg &msg) const
 }
 
 
+void 
+anslp_ipap_message::load_template_keys(void)
+{
+	ipap_field_key key1(0, IPAP_FT_IDAUCTION);
+	templateKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_SETID_AUCTION_TEMPLATE,key1) );
+					
+	ipap_field_key key2(0, IPAP_FT_IDBID);
+	templateKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_SETID_BID_TEMPLATE,key2) );
+						
+	ipap_field_key key3(0, IPAP_FT_IDALLOCATION);				
+	templateKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_SETID_ALLOCATION_TEMPLATE,key3) );
+					
+	ipap_field_key key4(0, IPAP_FT_IDAUCTION);				
+	templateKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_OPTNS_AUCTION_TEMPLATE,key4) );
+					
+	ipap_field_key key5(0, IPAP_FT_IDBID);				
+	templateKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_OPTNS_BID_TEMPLATE,key5) );
+					
+	ipap_field_key key6(0, IPAP_FT_IDALLOCATION);				
+	templateKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_OPTNS_ALLOCATION_TEMPLATE,key6) );
+					
+}
+
+
+void 
+anslp_ipap_message::load_record_keys(void)
+{
+	ipap_field_key key1(0, IPAP_FT_IDRECORD);
+	recordKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_SETID_AUCTION_TEMPLATE,key1) );
+									
+	ipap_field_key key2(0, IPAP_FT_IDRECORD);
+	recordKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_SETID_BID_TEMPLATE,key2) );
+					
+	ipap_field_key key3(0, IPAP_FT_IDRECORD);				
+	recordKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_SETID_ALLOCATION_TEMPLATE,key3) );
+					
+	ipap_field_key key4(0, IPAP_FT_IDRECORD);				
+	recordKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_OPTNS_AUCTION_TEMPLATE,key4) );
+										
+	ipap_field_key key5(0, IPAP_FT_IDRECORD);
+	recordKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_OPTNS_BID_TEMPLATE,key5) );
+										
+	ipap_field_key key6(0, IPAP_FT_IDRECORD);
+	recordKeys.insert ( 
+		std::pair<ipap_templ_type_t, ipap_field_key>
+				(IPAP_OPTNS_ALLOCATION_TEMPLATE,key6) );
+					
+}
+
+
+ipap_field_key 
+anslp_ipap_message::get_template_key(ipap_templ_type_t temp_type) const
+{
+	templateListConstIterKeys_t iter = templateKeys.find(temp_type);
+	if (iter != templateKeys.end()){
+		return iter->second;
+	}else{
+		throw anslp_ipap_bad_argument("template type not found in template keys");
+	}
+}
+
+ipap_field_key 
+anslp_ipap_message::get_record_key(ipap_templ_type_t temp_type) const
+{
+	recordListConstIterKeys_t iter= recordKeys.find(temp_type);
+	if (iter != recordKeys.end()){
+		return iter->second;
+	}else{
+		throw anslp_ipap_bad_argument("template type not found in record keys");
+	}
+
+}

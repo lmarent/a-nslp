@@ -215,7 +215,9 @@ libanslp_msg_la-anslp_ipap_message.lo: anslp_ipap_message.cpp \
  ../../include/msg/information_code.h \
  ../../include/msg/selection_auctioning_entities.h \
  ../../include/msg/msg_sequence_number.h \
- ../../include/msg/message_hop_count.h
+ ../../include/msg/message_hop_count.h \
+ ../../include/msg/anslp_ipap_exception.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/Error.h
 
 /usr/include/stdc-predef.h:
 
@@ -802,3 +804,9 @@ libanslp_msg_la-anslp_ipap_message.lo: anslp_ipap_message.cpp \
 ../../include/msg/msg_sequence_number.h:
 
 ../../include/msg/message_hop_count.h:
+
+../../include/msg/anslp_ipap_exception.h:
+
+/usr/local/include/ipap/stdincpp.h:
+
+/usr/local/include/ipap/Error.h:

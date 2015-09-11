@@ -114,6 +114,7 @@ am_test_runner_OBJECTS =  \
 	../test/test_runner-utils.$(OBJEXT) \
 	../test/test_runner-basic.$(OBJEXT) \
 	../test/test_runner-anslp_ipap_message_test.$(OBJEXT) \
+	../test/test_runner-anslp_ipap_xml_message_test.$(OBJEXT) \
 	../test/test_runner-generic_object_test.$(OBJEXT) \
 	../test/test_runner-information_code_test.$(OBJEXT) \
 	../test/test_runner-message_hop_count_test.$(OBJEXT) \
@@ -568,6 +569,7 @@ test_runner_SOURCES = ../src/benchmark_journal.cpp \
 					   ../test/utils.cpp \
 					   ../test/basic.cpp \
 					   ../test/anslp_ipap_message_test.cpp \
+					   ../test/anslp_ipap_xml_message_test.cpp \
 					   ../test/generic_object_test.cpp \
 					   ../test/information_code_test.cpp \
 					   ../test/message_hop_count_test.cpp \
@@ -712,6 +714,9 @@ clean-checkPROGRAMS:
 ../test/test_runner-anslp_ipap_message_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
+../test/test_runner-anslp_ipap_xml_message_test.$(OBJEXT):  \
+	../test/$(am__dirstamp) \
+	../test/$(DEPDIR)/$(am__dirstamp)
 ../test/test_runner-generic_object_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
@@ -785,6 +790,7 @@ include ../src/$(DEPDIR)/test_runner-session_id.Po
 include ../src/$(DEPDIR)/test_runner-session_manager.Po
 include ../test/$(DEPDIR)/test_runner-anslp_create_test.Po
 include ../test/$(DEPDIR)/test_runner-anslp_ipap_message_test.Po
+include ../test/$(DEPDIR)/test_runner-anslp_ipap_xml_message_test.Po
 include ../test/$(DEPDIR)/test_runner-anslp_msg_test.Po
 include ../test/$(DEPDIR)/test_runner-anslp_notify_test.Po
 include ../test/$(DEPDIR)/test_runner-anslp_refresh_test.Po
@@ -1090,6 +1096,20 @@ include ../test/$(DEPDIR)/test_runner-utils.Po
 #	$(AM_V_CXX)source='../test/anslp_ipap_message_test.cpp' object='../test/test_runner-anslp_ipap_message_test.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_runner_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../test/test_runner-anslp_ipap_message_test.obj `if test -f '../test/anslp_ipap_message_test.cpp'; then $(CYGPATH_W) '../test/anslp_ipap_message_test.cpp'; else $(CYGPATH_W) '$(srcdir)/../test/anslp_ipap_message_test.cpp'; fi`
+
+../test/test_runner-anslp_ipap_xml_message_test.o: ../test/anslp_ipap_xml_message_test.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_runner_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../test/test_runner-anslp_ipap_xml_message_test.o -MD -MP -MF ../test/$(DEPDIR)/test_runner-anslp_ipap_xml_message_test.Tpo -c -o ../test/test_runner-anslp_ipap_xml_message_test.o `test -f '../test/anslp_ipap_xml_message_test.cpp' || echo '$(srcdir)/'`../test/anslp_ipap_xml_message_test.cpp
+	$(AM_V_at)$(am__mv) ../test/$(DEPDIR)/test_runner-anslp_ipap_xml_message_test.Tpo ../test/$(DEPDIR)/test_runner-anslp_ipap_xml_message_test.Po
+#	$(AM_V_CXX)source='../test/anslp_ipap_xml_message_test.cpp' object='../test/test_runner-anslp_ipap_xml_message_test.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_runner_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../test/test_runner-anslp_ipap_xml_message_test.o `test -f '../test/anslp_ipap_xml_message_test.cpp' || echo '$(srcdir)/'`../test/anslp_ipap_xml_message_test.cpp
+
+../test/test_runner-anslp_ipap_xml_message_test.obj: ../test/anslp_ipap_xml_message_test.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_runner_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../test/test_runner-anslp_ipap_xml_message_test.obj -MD -MP -MF ../test/$(DEPDIR)/test_runner-anslp_ipap_xml_message_test.Tpo -c -o ../test/test_runner-anslp_ipap_xml_message_test.obj `if test -f '../test/anslp_ipap_xml_message_test.cpp'; then $(CYGPATH_W) '../test/anslp_ipap_xml_message_test.cpp'; else $(CYGPATH_W) '$(srcdir)/../test/anslp_ipap_xml_message_test.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../test/$(DEPDIR)/test_runner-anslp_ipap_xml_message_test.Tpo ../test/$(DEPDIR)/test_runner-anslp_ipap_xml_message_test.Po
+#	$(AM_V_CXX)source='../test/anslp_ipap_xml_message_test.cpp' object='../test/test_runner-anslp_ipap_xml_message_test.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_runner_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../test/test_runner-anslp_ipap_xml_message_test.obj `if test -f '../test/anslp_ipap_xml_message_test.cpp'; then $(CYGPATH_W) '../test/anslp_ipap_xml_message_test.cpp'; else $(CYGPATH_W) '$(srcdir)/../test/anslp_ipap_xml_message_test.cpp'; fi`
 
 ../test/test_runner-generic_object_test.o: ../test/generic_object_test.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_runner_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../test/test_runner-generic_object_test.o -MD -MP -MF ../test/$(DEPDIR)/test_runner-generic_object_test.Tpo -c -o ../test/test_runner-generic_object_test.o `test -f '../test/generic_object_test.cpp' || echo '$(srcdir)/'`../test/generic_object_test.cpp

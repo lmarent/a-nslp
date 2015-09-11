@@ -26,6 +26,7 @@ test_runner_SOURCES =  @top_srcdir@/src/benchmark_journal.cpp \
 					   @top_srcdir@/test/utils.cpp \
 					   @top_srcdir@/test/basic.cpp \
 					   @top_srcdir@/test/anslp_ipap_message_test.cpp \
+					   @top_srcdir@/test/anslp_ipap_xml_message_test.cpp \
 					   @top_srcdir@/test/generic_object_test.cpp \
 					   @top_srcdir@/test/information_code_test.cpp \
 					   @top_srcdir@/test/message_hop_count_test.cpp \

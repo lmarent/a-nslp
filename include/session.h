@@ -146,9 +146,9 @@ class session {
 
 	virtual bool is_final() const = 0;
 
-	void set_mspec_object(msg::anslp_mspec_object *object);
+	void set_request_mspec_object(msg::anslp_mspec_object *object);
 	
-	size_t get_number_mspec_objects();
+	size_t get_number_mspec_request_objects();
 	
   protected:
   

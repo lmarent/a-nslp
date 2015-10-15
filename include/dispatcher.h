@@ -50,7 +50,7 @@ namespace anslp {
  * then executes a handler. In other words, it is the top-level state machine.
  *
  * Even though not all methods are declared as 'const', the dispatcher itself
- * is constant and stateless. All state is kept in the session manager, MNSLP
+ * is constant and stateless. All state is kept in the session manager, A-NSLP
  * manager classes etc., which are shared among dispatcher instances.
  * Because of this, the dispatcher doesn't have to be thread-safe, it is enough
  * that the used components (session_manager etc.) are thread-safe.

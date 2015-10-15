@@ -32,7 +32,7 @@ class InitiatorTest;
  */
 class ni_session_test : public ni_session {
   public:
-	ni_session_test(state_t state=STATE_CLOSE) : ni_session(state) { }
+	ni_session_test(state_t state=STATE_ANSLP_CLOSE) : ni_session(state) { }
 
 	friend class InitiatorTest;
 };
@@ -95,8 +95,8 @@ void InitiatorTest::add_fields(msg::anslp_ipap_message * mess)
      * Builds the anslp ipap message
      */
 	uint16_t templatedataid = 0;
-	uint32_t starttime = 100;
-	uint32_t endtime = 200;
+	uint64_t starttime = 100;
+	uint64_t endtime = 200;
 	unsigned char   *buf1  = (unsigned char *) "1";
 	unsigned char   *buf1a  = (unsigned char *) "2";
 	unsigned char   *buf1b  = (unsigned char *) "3";
@@ -106,10 +106,10 @@ void InitiatorTest::add_fields(msg::anslp_ipap_message * mess)
 
 	int nfields = 4;
 	templatedataid = (mess->ip_message).new_data_template( nfields, IPAP_SETID_AUCTION_TEMPLATE );
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION, 65535);
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS, 4);
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS, 4);	
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME, 65535);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS);	
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME);
 
 	ipap_field field1 = (mess->ip_message).get_field_definition( 0, IPAP_FT_STARTSECONDS );
 	ipap_value_field fvalue1 = field1.get_ipap_value_field( starttime );
@@ -234,9 +234,9 @@ msg::ntlp_msg *InitiatorTest::create_anslp_refresh() const {
 void InitiatorTest::testClose() 
 {
 	/*
-	 * CLOSE ---[tg_CONF]---> PENDING
+	 * STATE_ANSLP_CLOSE ---[tg_CONF]---> PENDING
 	 */
-	ni_session_test s1(ni_session::STATE_CLOSE);
+	ni_session_test s1(ni_session::STATE_ANSLP_CLOSE);
 	vector<msg::anslp_mspec_object *> mspec_objects;
 	mspec_objects.push_back(mess1->copy());
 	mspec_objects.push_back(mess2->copy());
@@ -245,7 +245,7 @@ void InitiatorTest::testClose()
 	event *e1 = new api_create_event(source, destination);
 
 	process(s1, e1);
-	ASSERT_STATE(s1, ni_session::STATE_PENDING);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_PENDING);
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s1.get_response_timer());
 	event *e2 = new api_create_event(source,destination,(protlib::uint16) 0, 
@@ -253,9 +253,9 @@ void InitiatorTest::testClose()
 									  mspec_objects, conf->get_ni_session_lifetime(),
 									  selection_auctioning_entities::sme_any, NULL);
 	
-	ni_session_test s2(ni_session::STATE_CLOSE);
+	ni_session_test s2(ni_session::STATE_ANSLP_CLOSE);
 	process(s2, e2);
-	ASSERT_STATE(s2, ni_session::STATE_PENDING);
+	ASSERT_STATE(s2, ni_session::STATE_ANSLP_PENDING);
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s2.get_response_timer());
 }
@@ -265,9 +265,9 @@ void InitiatorTest::testPending()
 {
 		
 	/*
-	 * STATE_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_AUCTIONING
+	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_AUCTIONING
 	 */
-	ni_session_test s1(ni_session::STATE_PENDING);
+	ni_session_test s1(ni_session::STATE_ANSLP_PENDING);
 	s1.set_last_create_message(create_anslp_create());
 
 	ntlp_msg *resp1 = create_anslp_response(information_code::sc_success,
@@ -277,15 +277,15 @@ void InitiatorTest::testPending()
 	event *e1 = new msg_event(NULL, resp1);
 
 	process(s1, e1);
-	ASSERT_STATE(s1, ni_session::STATE_AUCTIONING);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_TIMER_STARTED(d, s1.get_refresh_timer());
 
 
 	/*
-	 * STATE_PENDING ---[rx_RESPONSE(ERROR)]---> CLOSE
+	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(ERROR)]---> CLOSE
 	 */
-	ni_session_test s2(ni_session::STATE_PENDING);
+	ni_session_test s2(ni_session::STATE_ANSLP_PENDING);
 	s2.set_last_create_message(create_anslp_create());
 
 	ntlp_msg *resp2 = create_anslp_response(
@@ -295,15 +295,15 @@ void InitiatorTest::testPending()
 	event *e2 = new msg_event(NULL, resp2);
 
 	process(s2, e2);
-	ASSERT_STATE(s2, ni_session::STATE_CLOSE);
+	ASSERT_STATE(s2, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
 
 
 	/*
-	 * STATE_PENDING ---[RESPONSE_TIMEOUT, retry]---> STATE_PENDING
+	 * STATE_ANSLP_PENDING ---[RESPONSE_TIMEOUT, retry]---> STATE_PENDING
 	 */
-	ni_session_test s3(ni_session::STATE_PENDING);
+	ni_session_test s3(ni_session::STATE_ANSLP_PENDING);
 	// fake a previously sent Create message
 	s3.set_last_create_message(create_anslp_create());
 	s3.get_response_timer().set_id(47);
@@ -311,15 +311,15 @@ void InitiatorTest::testPending()
 	timer_event *e3 = new timer_event(NULL, 47);
 
 	process(s3, e3);
-	ASSERT_STATE(s3, ni_session::STATE_PENDING);
+	ASSERT_STATE(s3, ni_session::STATE_ANSLP_PENDING);
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s3.get_response_timer());
 
 
 	/*
-	 * STATE_PENDING ---[RESPONSE_TIMEOUT, no retry]---> CLOSE
+	 * STATE_ANSLP_PENDING ---[RESPONSE_TIMEOUT, no retry]---> CLOSE
 	 */
-	ni_session_test s4(ni_session::STATE_PENDING);
+	ni_session_test s4(ni_session::STATE_ANSLP_PENDING);
 	// fake a previously sent Configure message
 	s4.set_last_create_message(create_anslp_create());	
 	s4.set_create_counter(1000);
@@ -327,33 +327,33 @@ void InitiatorTest::testPending()
 	timer_event *e4 = new timer_event(NULL, 47);
 
 	process(s4, e4);
-	ASSERT_STATE(s4, ni_session::STATE_CLOSE);
+	ASSERT_STATE(s4, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
 
 
 	/*
-	 * STATE_PENDING ---[tg_TEARDOWN]---> CLOSE
+	 * STATE_ANSLP_PENDING ---[tg_TEARDOWN]---> STATE_ANSLP_CLOSE
 	 */
-	ni_session_test s5(ni_session::STATE_PENDING);
+	ni_session_test s5(ni_session::STATE_ANSLP_PENDING);
 	s5.set_last_create_message(create_anslp_create());
 	event *e5 = new api_teardown_event(NULL);
 
 	process(s5, e5);
-	ASSERT_STATE(s5, ni_session::STATE_CLOSE);
+	ASSERT_STATE(s5, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_NO_TIMER(d);
 
 
 	/*
-	 * STATE_PENDING ---[tg_TEARDOWN]---> CLOSE
+	 * STATE_ANSLP_PENDING ---[tg_TEARDOWN]---> STATE_ANSLP_CLOSE
 	 */
-	ni_session_test s6(ni_session::STATE_PENDING);
+	ni_session_test s6(ni_session::STATE_ANSLP_PENDING);
 	s6.set_last_create_message(create_anslp_create());
 	event *e6 = new no_next_node_found_event(NULL);
 
 	process(s6, e6);
-	ASSERT_STATE(s6, ni_session::STATE_CLOSE);
+	ASSERT_STATE(s6, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
 
@@ -363,9 +363,9 @@ void InitiatorTest::testAuctioning()
 {
 		
 	/*
-	 * STATE_AUCTIONING ---[rx_RESPONSE(SUCCESS,REFRESH)]---> STATE_AUCTIONING
+	 * STATE_ANSLP_AUCTIONING ---[rx_RESPONSE(SUCCESS,REFRESH)]---> STATE_ANSLP_AUCTIONING
 	 */
-	ni_session_test s1(ni_session::STATE_AUCTIONING);
+	ni_session_test s1(ni_session::STATE_ANSLP_AUCTIONING);
 	s1.set_last_refresh_message(create_anslp_refresh());
 
 	ntlp_msg *resp1 = create_anslp_response(information_code::sc_success,
@@ -375,14 +375,14 @@ void InitiatorTest::testAuctioning()
 	event *e1 = new msg_event(NULL, resp1);
 
 	process(s1, e1);
-	ASSERT_STATE(s1, ni_session::STATE_AUCTIONING);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_TIMER_STARTED(d, s1.get_refresh_timer());
 	
 	/*
-	 * STATE_AUCTIONING ---[rx_RESPONSE(ERROR,REFRESH)]---> CLOSE
+	 * STATE_ANSLP_AUCTIONING ---[rx_RESPONSE(ERROR,REFRESH)]---> CLOSE
 	 */
-	ni_session_test s2(ni_session::STATE_AUCTIONING);
+	ni_session_test s2(ni_session::STATE_ANSLP_AUCTIONING);
 	s2.set_last_refresh_message(create_anslp_refresh());
 
 	ntlp_msg *resp2 = create_anslp_response(
@@ -392,64 +392,64 @@ void InitiatorTest::testAuctioning()
 	event *e2 = new msg_event(NULL, resp2);
 
 	process(s2, e2);
-	ASSERT_STATE(s2, ni_session::STATE_CLOSE);
+	ASSERT_STATE(s2, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
 
 
 	/*
-	 * STATE_AUCTIONING ---[RESPONSE_TIMEOUT, retry]---> STATE_AUCTIONING
+	 * STATE_ANSLP_AUCTIONING ---[RESPONSE_TIMEOUT, retry]---> STATE_ANSLP_AUCTIONING
 	 */
-	ni_session_test s3(ni_session::STATE_AUCTIONING);
+	ni_session_test s3(ni_session::STATE_ANSLP_AUCTIONING);
 	s3.set_last_refresh_message(create_anslp_refresh());
 	s3.get_response_timer().set_id(47);
 
 	timer_event *e3 = new timer_event(NULL, 47);
 
 	process(s3, e3);
-	ASSERT_STATE(s3, ni_session::STATE_AUCTIONING);
+	ASSERT_STATE(s3, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s3.get_response_timer());
 
 
 	/*
-	 * STATE_AUCTIONING ---[RESPONSE_TIMEOUT, no retry]---> STATE_AUCTIONING
+	 * STATE_ANSLP_AUCTIONING ---[RESPONSE_TIMEOUT, no retry]---> STATE_ANSLP_AUCTIONING
 	 */
-	ni_session_test s4(ni_session::STATE_AUCTIONING);
+	ni_session_test s4(ni_session::STATE_ANSLP_AUCTIONING);
 	s4.set_last_refresh_message(create_anslp_refresh());	
 	s4.set_refresh_counter(1000);
 	s4.get_response_timer().set_id(47);
 	timer_event *e4 = new timer_event(NULL, 47);
 
 	process(s4, e4);
-	ASSERT_STATE(s4, ni_session::STATE_CLOSE);
+	ASSERT_STATE(s4, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
 
 
 	/*
-	 * STATE_AUCTIONING ---[tg_TEARDOWN]---> STATE_CLOSE
+	 * STATE_ANSLP_AUCTIONING ---[tg_TEARDOWN]---> STATE_ANSLP_CLOSE
 	 */
-	ni_session_test s5(ni_session::STATE_AUCTIONING);
+	ni_session_test s5(ni_session::STATE_ANSLP_AUCTIONING);
 	s5.set_last_refresh_message(create_anslp_refresh());
 	event *e5 = new api_teardown_event(NULL);
 
 	process(s5, e5);
-	ASSERT_STATE(s5, ni_session::STATE_CLOSE);
+	ASSERT_STATE(s5, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_NO_TIMER(d);
 
 
 	/*
-	 * STATE_AUCTIONING ---[REFRESH_TIMEOUT]---> STATE_AUCTIONING
+	 * STATE_ANSLP_AUCTIONING ---[REFRESH_TIMEOUT]---> STATE_ANSLP_AUCTIONING
 	 */
-	ni_session_test s6(ni_session::STATE_AUCTIONING);
+	ni_session_test s6(ni_session::STATE_ANSLP_AUCTIONING);
 	s6.set_last_refresh_message(create_anslp_refresh());
 	s6.get_refresh_timer().set_id(0xABCD);
 	event *e6 = new timer_event(NULL, 0xABCD);
 
 	process(s6, e6);
-	ASSERT_STATE(s6, ni_session::STATE_AUCTIONING);
+	ASSERT_STATE(s6, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s6.get_response_timer());
 	
@@ -472,15 +472,15 @@ void InitiatorTest::testIntegratedStateMachine()
 					    selection_auctioning_entities::sme_any,
 					    NULL);
 
-	ni_session_test s1(ni_session::STATE_CLOSE);
+	ni_session_test s1(ni_session::STATE_ANSLP_CLOSE);
 	process(s1, e1);
-	ASSERT_STATE(s1, ni_session::STATE_PENDING);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_PENDING);
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s1.get_response_timer());
 
 	
 	/*
-	 * STATE_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_AUCTIONING
+	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_AUCTIONING
 	 */
 	ntlp_msg *resp1 = create_anslp_response(information_code::sc_success,
 		information_code::suc_successfully_processed,
@@ -489,18 +489,18 @@ void InitiatorTest::testIntegratedStateMachine()
 	event *e2 = new msg_event(NULL, resp1);
 
 	process(s1, e2);
-	ASSERT_STATE(s1, ni_session::STATE_AUCTIONING);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_TIMER_STARTED(d, s1.get_refresh_timer());
 
 	
 	/*
-	 * STATE_METERING ---[tg_TEARDOWN]---> STATE_CLOSE
+	 * STATE_METERING ---[tg_TEARDOWN]---> STATE_ANSLP_CLOSE
 	 */
 	event *e3 = new api_teardown_event(NULL);
 
 	process(s1, e3);
-	ASSERT_STATE(s1, ni_session::STATE_CLOSE);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_NO_TIMER(d);
 

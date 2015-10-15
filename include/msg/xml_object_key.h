@@ -32,6 +32,7 @@
 
 
 #include "stdincpp.h"
+#include "IpAp_template.h"
 
 namespace anslp 
 {
@@ -46,6 +47,10 @@ typedef enum
     IPAP_ALLOCATION,
     IPAP_MAX_XML_OBJECT_TYPE
 } ipap_xml_object_type_t;
+
+typedef vector<ipap_templ_type_t> 			relatedTemplateList_t;
+typedef vector<ipap_templ_type_t>::iterator relatedTemplateIterList_t;
+
 
 /**
  * \class xml_object_key
@@ -70,20 +75,24 @@ class xml_object_key
 
 private:
 
-	ipap_xml_object_type_t object_type;  		///< Object type assigned
-	string id_object;           ///< Object id within the object type.
+	//! Object type assigned
+	ipap_xml_object_type_t object_type;  		
+	
+	//! Object id within the object type.
+	string id_object;           
+	
+	//! List of templated associated with the object id.
+	relatedTemplateList_t relatedTemplateTypeList;
 
 public:
 
 	/// Constructor of the field key
-	inline xml_object_key(): 
-			object_type(IPAP_INVALID), id_object(""){}
-
+	xml_object_key();
+			
 	
 	/// Constructor of the field key
-	inline xml_object_key(ipap_xml_object_type_t _object_type, string _id_object): 
-			object_type(_object_type), id_object(_id_object){}
-	
+	xml_object_key(ipap_xml_object_type_t _object_type, string _id_object); 
+			
 	/// Destructor of the field key
 	inline ~xml_object_key(){}
 		
@@ -103,12 +112,7 @@ public:
 	/** 
 	 * Assignment operator. 
 	*/ 
-	inline xml_object_key& operator= (const xml_object_key& param)
-	{
-		object_type = param.object_type;
-		id_object = param.id_object;
-		return *this;
-	}
+	xml_object_key& operator= (const xml_object_key& param);
 	
 	inline ipap_xml_object_type_t get_object_type() const
 	{
@@ -127,6 +131,12 @@ public:
 	{
 		return !(operator ==(rhs)); 
 	}
+
+	/// Returns an iterator to the start of the related template types
+	inline relatedTemplateIterList_t begin(){ return relatedTemplateTypeList.begin(); }
+
+	/// Returns an iterator to the end of the related template types
+	inline relatedTemplateIterList_t end(){ return relatedTemplateTypeList.end(); }
 	
 	/** Convert the key field in a string.
 	*/ 

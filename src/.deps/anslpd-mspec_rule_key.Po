@@ -29,7 +29,9 @@ anslpd-mspec_rule_key.o: mspec_rule_key.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/concept_check.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_types.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_funcs.h \
- /usr/include/c++/4.8/debug/debug.h \
+ /usr/include/c++/4.8/debug/debug.h /usr/include/c++/4.8/debug/macros.h \
+ /usr/include/c++/4.8/debug/functions.h \
+ /usr/include/c++/4.8/debug/formatter.h /usr/include/c++/4.8/typeinfo \
  /usr/include/c++/4.8/bits/stl_iterator.h \
  /usr/include/c++/4.8/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++locale.h \
@@ -161,6 +163,14 @@ anslpd-mspec_rule_key.o: mspec_rule_key.cpp /usr/include/stdc-predef.h \
 /usr/include/c++/4.8/bits/stl_iterator_base_funcs.h:
 
 /usr/include/c++/4.8/debug/debug.h:
+
+/usr/include/c++/4.8/debug/macros.h:
+
+/usr/include/c++/4.8/debug/functions.h:
+
+/usr/include/c++/4.8/debug/formatter.h:
+
+/usr/include/c++/4.8/typeinfo:
 
 /usr/include/c++/4.8/bits/stl_iterator.h:
 

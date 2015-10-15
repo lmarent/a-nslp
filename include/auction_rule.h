@@ -47,11 +47,9 @@ namespace anslp
 /**
  * Auction rule.
  *
- * This consists of three parts an auction protocol part that defines 
- * the intervals for running the auction and resources being auctioned,
- * a bid part which corresponds to the actual bids competing, and 
- * an allocation part which notifies to all the bidders 
- * that win the auction.
+ * This consists of two parts: 
+ *    a set of objects corresponding to requests 
+ * 	  a set of objects corresponding to responses to those objects.
  *
  * An auction rule is just an abstraction. It has to be mapped to a concrete
  * auction rule, which is vendor-dependent.
@@ -60,15 +58,6 @@ namespace anslp
 typedef std::map<mspec_rule_key, msg::anslp_mspec_object *> objectList_t;
 typedef std::map<mspec_rule_key, msg::anslp_mspec_object *>::iterator objectListIter_t;
 typedef std::map<mspec_rule_key, msg::anslp_mspec_object *>::const_iterator objectListConstIter_t;
-
-typedef std::vector<std::string> keyAAList_t;
-typedef std::vector<std::string>::iterator keyAAListIter_t;
-typedef std::vector<std::string>::const_iterator keyAAListConstIter_t;
-
-typedef std::map<mspec_rule_key, keyAAList_t > ruleKeyList_t;
-typedef std::map<mspec_rule_key, keyAAList_t >::iterator ruleKeyIterList_t;
-typedef std::map<mspec_rule_key, keyAAList_t >::const_iterator ruleKeyConstIterList_t;
-
 
 
 class auction_rule 
@@ -93,48 +82,49 @@ class auction_rule
     */
 	auction_rule *copy() const;
 
-	void set_object(mspec_rule_key key, msg::anslp_mspec_object *obj);
+	void set_request_object(mspec_rule_key key, msg::anslp_mspec_object *obj);
+
+	void set_response_object(mspec_rule_key key, msg::anslp_mspec_object *obj);
 
     /**
     * Add a mspec objet to the rule. This creates the key to share with the
-    * metering application. 
+    * auctioning application. 
     * The key created is returned.
     */    
-    mspec_rule_key set_object(msg::anslp_mspec_object *obj);
-
-    void set_commands(mspec_rule_key key, keyAAList_t commands);
+    mspec_rule_key set_request_object(msg::anslp_mspec_object *obj);
+    
+    mspec_rule_key set_response_object(msg::anslp_mspec_object *obj);
 	
-	size_t get_number_mspec_objects();
-	
-	size_t get_number_rule_keys();
+	size_t get_number_mspec_request_objects();
 
-	size_t get_number_rule_keys() const;
-						
+	size_t get_number_mspec_response_objects();
+
+	size_t get_number_mspec_request_objects() const;
+
+	size_t get_number_mspec_response_objects() const;
+							
 	bool operator==(const auction_rule &rhs);
 	
 	bool operator!=(const auction_rule &rhs); 
 	
 	auction_rule & operator=(const auction_rule &rhs);
 	
-	objectList_t * getObjects(void) { return &objects; }
+	objectList_t * get_request_objects(void) { return &object_requests; }
+
+	objectList_t * get_response_objects(void) { return &object_responses; }
 	
-	void clear_commands();
 
   protected:
 	
 	/// Map for all mspec objects belonging to the rule to be used in the 
-	/// metering application.
-	objectList_t objects;
-	
-	/// This map maintains all keys for rules used for in the auctioning application(AA)
-	/// a mspec object can result in more than one rule.
-	/// we insert in the map when the key is installed in the AA
-	ruleKeyList_t rule_keys;
+	/// auction application.
+	objectList_t object_requests;
 
-  private:
-	
-	bool are_equal(keyAAList_t left, keyAAList_t right);
-	
+	/// Map for all mspec objects responses belonging to the rule to be used in the 
+	/// auction application.
+	objectList_t object_responses;
+
+		
 };
 
 std::ostream &operator<<(std::ostream &out, const auction_rule &mpr);

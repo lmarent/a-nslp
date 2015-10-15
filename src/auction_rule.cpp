@@ -63,11 +63,19 @@ auction_rule::~auction_rule()
 {
 	LogDebug("Starting destructor auction_rule");
 	
+	// Delete requests
 	objectListIter_t it;
-	for ( it = objects.begin(); it != objects.end(); it++)
+	for ( it = object_requests.begin(); it != object_requests.end(); it++)
 	{
 		delete(it->second);
 	}
+
+	// Delete responses.
+	for ( it = object_responses.begin(); it != object_responses.end(); it++)
+	{
+		delete(it->second);
+	}
+
 }
 
 /**
@@ -78,25 +86,26 @@ auction_rule::auction_rule(const auction_rule &rhs)
 	
 	LogDebug("Starting constructor from another instance");
 	
+	// Copy object request
 	std::map<mspec_rule_key, msg::anslp_mspec_object *>::const_iterator it;
-	for ( it = rhs.objects.begin(); it != rhs.objects.end(); it++ )
+	for ( it = rhs.object_requests.begin(); it != rhs.object_requests.end(); it++ )
 	{
 		const mspec_rule_key id = it->first;
 		const msg::anslp_mspec_object *obj = it->second;
 		if (obj){
-			set_object(id, obj->copy());
+			set_request_object(id, obj->copy());
 		}
 	}
 	
-	// Copy rules keys.
-	ruleKeyConstIterList_t it_rules;
-	for ( it_rules = rhs.rule_keys.begin(); it_rules != rhs.rule_keys.end(); it_rules++ )
+	// Copy rules responses.
+	for ( it = rhs.object_responses.begin(); it != rhs.object_responses.end(); it++ )
 	{
-		const mspec_rule_key id = it_rules->first;
-		std::vector<std::string> rules = it_rules->second;
-		set_commands(id, rules);
-	}
-	
+		const mspec_rule_key id = it->first;
+		const msg::anslp_mspec_object *obj = it->second;
+		if (obj){
+			set_response_object(id, obj->copy());
+		}
+	}	
 }
 
 /**
@@ -114,30 +123,62 @@ auction_rule::copy() const
 }
 
 void 
-auction_rule::set_object(mspec_rule_key key, msg::anslp_mspec_object *obj)
+auction_rule::set_request_object(mspec_rule_key key, msg::anslp_mspec_object *obj)
 {
 	
-	LogDebug("Starting set_object - Params: key, object");
+	LogDebug("Starting set_request_object - Params: key, object");
 	
 	if ( obj == NULL )
 		return;
 
-	msg::anslp_mspec_object *old = objects[key];
+	msg::anslp_mspec_object *old = object_requests[key];
 
 	if ( old )
 		delete old;
 
-	objects[key] = obj;
+	object_requests[key] = obj;
+}
+
+void 
+auction_rule::set_response_object(mspec_rule_key key, msg::anslp_mspec_object *obj)
+{
+	
+	LogDebug("Starting set_response_object - Params: key, object");
+	
+	if ( obj == NULL )
+		return;
+
+	msg::anslp_mspec_object *old = object_responses[key];
+
+	if ( old )
+		delete old;
+
+	object_responses[key] = obj;
 }
 
 mspec_rule_key 
-auction_rule::set_object(msg::anslp_mspec_object *obj)
+auction_rule::set_request_object(msg::anslp_mspec_object *obj)
 {
-	LogDebug("Starting set_object - Params: object");
+	LogDebug("Starting set_request_object - Params: object");
 	
 	if (obj != NULL){
 		mspec_rule_key key;
-		objects[key] = obj;
+		object_requests[key] = obj;
+		return key;
+	}
+	else{
+		throw std::invalid_argument( "received a NULL object" );
+	}
+}
+
+mspec_rule_key 
+auction_rule::set_response_object(msg::anslp_mspec_object *obj)
+{
+	LogDebug("Starting set_response_object - Params: object");
+	
+	if (obj != NULL){
+		mspec_rule_key key;
+		object_requests[key] = obj;
 		return key;
 	}
 	else{
@@ -146,23 +187,43 @@ auction_rule::set_object(msg::anslp_mspec_object *obj)
 }
 
 size_t
-auction_rule::get_number_mspec_objects()
+auction_rule::get_number_mspec_request_objects()
 {
-	return objects.size();
+	return object_requests.size();
 }
+
+size_t
+auction_rule::get_number_mspec_request_objects() const
+{
+	return object_requests.size();
+}
+
+size_t
+auction_rule::get_number_mspec_response_objects()
+{
+	return object_responses.size();
+}
+
+size_t
+auction_rule::get_number_mspec_response_objects() const
+{
+	return object_responses.size();
+}
+
 
 bool
 auction_rule::operator==(const auction_rule &rhs)
 {
-	if (objects.size() != rhs.objects.size()){
+
+	// All object requests have to be identical.
+	if (object_requests.size() != rhs.object_requests.size()){
 		return false;
 	}
 	
-	// All objects have to be identical.
 	objectListConstIter_t i;
-	for ( i = objects.begin(); i != objects.end(); i++ ) {
-		objectListConstIter_t j = rhs.objects.find(i->first);
-		if ( j == rhs.objects.end() ){
+	for ( i = object_requests.begin(); i != object_requests.end(); i++ ) {
+		objectListConstIter_t j = rhs.object_requests.find(i->first);
+		if ( j == rhs.object_requests.end() ){
 			return false;
 		}
 			
@@ -171,36 +232,26 @@ auction_rule::operator==(const auction_rule &rhs)
 		}
 	}	
 
-	// Verify rule keys.
-	if (rule_keys.size() != rhs.rule_keys.size())
+
+	// All object responses have to be identical.
+	if (object_responses.size() != rhs.object_responses.size()){
 		return false;
-	
-	ruleKeyConstIterList_t it;
-	for ( it = rule_keys.begin(); it != rule_keys.end(); it++ ) {
-		ruleKeyConstIterList_t ij = rhs.rule_keys.find(it->first);
-		if ( ij == rhs.rule_keys.end() )
-			return false;
-		
-		if ( are_equal(it->second, ij->second) == false )
-			return false;	
-
 	}
-	return true;
-}
-
-bool 
-auction_rule::are_equal(std::vector<std::string> left, std::vector<std::string> right)
-{
-	std::sort (left.begin(), left.end());
-	std::sort (right.begin(), right.end());
-	for ( int index = 0; index < rule_keys.size(); index ++ ) {
-				
-		if ( left[index].compare(right[index]) != 0 ){
+	
+	for ( i = object_responses.begin(); i != object_responses.end(); i++ ) {
+		objectListConstIter_t j = rhs.object_responses.find(i->first);
+		if ( j == rhs.object_responses.end() ){
+			return false;
+		}
+			
+		if ( (i->second)->notEqual(*(j->second))  ){
 			return false;
 		}
 	}	
+
 	return true;
 }
+
 
 bool
 auction_rule::operator!=(const auction_rule &rhs) 
@@ -218,46 +269,28 @@ auction_rule &
 auction_rule::operator=(const auction_rule &rhs)
 {
 	std::map<mspec_rule_key, msg::anslp_mspec_object *>::const_iterator it;
-	for ( it = rhs.objects.begin(); it != rhs.objects.end(); it++ )
+	for ( it = rhs.object_requests.begin(); it != rhs.object_requests.end(); it++ )
 	{
 		const mspec_rule_key id = it->first;
 		const msg::anslp_mspec_object *obj = it->second;
 		if (obj){
-			set_object(id, obj->copy());
+			set_request_object(id, obj->copy());
 		}
 	}
 	
-	ruleKeyConstIterList_t it_rule_keys;
-	for ( it_rule_keys = rhs.rule_keys.begin(); it_rule_keys != rhs.rule_keys.end(); it_rule_keys++)
+
+	for ( it = rhs.object_responses.begin(); it != rhs.object_responses.end(); it++ )
 	{
-		mspec_rule_key id = it_rule_keys->first;
-		std::vector<std::string> list_keys = it_rule_keys->second;
-		set_commands(id, list_keys);
+		const mspec_rule_key id = it->first;
+		const msg::anslp_mspec_object *obj = it->second;
+		if (obj){
+			set_response_object(id, obj->copy());
+		}
 	}
 	
 	return *this;
 }
 
-void auction_rule::set_commands(mspec_rule_key key, std::vector<std::string> commands)
-{
-	rule_keys.insert(std::pair<mspec_rule_key, std::vector<std::string> > (key, commands));
-
-}
-
-void auction_rule::clear_commands()
-{
-	rule_keys.clear();
-}
-
-size_t auction_rule::get_number_rule_keys()
-{
-	return rule_keys.size();
-}
-
-size_t auction_rule::get_number_rule_keys() const
-{
-	return rule_keys.size();
-}
 
 }
 

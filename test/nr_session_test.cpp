@@ -30,7 +30,7 @@ class ResponderTest;
  */
 class nr_session_test : public nr_session {
   public:
-	nr_session_test(state_t state=STATE_CLOSE, uint32 msn=0)
+	nr_session_test(state_t state=STATE_ANSLP_CLOSE, uint32 msn=0)
 		: nr_session(state, msn) { }
 
 	friend class ResponderTest;
@@ -87,8 +87,8 @@ void ResponderTest::add_fields(msg::anslp_ipap_message * mess)
      * Builds the ipfix message
      */
 	uint16_t templatedataid = 0;
-	uint32_t starttime = 100;
-	uint32_t endtime = 200;
+	uint64_t starttime = 100;
+	uint64_t endtime = 200;
 	unsigned char   *buf1  = (unsigned char *) "1";
 	unsigned char   *buf1a  = (unsigned char *) "2";
 	unsigned char   *buf1b  = (unsigned char *) "3";
@@ -98,10 +98,10 @@ void ResponderTest::add_fields(msg::anslp_ipap_message * mess)
 
 	int nfields = 4;
 	templatedataid = (mess->ip_message).new_data_template( nfields, IPAP_SETID_AUCTION_TEMPLATE );
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION, 65535);
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS, 4);
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS, 4);	
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME, 65535);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS);	
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME);
 
 	ipap_field field1 = (mess->ip_message).get_field_definition( 0, IPAP_FT_STARTSECONDS );
 	ipap_value_field fvalue1 = field1.get_ipap_value_field( starttime );
@@ -216,25 +216,25 @@ ResponderTest::testClose() {
 	/*
 	 * CLOSE ---[rx_CREATE && CHECK_AA && CREATE(Lifetime>0) ]---> AUCTIONING
 	 */
-	nr_session_test s1(nr_session::STATE_CLOSE);
+	nr_session_test s1(nr_session::STATE_ANSLP_CLOSE);
 
 	msg::ntlp_msg *msg = create_anslp_create();
 	event *e1 = new msg_event(NULL, msg, true);
 	 
 	process(s1, e1);
-	ASSERT_STATE(s1, nr_session::STATE_AUCTIONING);
+	ASSERT_STATE(s1, nr_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
 	
 	/*
 	 * CLOSE ---[rx_CREATE && CREATE(Lifetime > MAX) ]---> AUCTIONING
 	 */
-	nr_session_test s2(nr_session::STATE_CLOSE);
+	nr_session_test s2(nr_session::STATE_ANSLP_CLOSE);
 	event *e2 = new msg_event(NULL,
 		create_anslp_create(START_MSN+1, 100000), true);
 	
 	process(s2, e2);
-	ASSERT_STATE(s2, nr_session::STATE_AUCTIONING);
+	ASSERT_STATE(s2, nr_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_RESPONSE_MESSAGE_SENT(d,
 		information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
@@ -247,50 +247,50 @@ ResponderTest::testAuctioning() {
 	
 	
 	/*
-	 * STATE_AUCTIONING ---[rx_REFRESH && CHECK_AA && REFRESH(Lifetime>0) ]---> STATE_AUCTIONING
+	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && CHECK_AA && REFRESH(Lifetime>0) ]---> STATE_ANSLP_AUCTIONING
 	 */
-	nr_session_test s1(nr_session::STATE_AUCTIONING, START_MSN);
+	nr_session_test s1(nr_session::STATE_ANSLP_AUCTIONING, START_MSN);
 	event *e1 = new msg_event(NULL, create_anslp_refresh(START_MSN+1, 10), true);
 
 	process(s1, e1);
-	ASSERT_STATE(s1, nr_session::STATE_AUCTIONING);
+	ASSERT_STATE(s1, nr_session::STATE_ANSLP_AUCTIONING);
 	CPPUNIT_ASSERT( s1.get_msg_sequence_number() == START_MSN+1 );
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
 
 	/*
-	 * STATE_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime > MAX) ]---> STATE_AUCTIONING
+	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime > MAX) ]---> STATE_ANSLP_AUCTIONING
 	 */
-	nr_session_test s2(nr_session::STATE_AUCTIONING, START_MSN);
+	nr_session_test s2(nr_session::STATE_ANSLP_AUCTIONING, START_MSN);
 	event *e2 = new msg_event(NULL,
 		create_anslp_refresh(START_MSN+1, 10), true);
 
 	process(s2, e2);
-	ASSERT_STATE(s2, nr_session::STATE_AUCTIONING);
+	ASSERT_STATE(s2, nr_session::STATE_ANSLP_AUCTIONING);
 	CPPUNIT_ASSERT( s1.get_msg_sequence_number() == START_MSN+1 );
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
 
 	/*
-	 * STATE_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0) ]--->STATE_CLOSE
+	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0) ]--->STATE_ANSLP_CLOSE
 	 */
-	nr_session_test s3(nr_session::STATE_AUCTIONING, START_MSN);
+	nr_session_test s3(nr_session::STATE_ANSLP_AUCTIONING, START_MSN);
 	event *e3 = new msg_event(NULL,
 			create_anslp_refresh(START_MSN+1, 0), true);
 
 	process(s3, e3);
-	ASSERT_STATE(s3, nr_session::STATE_CLOSE);
+	ASSERT_STATE(s3, nr_session::STATE_ANSLP_CLOSE);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_NO_TIMER(d);
 
 	/*
 	 * STATE_AUCTIONING_PART ---[rx_REFRESH && MSN too low ]---> STATE_AUCTIONING_PART
 	 */
-	nr_session_test s4(nr_session::STATE_AUCTIONING, START_MSN);
+	nr_session_test s4(nr_session::STATE_ANSLP_AUCTIONING, START_MSN);
 	event *e4 = new msg_event(NULL, create_anslp_refresh(START_MSN, 10), true);
 
 	process(s4, e4);
-	ASSERT_STATE(s4, nr_session::STATE_AUCTIONING);
+	ASSERT_STATE(s4, nr_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
 }
@@ -302,23 +302,23 @@ ResponderTest::testIntegratedStateMachine()
 	/*
 	 * CLOSE ---[rx_CREATE && CHECK_AA && CREATE(Lifetime>0) ]---> AUCTIONING
 	 */
-	nr_session_test s1(nr_session::STATE_CLOSE);
+	nr_session_test s1(nr_session::STATE_ANSLP_CLOSE);
 	event *e1 = new msg_event(NULL, create_anslp_create(), true);
 
 	process(s1, e1);
-	ASSERT_STATE(s1, nr_session::STATE_AUCTIONING);
+	ASSERT_STATE(s1, nr_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
 
 
 	/*
-	 * STATE_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0) ]--->STATE_CLOSE
+	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0) ]--->STATE_ANSLP_CLOSE
 	 */
 	event *e2 = new msg_event(NULL,
 			create_anslp_refresh(START_MSN+1, 0), true);
 
 	process(s1, e2);
-	ASSERT_STATE(s1, nr_session::STATE_CLOSE);
+	ASSERT_STATE(s1, nr_session::STATE_ANSLP_CLOSE);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_NO_TIMER(d);
 

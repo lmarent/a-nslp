@@ -64,16 +64,16 @@ class nr_session : public session {
 	 * States of a session.
 	 */
 	enum state_t {
-		STATE_CLOSE		= 0,
-		STATE_PENDING	= 1,
-		STATE_AUCTIONING	= 2
+		STATE_ANSLP_CLOSE		= 0,
+		STATE_ANSLP_PENDING	= 1,
+		STATE_ANSLP_AUCTIONING	= 2
 	};
 
 	void process_event(dispatcher *d, event *evt);
 	
 	state_t get_state() const;
 
-	nr_session(state_t s=STATE_CLOSE, uint32 msn=0);
+	nr_session(state_t s=STATE_ANSLP_CLOSE, uint32 msn=0);
 	
 	inline timer &get_state_timer() { return state_timer; }
 	
@@ -138,7 +138,7 @@ inline nr_session::state_t nr_session::get_state() const
 
 inline bool nr_session::is_final() const 
 {
-	return get_state() == STATE_CLOSE;
+	return get_state() == STATE_ANSLP_CLOSE;
 }
 
 

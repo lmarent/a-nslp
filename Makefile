@@ -81,9 +81,9 @@ host_triplet = x86_64-unknown-linux-gnu
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(srcdir)/config.h.in $(srcdir)/libanslp_msg-0.0.pc.in COPYING \
-	INSTALL compile config.guess config.sub depcomp install-sh \
-	missing ltmain.sh
+	$(srcdir)/config.h.in $(srcdir)/libanslp-0.0.pc.in \
+	$(srcdir)/libanslp_msg-0.0.pc.in COPYING INSTALL compile \
+	config.guess config.sub depcomp install-sh missing ltmain.sh
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -95,7 +95,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = libanslp_msg-0.0.pc
+CONFIG_CLEAN_FILES = libanslp-0.0.pc libanslp_msg-0.0.pc
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
@@ -370,7 +370,7 @@ top_srcdir = .
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src/msg src test
 ACLOCAL_AMFLAGS = -I m4
-pkgconfig_DATA = libanslp_msg-0.0.pc
+pkgconfig_DATA = libanslp-0.0.pc libanslp_msg-0.0.pc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -424,6 +424,8 @@ $(srcdir)/config.h.in: # $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+libanslp-0.0.pc: $(top_builddir)/config.status $(srcdir)/libanslp-0.0.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 libanslp_msg-0.0.pc: $(top_builddir)/config.status $(srcdir)/libanslp_msg-0.0.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 

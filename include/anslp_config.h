@@ -53,17 +53,14 @@ namespace anslp {
     anslpconf_dispatcher_threads,
     anslpconf_is_auctioneer,
     anslpconf_install_auction_rules,    
-    anslpconf_export_config_file,
-    anslpconf_configuration_file,
     
     /* Metering application parameters */
-    anslpconf_auctioning_application,
+    anslpconf_auctioneer_application,
 	anslpconf_auctioneer_user,
 	anslpconf_auctioneer_password,
 	anslpconf_auctioneer_server,
 	anslpconf_auctioneer_def_xsl,
 	anslpconf_auctioneer_port,
-	anslpconf_export_directory,
     
     /* NI  */
     anslpconf_ni_session_lifetime,
@@ -77,8 +74,6 @@ namespace anslp {
     anslpconf_nf_response_timeout,
     /* NR  */
     anslpconf_nr_max_session_lifetime,
-    anslpconf_nr_ext_max_retries,
-    anslpconf_nr_ext_response_timeout,
     anslpconf_maxparno
   };
 
@@ -137,14 +132,8 @@ class anslp_config {
 	bool is_auctioneer() const { return getpar<bool>(anslpconf_is_auctioneer); }
 	
 	string get_auctioning_application() const { 
-		return getpar<string>(anslpconf_auctioning_application); }
-		
-	string get_export_config_file() const { 
-		return getpar<string>(anslpconf_export_config_file); }
-	
-	string get_configuration_file() const { 
-		return getpar<string>(anslpconf_configuration_file); }
-
+		return getpar<string>(anslpconf_auctioneer_application); }
+			
 	string get_user() const {
 		return getpar<string>(anslpconf_auctioneer_user); }
 	
@@ -159,9 +148,6 @@ class anslp_config {
 
 	uint32 get_auctioneer_port() const {
 		return getpar<uint32>(anslpconf_auctioneer_port); }
-
-	string get_export_directory() const {
-		return getpar<string>(anslpconf_export_directory); }
 
     uint32 get_ni_session_lifetime() const { 
 		return getpar<uint32>(anslpconf_ni_max_session_lifetime); }
@@ -186,13 +172,7 @@ class anslp_config {
 
 	uint32 get_nr_max_session_lifetime() const {
 		return getpar<uint32>(anslpconf_nr_max_session_lifetime); }
-
-	uint32 get_nr_ext_max_retries() const { 
-		return getpar<uint32>(anslpconf_nr_ext_max_retries); }
 		
-	uint32 get_nr_ext_response_timeout() const {
-		return getpar<uint32>(anslpconf_nr_ext_response_timeout); }
-
 	/// The ID of the queue that receives messages from the NTLP.
 	static const message::qaddr_t INPUT_QUEUE_ADDRESS
 		= message::qaddr_api_3;

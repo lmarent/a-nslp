@@ -101,15 +101,29 @@ void anslp_daemon::startup() {
 	}
 
     AddressList *addresses = new AddressList();
+	
+	LogInfo("starting it is going to read parameters 1");
 
-    hostaddresslist_t& ntlpv4addr= ntlp::gconf.getparref< hostaddresslist_t >(ntlp::gistconf_localaddrv4);
-    hostaddresslist_t& ntlpv6addr= ntlp::gconf.getparref< hostaddresslist_t >(ntlp::gistconf_localaddrv6);
+	hostaddresslist_t& ntlpv4addr= ntlp::gconf.getparref< protlib::hostaddresslist_t >(ntlp::gistconf_localaddrv4);
+
+#ifdef DEBUG
+	LogInfo("EStoy aqui 1 ");
+#endif
+	
+    hostaddresslist_t& ntlpv6addr= ntlp::gconf.getparref< protlib::hostaddresslist_t >(ntlp::gistconf_localaddrv6);
+
+#ifdef DEBUG
+	LogInfo("EStoy aqui 2 ");
+#endif
+	cout << "LLgue hasta qui" << endl;
 
     if (ntlpv4addr.size() == 0 && ntlpv6addr.size() == 0) {
          addresses->add_host_prop(NULL, AddressList::ConfiguredAddr_P);
          addresses->add_host_prop(NULL, AddressList::ConfiguredAddr_P);
          addresses->add_host_prop(NULL, AddressList::ConfiguredAddr_P);
     }
+
+	LogInfo("starting it is going to read parameters 1a");
 
     // fill in configured IPv4 addresses
     if (ntlpv4addr.size() != 0) {
@@ -119,7 +133,9 @@ void anslp_daemon::startup() {
             addresses->add_property(na);
          }
     }
-
+	
+	LogInfo("starting it is going to read parameters 2");
+	
     // fill in configured IPv6 addresses
     if (ntlpv6addr.size() != 0) {
          hostaddresslist_t::const_iterator it;
@@ -143,6 +159,7 @@ void anslp_daemon::startup() {
        addresses->add_property(na, AddressList::ConfiguredAddr_P);
    }
 
+	LogInfo("starting it is going to read parameters 3");
     // MOBILITY: care-of interfaces
     const string& coa_iface= ntlp::gconf.getparref< string >(ntlp::gistconf_coa_interfaces);
     if (!coa_iface.empty()){
@@ -171,7 +188,8 @@ void anslp_daemon::startup() {
         addresses->add_property(na, AddressList::AltHAAddr_P);
         addresses->add_property(na, AddressList::ConfiguredAddr_P);
     }
-
+	
+	LogInfo("starting it is going to read parameters 4");
 
 	/*
 	 * Start the GIST thread.
@@ -196,6 +214,8 @@ void anslp_daemon::startup() {
 	api_msg->set_source(anslp_config::INPUT_QUEUE_ADDRESS);
 	api_msg->set_register(anslp_config::NSLP_ID, 0); // NSLPID, RAO
 
+	LogInfo("starting it is going to read parameters 5");
+	
 	/*
 	 * TODO: We have no way to find out if the NTLP thread is up and has
 	 * already registered an input queue. Because of this, we try to send
@@ -314,5 +334,5 @@ void anslp::cleanup_framework() {
 	QueueManager::clear();
 	ANSLP_IEManager::clear();
 	//tsdb::end();
-	LogError("mnslp::cleanup_framework() doesn't call tsdb::end()!");
+	LogError("anslp::cleanup_framework() doesn't call tsdb::end()!");
 }

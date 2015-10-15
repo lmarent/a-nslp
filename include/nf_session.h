@@ -64,9 +64,9 @@ class nf_session : public session {
 	 * States of a session.
 	 */
 	enum state_t {
-		STATE_CLOSE		= 0,
-		STATE_PENDING	= 1,
-		STATE_AUCTIONING	= 2
+		STATE_ANSLP_CLOSE		= 0,
+		STATE_ANSLP_PENDING		= 1,
+		STATE_ANSLP_AUCTIONING	= 2
 	};
 
 	nf_session(state_t s, const anslp_config *conf);
@@ -170,7 +170,7 @@ std::ostream &operator<<(std::ostream &out, const nf_session &s);
 
 
 inline bool nf_session::is_final() const {
-	return get_state() == STATE_CLOSE;
+	return get_state() == STATE_ANSLP_CLOSE;
 }
 
 inline void nf_session::set_last_create_message(msg::ntlp_msg *msg) {

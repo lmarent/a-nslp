@@ -30,6 +30,9 @@
 #include "stdincpp.h"
 #include "Error.h"
 
+namespace anslp 
+{
+  namespace msg {
 
 class anslp_ipap_bad_argument: public Error
 {
@@ -138,5 +141,8 @@ inline const char* anslp_ipap_memory_allocation::what()
 	 return (Error::getError()).c_str();
 }
 
+}
+
+}
 
 #endif // ANSLP_IPAP_EXCEPTION_H

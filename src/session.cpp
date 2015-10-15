@@ -47,7 +47,7 @@ using protlib::uint32;
  * A random session ID is created and the message sequence number is set to 0.
  * Additionally, the mutex is initialized.
  */
-session::session() : id(), msn(0), rule(NULL) 
+session::session() : rule(NULL), id(), msn(0)
 {
 	init();
 }
@@ -61,7 +61,7 @@ session::session() : id(), msn(0), rule(NULL)
  *
  * @param sid a hopefully unique session id
  */
-session::session(const session_id &sid) : id(sid), msn(0), rule(NULL) 
+session::session(const session_id &sid) : rule(NULL), id(sid), msn(0)
 {
 	init();
 }
@@ -204,16 +204,16 @@ bool session::check_participating(const uint32 _sme)
 	return val_return;
 }
 
-void session::set_mspec_object(anslp_mspec_object *object) 
+void session::set_request_mspec_object(anslp_mspec_object *object) 
 {
 	if (rule != NULL)
-		rule->set_object(object);
+		rule->set_request_object(object);
 }
 
-size_t session::get_number_mspec_objects(void)
+size_t session::get_number_mspec_request_objects(void)
 {
 	if (rule != NULL)
-		return rule->get_number_mspec_objects();
+		return rule->get_number_mspec_request_objects();
 	else
 		return 0;
 }

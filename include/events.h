@@ -306,7 +306,7 @@ class api_create_event : public api_event {
 		
 	inline uint32 get_selection_auctioning_entities()  const { return (uint32) sel_auct_entities; }
 	
-	inline const std::vector<msg::anslp_mspec_object *> &get_metering_objects() const {
+	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
 		return mspec_objects; }
 
 	inline FastQueue *get_return_queue() const { return return_queue; }

@@ -1,5 +1,5 @@
 /*
- * A ANSLP RESPONSE Message.
+ * A A-NSLP RESPONSE Message.
  *
  * $Id: anslp_response.h 2015-09-01  $
  * $HeadURL: https://./include/msg/anslp_response.h $
@@ -137,9 +137,11 @@ class anslp_response : public anslp_msg {
 	bool is_response_to(const anslp_refresh *msg) const;
 
 	/** 
-	 * Insert a ipap message to the response message
+	 * Insert an mspec oject message to the response message
 	 */ 
-	void set_anslp_ipap_message(anslp_ipap_message *message);
+	void set_mspec_object(anslp_mspec_object *message);
+	
+	void get_mspec_objects(vector<anslp_mspec_object *> &list_return);
 
   protected:
   

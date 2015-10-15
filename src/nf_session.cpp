@@ -58,7 +58,7 @@ using protlib::uint32;
  * Use this if the session ID is known in advance.
  */
 nf_session::nf_session(const session_id &id, const anslp_config *conf)
-		: session(id), state(nf_session::STATE_CLOSE), config(conf),
+		: session(id), state(nf_session::STATE_ANSLP_CLOSE), config(conf),
 		  proxy_mode(false), lifetime(0), max_lifetime(0),
 		  response_timeout(0), state_timer(this), response_timer(this),
 		  ni_mri(NULL), nr_mri(NULL), create_message(NULL), 
@@ -172,7 +172,7 @@ void nf_session::set_pc_mri(msg_event *evt) throw (request_error)
 }
 
 /**
- * Create a metering policy rule from the given event and save it.
+ * Create an auctioning policy rule from the given event and save it.
  *
  * If we receive a successful response later, we will activate the rule.
  * In case we don't support the requested policy rule, an exception is thrown.
@@ -200,7 +200,8 @@ void nf_session::set_auction_rule(dispatcher *d,
 		{
 			try{
 				if (d->check(object)){
-				   rule->set_object(object->copy());
+				   rule->set_request_object(object->copy());
+				   missing_objects.push_back(object->copy());
 				}
 				else{
 				   missing_objects.push_back(object->copy());
@@ -218,7 +219,7 @@ void nf_session::set_auction_rule(dispatcher *d,
 }
 
 
-// For implementation of metering interface.
+// For implementation of auctioning interface.
 
 
 /****************************************************************************
@@ -278,7 +279,7 @@ nf_session::build_create_message(msg_event *e,
 
 
 /**
- * Build a MNSLP Refresh message to teardown other configurations
+ * Build a A-NSLP Refresh message to teardown other configurations
  * This could happend when the something went wrong installing the policy rules
  *
  * This will fetch the MSN and also increment the MSN.
@@ -349,17 +350,17 @@ nf_session::process_state_close(dispatcher *d, event *evt)
 		missing_objects.clear();
 		
 		LogDebug( "Ending process State Close New state PENDING");		
-		return STATE_PENDING;
+		return STATE_ANSLP_PENDING;
 	}	
 	catch ( auction_rule_installer_error &exc ) {
 		LogError("auction rule not supported: " << exc);
 		d->send_message( msg->create_error_response(exc) );
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 	catch ( request_error &exc ) {
 		LogError("Mri information not found : " << exc);
 		d->send_message( msg->create_error_response(exc) );
-		return STATE_CLOSE;	
+		return STATE_ANSLP_CLOSE;	
 	}
 	
 }
@@ -402,11 +403,11 @@ nf_session::handle_state_close(dispatcher *d, event *evt)
 		catch ( request_error &e ) {
 			LogError(e);
 			d->send_message( msg->create_error_response(e) );
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 		if ( lifetime == 0 ) {
 			LogWarn("lifetime == 0, discarding message");
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 		/*
 		 * All basic preconditions match, the CREATE seems to be valid.
@@ -424,7 +425,7 @@ nf_session::handle_state_close(dispatcher *d, event *evt)
 }
 
 /*
- * state: STATE_PENDING
+ * state: STATE_ANSLP_PENDING
  */
 nf_session::state_t 
 nf_session::handle_state_pending(dispatcher *d, event *evt) {
@@ -457,7 +458,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 		catch ( request_error &e ) {
 			LogError(e);
 			d->send_message( msg->create_error_response(e) );
-			return STATE_PENDING; // no change
+			return STATE_ANSLP_PENDING; // no change
 		}
 
 		if ( create->get_msg_sequence_number() >
@@ -470,7 +471,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 
 			d->send_message( msg->copy_for_forwarding() );
 
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 		else if ( create->get_msg_sequence_number()
 				== previous->get_msg_sequence_number() ) {
@@ -481,7 +482,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 
 			state_timer.start(d, get_response_timeout());
 
-			return STATE_PENDING; // no change
+			return STATE_ANSLP_PENDING; // no change
 		}
 		else {
 			LogWarn("Replacing CREATE message."); 
@@ -511,13 +512,13 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 
 		// TODO: ReportAsyncEvent() ?
 
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 	/*
 	 * Outdated timer event, discard and don't log.
 	 */
 	else if ( is_timer(evt) ) {
-		return STATE_PENDING; // no change
+		return STATE_ANSLP_PENDING; // no change
 	}
 
 	/*
@@ -532,7 +533,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 		anslp_create *c = get_last_create_message()->get_anslp_create();
 		if ( ! resp->is_response_to(c) ) {
 			LogWarn("RESPONSE doesn't match CREATE, discarding");
-			return STATE_PENDING; // no change
+			return STATE_ANSLP_PENDING; // no change
 		}
 
 		if ( resp->is_success() ) {
@@ -540,16 +541,31 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 
 			auction_rule * result = d->install_auction_rules(rule);
 			// Verify that every rule that passed the checking process could be installed.
-			if (result->get_number_mspec_objects() == rule->get_number_mspec_objects() )
+			if (result->get_number_mspec_request_objects() 
+					== rule->get_number_mspec_response_objects() )
 			{
 				// free the space allocated to the rule to be installed.
 				delete(rule);
 			
-				// Assign the response as the rule installed.
+				// Assign the response with local rules installed.
+				
+				anslp_response *response = resp->copy();
+				
 				rule = result;
-				d->send_message( create_msg_for_ni(msg) );
+				objectListIter_t iter;
+				for (iter = result->get_response_objects()->begin(); 
+						iter != result->get_response_objects()->end(); ++iter){
+					response->set_mspec_object((iter->second)->copy());
+				}
+				
+				/*
+				* Wrap the Response inside an ntlp_msg and add session ID and MRI.
+				*/
+				ntlp_msg *msgRsp = new ntlp_msg(get_id(), response, get_ni_mri()->copy(), 0);
+				
+				d->send_message( msgRsp );
 				state_timer.start(d, get_lifetime());
-				return STATE_AUCTIONING;
+				return STATE_ANSLP_AUCTIONING;
 			}
 			else
 			{
@@ -558,7 +574,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 				// Assign the response as the rule installed.
 				rule = result;
 				// Uninstall the previous rules.
-				if (rule->get_number_rule_keys() > 0)
+				if (rule->get_number_mspec_response_objects() > 0)
 					d->remove_auction_rules(rule);
 				
 				// Create message towards nr to teardown what we have done before 
@@ -569,7 +585,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 				d->send_message( msg->create_response(
 								 information_code::sc_permanent_failure, 
 								 information_code::fail_internal_error));
-				return STATE_CLOSE;
+				return STATE_ANSLP_CLOSE;
 			}
 		}
 		else {
@@ -580,7 +596,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 
 			d->send_message( create_msg_for_ni(msg) );
 
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 	}
 	
@@ -589,7 +605,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 	 */
 	else {
 		LogInfo("discarding unexpected event " << *evt);
-		return STATE_PENDING; // no change
+		return STATE_ANSLP_PENDING; // no change
 	}
 
 	LogDebug("Ending handle_state_pending(): " << *this);
@@ -598,14 +614,14 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 
 
 /*
- * state: STATE_AUCTIONING
+ * state: STATE_ANSLP_AUCTIONING
  */
 nf_session::state_t nf_session::handle_state_auctioning(
 		dispatcher *d, event *evt) {
 
 	using namespace anslp::msg;
   
-	LogDebug("Begining handle_STATE_AUCTIONING(): " << *this);
+	LogDebug("Begining handle_STATE_ANSLP_AUCTIONING(): " << *this);
   
 	/*
 	 * A msg_event arrived which contains a MNSLP REFRESH message.
@@ -633,12 +649,12 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		catch ( request_error &e ) {
 			LogError(e);
 			d->send_message( msg->create_error_response(e) );
-			return STATE_AUCTIONING; // no change!
+			return STATE_ANSLP_AUCTIONING; // no change!
 		}
 
 		if ( ! is_greater_than(msn, get_msg_sequence_number()) ) {
 			LogWarn("discarding duplicate response.");
-			return STATE_AUCTIONING; // no change
+			return STATE_ANSLP_AUCTIONING; // no change
 		}
 
 		/*
@@ -659,7 +675,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 			response_timer.start(d, get_response_timeout());
 
-			return STATE_AUCTIONING; // no change
+			return STATE_ANSLP_AUCTIONING; // no change
 		}
 		else {	// lifetime == 0
 			LogDebug("forwarder session refreshed lifetime 0.");
@@ -674,7 +690,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 			response_timer.start(d, get_response_timeout());
 						
 			// Wait confirmation to close session
-			return STATE_AUCTIONING; 
+			return STATE_ANSLP_AUCTIONING; 
 
 		}
 	}
@@ -694,7 +710,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		state_timer.stop();
 		
 		// Uninstall the previous rules.
-		if (rule->get_number_rule_keys() > 0)
+		if (rule->get_number_mspec_response_objects() > 0)
 			d->remove_auction_rules(rule);
 
 		// TODO: check the spec!
@@ -704,7 +720,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 		d->send_message( response );
 
-		return STATE_CLOSE; 
+		return STATE_ANSLP_CLOSE; 
 	}
 	
 	/*
@@ -716,12 +732,12 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		response_timer.stop();
 
 		// Uninstall the previous rules.
-		if (rule->get_number_rule_keys() > 0)
+		if (rule->get_number_mspec_response_objects() > 0)
 			d->remove_auction_rules(rule);
 
 		// TODO: ReportAsyncEvent()
 
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 	/*
 	 * GIST detected that one of our routes is no longer usable. This
@@ -731,10 +747,10 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		LogUnimp("route to the NI or to the NR is no longer usable");
 
 		// Uninstall the previous rules.
-		if (rule->get_number_rule_keys() > 0)
+		if (rule->get_number_mspec_response_objects() > 0)
 			d->remove_auction_rules(rule);
 
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}	
 	/*
 	 * A RESPONSE to a REFRESH arrived.
@@ -746,12 +762,12 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		ntlp_msg *msg = e->get_ntlp_msg();
 		anslp_response *response = e->get_response();
 		
-		// Discard if this is not a RESPONSE to our original CREATE.
+		// Discard if this is not a RESPONSE to our original REFRESH.
 		anslp_refresh *c = get_last_refresh_message()->get_anslp_refresh();
 		if ( ! response->is_response_to(c) ) 
 		{			
 			LogWarn("RESPONSE doesn't match REFRESH, discarding");
-			return STATE_AUCTIONING;	// no change
+			return STATE_ANSLP_AUCTIONING;	// no change
 		}
 
 		
@@ -763,43 +779,43 @@ nf_session::state_t nf_session::handle_state_auctioning(
 			{
 				state_timer.stop();	
 				// Uninstall the previous rules.
-				if (rule->get_number_rule_keys() > 0)
+				if (rule->get_number_mspec_response_objects() > 0)
 					d->remove_auction_rules(rule);	
-				return STATE_CLOSE;
+				return STATE_ANSLP_CLOSE;
 			}
 			else
 			{
 				state_timer.start(d, get_lifetime());
-				return STATE_AUCTIONING; // no change
+				return STATE_ANSLP_AUCTIONING; // no change
 			}
 		}
 		else {
 			LogWarn("error message received.");
 			state_timer.stop();
 			// Uninstall the previous rules.
-			if (rule->get_number_rule_keys() > 0)
+			if (rule->get_number_mspec_response_objects() > 0)
 				d->remove_auction_rules(rule);
 			
 			d->send_message( create_msg_for_ni(msg) );
 
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 	}
 	/*
 	 * Outdated timer event, discard and don't log.
 	 */
 	else if ( is_timer(evt) ) {
-		return STATE_AUCTIONING; // no change
+		return STATE_ANSLP_AUCTIONING; // no change
 	}
 	/*
 	 * Received unexpected event.
 	 */
 	else {
 		LogInfo("discarding unexpected event " << *evt);
-		return STATE_AUCTIONING; // no change
+		return STATE_ANSLP_AUCTIONING; // no change
 	}
 
-	LogDebug("Ending handle_STATE_AUCTIONING(): " << *this);
+	LogDebug("Ending handle_STATE_ANSLP_AUCTIONING(): " << *this);
 	
 }
 
@@ -814,15 +830,15 @@ void nf_session::process_event(dispatcher *d, event *evt) {
 
 	switch ( get_state() ) {
 
-		case nf_session::STATE_CLOSE:
+		case nf_session::STATE_ANSLP_CLOSE:
 			state = handle_state_close(d, evt);
 			break;
 
-		case nf_session::STATE_PENDING:
+		case nf_session::STATE_ANSLP_PENDING:
 			state = handle_state_pending(d, evt);
 			break;
 
-		case nf_session::STATE_AUCTIONING:
+		case nf_session::STATE_ANSLP_AUCTIONING:
 			state = handle_state_auctioning(d, evt);
 			break;
 

@@ -93,6 +93,6 @@ void init_framework();
 void cleanup_framework();
 
 
-} // namespace anslp
+}; // namespace anslp
 
 #endif // ANSLP_DAEMON_H

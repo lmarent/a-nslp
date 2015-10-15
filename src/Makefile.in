@@ -28,6 +28,7 @@
 #
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -75,7 +76,6 @@ am__make_running_with_option = \
 am__make_dryrun = (target_option=n; $(am__make_running_with_option))
 am__make_keepgoing = (target_option=k; $(am__make_running_with_option))
 pkgdatadir = $(datadir)/@PACKAGE@
-pkgincludedir = $(includedir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkglibexecdir = $(libexecdir)/@PACKAGE@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
@@ -92,12 +92,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = anslpd$(EXEEXT) test_client$(EXEEXT)
+bin_PROGRAMS = anslpd$(EXEEXT)
 @NSIS_NO_WARN_HASHMAP_TRUE@am__append_1 = -Wno-deprecated
 @NSIS_NO_WARN_HASHMAP_FALSE@am__append_2 = 
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(top_srcdir)/depcomp $(include_HEADERS)
+	$(top_srcdir)/depcomp $(include_HEADERS) $(pkginclude_HEADERS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -109,7 +109,56 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
+	"$(DESTDIR)$(includedir)" "$(DESTDIR)$(pkgincludedir)"
+LTLIBRARIES = $(lib_LTLIBRARIES)
+am__DEPENDENCIES_1 =
+libanslp_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_libanslp_la_OBJECTS = libanslp_la-anslp_timers.lo \
+	libanslp_la-auction_rule.lo \
+	libanslp_la-auction_rule_installer.lo \
+	libanslp_la-benchmark_journal.lo libanslp_la-dispatcher.lo \
+	libanslp_la-gistka_mapper.lo libanslp_la-mspec_rule_key.lo \
+	libanslp_la-netauct_rule_installer.lo \
+	libanslp_la-nf_session.lo libanslp_la-ni_session.lo \
+	libanslp_la-nop_auction_rule_installer.lo \
+	libanslp_la-nr_session.lo libanslp_la-session.lo \
+	libanslp_la-session_id.lo libanslp_la-session_manager.lo \
+	libanslp_la-anslp_config.lo libanslp_la-anslp_daemon.lo
+libanslp_la_OBJECTS = $(am_libanslp_la_OBJECTS)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 PROGRAMS = $(bin_PROGRAMS)
 am_anslpd_OBJECTS = anslpd-benchmark_journal.$(OBJEXT) \
 	anslpd-gistka_mapper.$(OBJEXT) anslpd-session_id.$(OBJEXT) \
@@ -117,23 +166,14 @@ am_anslpd_OBJECTS = anslpd-benchmark_journal.$(OBJEXT) \
 	anslpd-ni_session.$(OBJEXT) anslpd-nr_session.$(OBJEXT) \
 	anslpd-session_manager.$(OBJEXT) anslpd-session.$(OBJEXT) \
 	anslpd-netauct_rule_installer.$(OBJEXT) \
-	anslpd-anslp_config.$(OBJEXT) anslpd-anslp_timers.$(OBJEXT) \
-	anslpd-anslp_daemon.$(OBJEXT) anslpd-auction_rule.$(OBJEXT) \
-	anslpd-mspec_rule_key.$(OBJEXT) anslpd-main.$(OBJEXT) \
+	anslpd-auction_rule.$(OBJEXT) anslpd-mspec_rule_key.$(OBJEXT) \
+	anslpd-main.$(OBJEXT) \
 	anslpd-nop_auction_rule_installer.$(OBJEXT) \
-	anslpd-auction_rule_installer.$(OBJEXT)
+	anslpd-auction_rule_installer.$(OBJEXT) \
+	anslpd-anslp_timers.$(OBJEXT) anslpd-anslp_config.$(OBJEXT) \
+	anslpd-anslp_daemon.$(OBJEXT)
 anslpd_OBJECTS = $(am_anslpd_OBJECTS)
-am__DEPENDENCIES_1 =
 anslpd_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
-am_test_client_OBJECTS = test_client-test_client.$(OBJEXT)
-test_client_OBJECTS = $(am_test_client_OBJECTS)
-test_client_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -170,41 +210,14 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(anslpd_SOURCES) $(test_client_SOURCES)
-DIST_SOURCES = $(anslpd_SOURCES) $(test_client_SOURCES)
+SOURCES = $(libanslp_la_SOURCES) $(anslpd_SOURCES)
+DIST_SOURCES = $(libanslp_la_SOURCES) $(anslpd_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-HEADERS = $(include_HEADERS)
+HEADERS = $(include_HEADERS) $(pkginclude_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -225,6 +238,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+pkgincludedir = $(includedir)/$(PACKAGE)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -367,40 +381,80 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-LDADD = $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) $(LIBIPAP_LIBS)
 API_INC = $(top_srcdir)/include
-INC_DIR = $(top_srcdir)/include/
+INC_DIR = $(top_srcdir)/include
 ANSLPMSG_INCDIR = $(INC_DIR)/msg
 ANSLPMSG_LIBDIR = $(top_srcdir)/src/msg/
 ANSLPMSG_LLIB = anslp_msg
+lib_LTLIBRARIES = libanslp.la
+pkginclude_HEADERS = $(INC_DIR)/events.h \
+					 $(INC_DIR)/mspec_rule_key.h \
+					 $(INC_DIR)/auction_rule.h \
+					 $(INC_DIR)/anslp_config.h \
+					 $(INC_DIR)/anslp_daemon.h \
+					 $(INC_DIR)/anslp_timers.h \
+					 $(INC_DIR)/ni_session.h \
+					 $(INC_DIR)/nf_session.h \
+					 $(INC_DIR)/nr_session.h \
+					 $(INC_DIR)/session.h \
+					 $(INC_DIR)/session_id.h \
+					 $(INC_DIR)/session_manager.h \
+					 $(INC_DIR)/auction_rule_installer.h \
+					 $(INC_DIR)/nop_auction_rule_installer.h \
+					 $(INC_DIR)/netauct_rule_installer.h
+
+@ENABLE_DEBUG_FALSE@AM_CXXFLAGS = -I$(top_srcdir)/include -O2 \
+@ENABLE_DEBUG_FALSE@	$(am__append_1) $(am__append_2)
+@ENABLE_DEBUG_TRUE@AM_CXXFLAGS = -I$(top_srcdir)/include -g \
+@ENABLE_DEBUG_TRUE@	-fno-inline -DDEBUG -D_GLIBCXX_DEBUG -ggdb \
+@ENABLE_DEBUG_TRUE@	$(am__append_1) $(am__append_2)
+libanslp_la_CPPFLAGS = -I$(API_INC) -I$(ANSLPMSG_INCDIR) \
+	$(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
+	$(LIBIPAP_CFLAGS) @LIBXML_CFLAGS@ @CURL_CFLAGS@ \
+	@LIBXSLT_CFLAGS@ @LIBUUID_CFLAGS@ $(am__empty)
+libanslp_la_SOURCES = anslp_timers.cpp \
+					  auction_rule.cpp \
+					  auction_rule_installer.cpp \
+					  benchmark_journal.cpp \
+					  dispatcher.cpp \
+					  gistka_mapper.cpp \
+					  mspec_rule_key.cpp \
+					  netauct_rule_installer.cpp \
+					  nf_session.cpp \
+					  ni_session.cpp \
+					  nop_auction_rule_installer.cpp \
+					  nr_session.cpp \
+					  session.cpp \
+					  session_id.cpp \
+					  session_manager.cpp \
+					  anslp_config.cpp \
+					  anslp_daemon.cpp
+
+libanslp_la_LIBADD = -L$(ANSLPMSG_LIBDIR) -l$(ANSLPMSG_LLIB) \
+	$(LIBGIST_LIBS) $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) \
+	$(LIBGIST_LIBS) $(LIBIPAP_LIBS) -lnetfilter_queue -lssl \
+	-lcrypto -lrt $(LD_SCTP_LIB) -lpthread -lxml2 @LIBXML_LIBS@ \
+	@CURL_LIBS@ @LIBXSLT_LIBS@ @LIBUUID_LIBS@ $(am__empty)
+LDADD = $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) $(LIBIPAP_LIBS)
 anslpd_CPPFLAGS = -I$(API_INC) -I$(ANSLPMSG_INCDIR) $(LIBGIST_CFLAGS) \
 	$(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) $(LIBIPAP_CFLAGS) \
 	@LIBXML_CFLAGS@ @CURL_CFLAGS@ @LIBXSLT_CFLAGS@ \
 	@LIBUUID_CFLAGS@ $(am__empty)
-test_client_CPPFLAGS = -I$(API_INC) -I$(ANSLPMSG_INCDIR) \
-	-I$(LIBGIST_CFLAGS) -I$(LIBPROT_CFLAGS) \
-	-I$(LIBFASTQUEUE_CFLAGS) -I$(LIBIPAP_CFLAGS) @LIBXML_CFLAGS@ \
-	@CURL_CFLAGS@ @LIBXSLT_CFLAGS@ @LIBUUID_CFLAGS@ $(am__empty)
 anslpd_SOURCES = benchmark_journal.cpp gistka_mapper.cpp session_id.cpp \
 		    dispatcher.cpp nf_session.cpp ni_session.cpp \
 	   	    nr_session.cpp session_manager.cpp session.cpp \
 	   	    netauct_rule_installer.cpp \
-	   	    anslp_config.cpp anslp_timers.cpp anslp_daemon.cpp \
 	   	    auction_rule.cpp mspec_rule_key.cpp main.cpp \
-	   	    nop_auction_rule_installer.cpp auction_rule_installer.cpp
+	   	    nop_auction_rule_installer.cpp auction_rule_installer.cpp \
+	   	    anslp_timers.cpp anslp_config.cpp anslp_daemon.cpp
 
-test_client_SOURCES = test_client.cpp
 @USE_WITH_SCTP_TRUE@LD_SCTP_LIB = -lsctp
 anslpd_LDADD = -L$(ANSLPMSG_LIBDIR) -l$(ANSLPMSG_LLIB) $(LIBGIST_LIBS) \
 	$(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBIPAP_LIBS) \
 	-lnetfilter_queue -lssl -lcrypto -lrt $(LD_SCTP_LIB) -lpthread \
 	-lxml2 @LIBXML_LIBS@ @CURL_LIBS@ @LIBXSLT_LIBS@ @LIBUUID_LIBS@
-test_client_LDADD = -L. -l$(ANSLP_LLIB) -L$(ANSLP_MSG_LIBDIR) \
-	-l$(ANSLPMSG_LLIB) $(LIBGIST_LIBS) $(LIBPROT_LIBS) \
-	$(LIBFASTQUEUE_LIBS) $(LIBIPAP_LIBS) -lnetfilter_queue -lssl \
-	-lrt $(LD_SCTP_LIB) -lpthread -lxml2 @LIBXML_LIBS@ @CURL_LIBS@ \
-	@LIBXSLT_LIBS@ @LIBUUID_LIBS@ $(am__empty)
 include_HEADERS = $(INC_DIR)/session_id.h \
+			      $(INC_DIR)/anslp_config.h \
 				  $(ANSLPMSG_INCDIR)/msg_sequence_number.h \
 				  $(ANSLPMSG_INCDIR)/anslp_ie.h \
 				  $(ANSLPMSG_INCDIR)/anslp_object.h \
@@ -415,11 +469,6 @@ include_HEADERS = $(INC_DIR)/session_id.h \
 	        	  $(ANSLPMSG_INCDIR)/anslp_refresh.h \
 	        	  $(ANSLPMSG_INCDIR)/anslp_notify.h 
 
-@ENABLE_DEBUG_FALSE@AM_CXXFLAGS = -I$(top_srcdir)/include -O2 \
-@ENABLE_DEBUG_FALSE@	$(am__append_1) $(am__append_2)
-@ENABLE_DEBUG_TRUE@AM_CXXFLAGS = -I$(top_srcdir)/include -g \
-@ENABLE_DEBUG_TRUE@	-fno-inline -DDEBUG -D_GLIBCXX_DEBUG \
-@ENABLE_DEBUG_TRUE@	$(am__append_1) $(am__append_2)
 all: all-am
 
 .SUFFIXES:
@@ -454,6 +503,44 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+
+libanslp.la: $(libanslp_la_OBJECTS) $(libanslp_la_DEPENDENCIES) $(EXTRA_libanslp_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libanslp_la_OBJECTS) $(libanslp_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -508,10 +595,6 @@ anslpd$(EXEEXT): $(anslpd_OBJECTS) $(anslpd_DEPENDENCIES) $(EXTRA_anslpd_DEPENDE
 	@rm -f anslpd$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(anslpd_OBJECTS) $(anslpd_LDADD) $(LIBS)
 
-test_client$(EXEEXT): $(test_client_OBJECTS) $(test_client_DEPENDENCIES) $(EXTRA_test_client_DEPENDENCIES) 
-	@rm -f test_client$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(test_client_OBJECTS) $(test_client_LDADD) $(LIBS)
-
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -536,7 +619,23 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anslpd-session.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anslpd-session_id.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/anslpd-session_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_client-test_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-anslp_config.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-anslp_daemon.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-anslp_timers.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-auction_rule.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-auction_rule_installer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-benchmark_journal.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-dispatcher.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-gistka_mapper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-mspec_rule_key.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-netauct_rule_installer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-nf_session.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-ni_session.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-nop_auction_rule_installer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-nr_session.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-session.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-session_id.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libanslp_la-session_manager.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -561,6 +660,125 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
+
+libanslp_la-anslp_timers.lo: anslp_timers.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-anslp_timers.lo -MD -MP -MF $(DEPDIR)/libanslp_la-anslp_timers.Tpo -c -o libanslp_la-anslp_timers.lo `test -f 'anslp_timers.cpp' || echo '$(srcdir)/'`anslp_timers.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-anslp_timers.Tpo $(DEPDIR)/libanslp_la-anslp_timers.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_timers.cpp' object='libanslp_la-anslp_timers.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-anslp_timers.lo `test -f 'anslp_timers.cpp' || echo '$(srcdir)/'`anslp_timers.cpp
+
+libanslp_la-auction_rule.lo: auction_rule.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-auction_rule.lo -MD -MP -MF $(DEPDIR)/libanslp_la-auction_rule.Tpo -c -o libanslp_la-auction_rule.lo `test -f 'auction_rule.cpp' || echo '$(srcdir)/'`auction_rule.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-auction_rule.Tpo $(DEPDIR)/libanslp_la-auction_rule.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='auction_rule.cpp' object='libanslp_la-auction_rule.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-auction_rule.lo `test -f 'auction_rule.cpp' || echo '$(srcdir)/'`auction_rule.cpp
+
+libanslp_la-auction_rule_installer.lo: auction_rule_installer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-auction_rule_installer.lo -MD -MP -MF $(DEPDIR)/libanslp_la-auction_rule_installer.Tpo -c -o libanslp_la-auction_rule_installer.lo `test -f 'auction_rule_installer.cpp' || echo '$(srcdir)/'`auction_rule_installer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-auction_rule_installer.Tpo $(DEPDIR)/libanslp_la-auction_rule_installer.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='auction_rule_installer.cpp' object='libanslp_la-auction_rule_installer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-auction_rule_installer.lo `test -f 'auction_rule_installer.cpp' || echo '$(srcdir)/'`auction_rule_installer.cpp
+
+libanslp_la-benchmark_journal.lo: benchmark_journal.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-benchmark_journal.lo -MD -MP -MF $(DEPDIR)/libanslp_la-benchmark_journal.Tpo -c -o libanslp_la-benchmark_journal.lo `test -f 'benchmark_journal.cpp' || echo '$(srcdir)/'`benchmark_journal.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-benchmark_journal.Tpo $(DEPDIR)/libanslp_la-benchmark_journal.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='benchmark_journal.cpp' object='libanslp_la-benchmark_journal.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-benchmark_journal.lo `test -f 'benchmark_journal.cpp' || echo '$(srcdir)/'`benchmark_journal.cpp
+
+libanslp_la-dispatcher.lo: dispatcher.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-dispatcher.lo -MD -MP -MF $(DEPDIR)/libanslp_la-dispatcher.Tpo -c -o libanslp_la-dispatcher.lo `test -f 'dispatcher.cpp' || echo '$(srcdir)/'`dispatcher.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-dispatcher.Tpo $(DEPDIR)/libanslp_la-dispatcher.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dispatcher.cpp' object='libanslp_la-dispatcher.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-dispatcher.lo `test -f 'dispatcher.cpp' || echo '$(srcdir)/'`dispatcher.cpp
+
+libanslp_la-gistka_mapper.lo: gistka_mapper.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-gistka_mapper.lo -MD -MP -MF $(DEPDIR)/libanslp_la-gistka_mapper.Tpo -c -o libanslp_la-gistka_mapper.lo `test -f 'gistka_mapper.cpp' || echo '$(srcdir)/'`gistka_mapper.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-gistka_mapper.Tpo $(DEPDIR)/libanslp_la-gistka_mapper.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='gistka_mapper.cpp' object='libanslp_la-gistka_mapper.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-gistka_mapper.lo `test -f 'gistka_mapper.cpp' || echo '$(srcdir)/'`gistka_mapper.cpp
+
+libanslp_la-mspec_rule_key.lo: mspec_rule_key.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-mspec_rule_key.lo -MD -MP -MF $(DEPDIR)/libanslp_la-mspec_rule_key.Tpo -c -o libanslp_la-mspec_rule_key.lo `test -f 'mspec_rule_key.cpp' || echo '$(srcdir)/'`mspec_rule_key.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-mspec_rule_key.Tpo $(DEPDIR)/libanslp_la-mspec_rule_key.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='mspec_rule_key.cpp' object='libanslp_la-mspec_rule_key.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-mspec_rule_key.lo `test -f 'mspec_rule_key.cpp' || echo '$(srcdir)/'`mspec_rule_key.cpp
+
+libanslp_la-netauct_rule_installer.lo: netauct_rule_installer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-netauct_rule_installer.lo -MD -MP -MF $(DEPDIR)/libanslp_la-netauct_rule_installer.Tpo -c -o libanslp_la-netauct_rule_installer.lo `test -f 'netauct_rule_installer.cpp' || echo '$(srcdir)/'`netauct_rule_installer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-netauct_rule_installer.Tpo $(DEPDIR)/libanslp_la-netauct_rule_installer.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='netauct_rule_installer.cpp' object='libanslp_la-netauct_rule_installer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-netauct_rule_installer.lo `test -f 'netauct_rule_installer.cpp' || echo '$(srcdir)/'`netauct_rule_installer.cpp
+
+libanslp_la-nf_session.lo: nf_session.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-nf_session.lo -MD -MP -MF $(DEPDIR)/libanslp_la-nf_session.Tpo -c -o libanslp_la-nf_session.lo `test -f 'nf_session.cpp' || echo '$(srcdir)/'`nf_session.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-nf_session.Tpo $(DEPDIR)/libanslp_la-nf_session.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='nf_session.cpp' object='libanslp_la-nf_session.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-nf_session.lo `test -f 'nf_session.cpp' || echo '$(srcdir)/'`nf_session.cpp
+
+libanslp_la-ni_session.lo: ni_session.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-ni_session.lo -MD -MP -MF $(DEPDIR)/libanslp_la-ni_session.Tpo -c -o libanslp_la-ni_session.lo `test -f 'ni_session.cpp' || echo '$(srcdir)/'`ni_session.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-ni_session.Tpo $(DEPDIR)/libanslp_la-ni_session.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ni_session.cpp' object='libanslp_la-ni_session.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-ni_session.lo `test -f 'ni_session.cpp' || echo '$(srcdir)/'`ni_session.cpp
+
+libanslp_la-nop_auction_rule_installer.lo: nop_auction_rule_installer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-nop_auction_rule_installer.lo -MD -MP -MF $(DEPDIR)/libanslp_la-nop_auction_rule_installer.Tpo -c -o libanslp_la-nop_auction_rule_installer.lo `test -f 'nop_auction_rule_installer.cpp' || echo '$(srcdir)/'`nop_auction_rule_installer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-nop_auction_rule_installer.Tpo $(DEPDIR)/libanslp_la-nop_auction_rule_installer.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='nop_auction_rule_installer.cpp' object='libanslp_la-nop_auction_rule_installer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-nop_auction_rule_installer.lo `test -f 'nop_auction_rule_installer.cpp' || echo '$(srcdir)/'`nop_auction_rule_installer.cpp
+
+libanslp_la-nr_session.lo: nr_session.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-nr_session.lo -MD -MP -MF $(DEPDIR)/libanslp_la-nr_session.Tpo -c -o libanslp_la-nr_session.lo `test -f 'nr_session.cpp' || echo '$(srcdir)/'`nr_session.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-nr_session.Tpo $(DEPDIR)/libanslp_la-nr_session.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='nr_session.cpp' object='libanslp_la-nr_session.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-nr_session.lo `test -f 'nr_session.cpp' || echo '$(srcdir)/'`nr_session.cpp
+
+libanslp_la-session.lo: session.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-session.lo -MD -MP -MF $(DEPDIR)/libanslp_la-session.Tpo -c -o libanslp_la-session.lo `test -f 'session.cpp' || echo '$(srcdir)/'`session.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-session.Tpo $(DEPDIR)/libanslp_la-session.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='session.cpp' object='libanslp_la-session.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-session.lo `test -f 'session.cpp' || echo '$(srcdir)/'`session.cpp
+
+libanslp_la-session_id.lo: session_id.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-session_id.lo -MD -MP -MF $(DEPDIR)/libanslp_la-session_id.Tpo -c -o libanslp_la-session_id.lo `test -f 'session_id.cpp' || echo '$(srcdir)/'`session_id.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-session_id.Tpo $(DEPDIR)/libanslp_la-session_id.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='session_id.cpp' object='libanslp_la-session_id.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-session_id.lo `test -f 'session_id.cpp' || echo '$(srcdir)/'`session_id.cpp
+
+libanslp_la-session_manager.lo: session_manager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-session_manager.lo -MD -MP -MF $(DEPDIR)/libanslp_la-session_manager.Tpo -c -o libanslp_la-session_manager.lo `test -f 'session_manager.cpp' || echo '$(srcdir)/'`session_manager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-session_manager.Tpo $(DEPDIR)/libanslp_la-session_manager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='session_manager.cpp' object='libanslp_la-session_manager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-session_manager.lo `test -f 'session_manager.cpp' || echo '$(srcdir)/'`session_manager.cpp
+
+libanslp_la-anslp_config.lo: anslp_config.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-anslp_config.lo -MD -MP -MF $(DEPDIR)/libanslp_la-anslp_config.Tpo -c -o libanslp_la-anslp_config.lo `test -f 'anslp_config.cpp' || echo '$(srcdir)/'`anslp_config.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-anslp_config.Tpo $(DEPDIR)/libanslp_la-anslp_config.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_config.cpp' object='libanslp_la-anslp_config.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-anslp_config.lo `test -f 'anslp_config.cpp' || echo '$(srcdir)/'`anslp_config.cpp
+
+libanslp_la-anslp_daemon.lo: anslp_daemon.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libanslp_la-anslp_daemon.lo -MD -MP -MF $(DEPDIR)/libanslp_la-anslp_daemon.Tpo -c -o libanslp_la-anslp_daemon.lo `test -f 'anslp_daemon.cpp' || echo '$(srcdir)/'`anslp_daemon.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libanslp_la-anslp_daemon.Tpo $(DEPDIR)/libanslp_la-anslp_daemon.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_daemon.cpp' object='libanslp_la-anslp_daemon.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libanslp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libanslp_la-anslp_daemon.lo `test -f 'anslp_daemon.cpp' || echo '$(srcdir)/'`anslp_daemon.cpp
 
 anslpd-benchmark_journal.o: benchmark_journal.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-benchmark_journal.o -MD -MP -MF $(DEPDIR)/anslpd-benchmark_journal.Tpo -c -o anslpd-benchmark_journal.o `test -f 'benchmark_journal.cpp' || echo '$(srcdir)/'`benchmark_journal.cpp
@@ -702,48 +920,6 @@ anslpd-netauct_rule_installer.obj: netauct_rule_installer.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-netauct_rule_installer.obj `if test -f 'netauct_rule_installer.cpp'; then $(CYGPATH_W) 'netauct_rule_installer.cpp'; else $(CYGPATH_W) '$(srcdir)/netauct_rule_installer.cpp'; fi`
 
-anslpd-anslp_config.o: anslp_config.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_config.o -MD -MP -MF $(DEPDIR)/anslpd-anslp_config.Tpo -c -o anslpd-anslp_config.o `test -f 'anslp_config.cpp' || echo '$(srcdir)/'`anslp_config.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_config.Tpo $(DEPDIR)/anslpd-anslp_config.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_config.cpp' object='anslpd-anslp_config.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_config.o `test -f 'anslp_config.cpp' || echo '$(srcdir)/'`anslp_config.cpp
-
-anslpd-anslp_config.obj: anslp_config.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_config.obj -MD -MP -MF $(DEPDIR)/anslpd-anslp_config.Tpo -c -o anslpd-anslp_config.obj `if test -f 'anslp_config.cpp'; then $(CYGPATH_W) 'anslp_config.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_config.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_config.Tpo $(DEPDIR)/anslpd-anslp_config.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_config.cpp' object='anslpd-anslp_config.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_config.obj `if test -f 'anslp_config.cpp'; then $(CYGPATH_W) 'anslp_config.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_config.cpp'; fi`
-
-anslpd-anslp_timers.o: anslp_timers.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_timers.o -MD -MP -MF $(DEPDIR)/anslpd-anslp_timers.Tpo -c -o anslpd-anslp_timers.o `test -f 'anslp_timers.cpp' || echo '$(srcdir)/'`anslp_timers.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_timers.Tpo $(DEPDIR)/anslpd-anslp_timers.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_timers.cpp' object='anslpd-anslp_timers.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_timers.o `test -f 'anslp_timers.cpp' || echo '$(srcdir)/'`anslp_timers.cpp
-
-anslpd-anslp_timers.obj: anslp_timers.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_timers.obj -MD -MP -MF $(DEPDIR)/anslpd-anslp_timers.Tpo -c -o anslpd-anslp_timers.obj `if test -f 'anslp_timers.cpp'; then $(CYGPATH_W) 'anslp_timers.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_timers.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_timers.Tpo $(DEPDIR)/anslpd-anslp_timers.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_timers.cpp' object='anslpd-anslp_timers.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_timers.obj `if test -f 'anslp_timers.cpp'; then $(CYGPATH_W) 'anslp_timers.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_timers.cpp'; fi`
-
-anslpd-anslp_daemon.o: anslp_daemon.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_daemon.o -MD -MP -MF $(DEPDIR)/anslpd-anslp_daemon.Tpo -c -o anslpd-anslp_daemon.o `test -f 'anslp_daemon.cpp' || echo '$(srcdir)/'`anslp_daemon.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_daemon.Tpo $(DEPDIR)/anslpd-anslp_daemon.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_daemon.cpp' object='anslpd-anslp_daemon.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_daemon.o `test -f 'anslp_daemon.cpp' || echo '$(srcdir)/'`anslp_daemon.cpp
-
-anslpd-anslp_daemon.obj: anslp_daemon.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_daemon.obj -MD -MP -MF $(DEPDIR)/anslpd-anslp_daemon.Tpo -c -o anslpd-anslp_daemon.obj `if test -f 'anslp_daemon.cpp'; then $(CYGPATH_W) 'anslp_daemon.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_daemon.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_daemon.Tpo $(DEPDIR)/anslpd-anslp_daemon.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_daemon.cpp' object='anslpd-anslp_daemon.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_daemon.obj `if test -f 'anslp_daemon.cpp'; then $(CYGPATH_W) 'anslp_daemon.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_daemon.cpp'; fi`
-
 anslpd-auction_rule.o: auction_rule.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-auction_rule.o -MD -MP -MF $(DEPDIR)/anslpd-auction_rule.Tpo -c -o anslpd-auction_rule.o `test -f 'auction_rule.cpp' || echo '$(srcdir)/'`auction_rule.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-auction_rule.Tpo $(DEPDIR)/anslpd-auction_rule.Po
@@ -814,19 +990,47 @@ anslpd-auction_rule_installer.obj: auction_rule_installer.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-auction_rule_installer.obj `if test -f 'auction_rule_installer.cpp'; then $(CYGPATH_W) 'auction_rule_installer.cpp'; else $(CYGPATH_W) '$(srcdir)/auction_rule_installer.cpp'; fi`
 
-test_client-test_client.o: test_client.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_client_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_client-test_client.o -MD -MP -MF $(DEPDIR)/test_client-test_client.Tpo -c -o test_client-test_client.o `test -f 'test_client.cpp' || echo '$(srcdir)/'`test_client.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_client-test_client.Tpo $(DEPDIR)/test_client-test_client.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='test_client.cpp' object='test_client-test_client.o' libtool=no @AMDEPBACKSLASH@
+anslpd-anslp_timers.o: anslp_timers.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_timers.o -MD -MP -MF $(DEPDIR)/anslpd-anslp_timers.Tpo -c -o anslpd-anslp_timers.o `test -f 'anslp_timers.cpp' || echo '$(srcdir)/'`anslp_timers.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_timers.Tpo $(DEPDIR)/anslpd-anslp_timers.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_timers.cpp' object='anslpd-anslp_timers.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_client_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_client-test_client.o `test -f 'test_client.cpp' || echo '$(srcdir)/'`test_client.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_timers.o `test -f 'anslp_timers.cpp' || echo '$(srcdir)/'`anslp_timers.cpp
 
-test_client-test_client.obj: test_client.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_client_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_client-test_client.obj -MD -MP -MF $(DEPDIR)/test_client-test_client.Tpo -c -o test_client-test_client.obj `if test -f 'test_client.cpp'; then $(CYGPATH_W) 'test_client.cpp'; else $(CYGPATH_W) '$(srcdir)/test_client.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_client-test_client.Tpo $(DEPDIR)/test_client-test_client.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='test_client.cpp' object='test_client-test_client.obj' libtool=no @AMDEPBACKSLASH@
+anslpd-anslp_timers.obj: anslp_timers.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_timers.obj -MD -MP -MF $(DEPDIR)/anslpd-anslp_timers.Tpo -c -o anslpd-anslp_timers.obj `if test -f 'anslp_timers.cpp'; then $(CYGPATH_W) 'anslp_timers.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_timers.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_timers.Tpo $(DEPDIR)/anslpd-anslp_timers.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_timers.cpp' object='anslpd-anslp_timers.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_client_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_client-test_client.obj `if test -f 'test_client.cpp'; then $(CYGPATH_W) 'test_client.cpp'; else $(CYGPATH_W) '$(srcdir)/test_client.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_timers.obj `if test -f 'anslp_timers.cpp'; then $(CYGPATH_W) 'anslp_timers.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_timers.cpp'; fi`
+
+anslpd-anslp_config.o: anslp_config.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_config.o -MD -MP -MF $(DEPDIR)/anslpd-anslp_config.Tpo -c -o anslpd-anslp_config.o `test -f 'anslp_config.cpp' || echo '$(srcdir)/'`anslp_config.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_config.Tpo $(DEPDIR)/anslpd-anslp_config.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_config.cpp' object='anslpd-anslp_config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_config.o `test -f 'anslp_config.cpp' || echo '$(srcdir)/'`anslp_config.cpp
+
+anslpd-anslp_config.obj: anslp_config.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_config.obj -MD -MP -MF $(DEPDIR)/anslpd-anslp_config.Tpo -c -o anslpd-anslp_config.obj `if test -f 'anslp_config.cpp'; then $(CYGPATH_W) 'anslp_config.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_config.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_config.Tpo $(DEPDIR)/anslpd-anslp_config.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_config.cpp' object='anslpd-anslp_config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_config.obj `if test -f 'anslp_config.cpp'; then $(CYGPATH_W) 'anslp_config.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_config.cpp'; fi`
+
+anslpd-anslp_daemon.o: anslp_daemon.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_daemon.o -MD -MP -MF $(DEPDIR)/anslpd-anslp_daemon.Tpo -c -o anslpd-anslp_daemon.o `test -f 'anslp_daemon.cpp' || echo '$(srcdir)/'`anslp_daemon.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_daemon.Tpo $(DEPDIR)/anslpd-anslp_daemon.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_daemon.cpp' object='anslpd-anslp_daemon.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_daemon.o `test -f 'anslp_daemon.cpp' || echo '$(srcdir)/'`anslp_daemon.cpp
+
+anslpd-anslp_daemon.obj: anslp_daemon.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT anslpd-anslp_daemon.obj -MD -MP -MF $(DEPDIR)/anslpd-anslp_daemon.Tpo -c -o anslpd-anslp_daemon.obj `if test -f 'anslp_daemon.cpp'; then $(CYGPATH_W) 'anslp_daemon.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_daemon.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/anslpd-anslp_daemon.Tpo $(DEPDIR)/anslpd-anslp_daemon.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='anslp_daemon.cpp' object='anslpd-anslp_daemon.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(anslpd_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o anslpd-anslp_daemon.obj `if test -f 'anslp_daemon.cpp'; then $(CYGPATH_W) 'anslp_daemon.cpp'; else $(CYGPATH_W) '$(srcdir)/anslp_daemon.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -854,6 +1058,27 @@ uninstall-includeHEADERS:
 	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
+install-pkgincludeHEADERS: $(pkginclude_HEADERS)
+	@$(NORMAL_INSTALL)
+	@list='$(pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(pkgincludedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(pkgincludedir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(pkgincludedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(pkgincludedir)" || exit $$?; \
+	done
+
+uninstall-pkgincludeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(pkgincludedir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -939,9 +1164,11 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -976,7 +1203,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -996,13 +1224,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-includeHEADERS
+install-data-am: install-includeHEADERS install-pkgincludeHEADERS
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -1042,24 +1270,28 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS
+uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS \
+	uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool cscopelist-am \
-	ctags ctags-am distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
+	clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool cscopelist-am ctags ctags-am distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am \
 	install-includeHEADERS install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-binPROGRAMS uninstall-includeHEADERS
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
+	install-pkgincludeHEADERS install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-includeHEADERS \
+	uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
 
 
 # end of Makefile.am

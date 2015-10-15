@@ -92,24 +92,35 @@ class auction_rule_installer {
 		throw (auction_rule_installer_error) = 0;
 
 	/**
-	 * Install the given policy rule.
+	 * Create the given auction session.
 	 * 
 	 * Subclasses have to use operating system dependent code to access the
-	 * local metering package. After calling this method, the rules are
-	 * in effect and data traffic will be treated as requested.
+	 * local auctioning application. 
+	 * After calling this method, the auction session is created in 
+	 * the auctioning application and nodes can start the auction process.
 	 */
-	virtual auction_rule * install(const auction_rule *mt_object) = 0;
+	virtual auction_rule * create(const auction_rule *mt_object) = 0;
 
 	/**
-	 * Remove the given policy rule.
+	 * Remove the given auction session.
 	 *
-	 * After calling this method, the previously installed rules are no
+	 * After calling this method, the previously created sessions are no
 	 * longer in effect.
 	 *
-	 * Note that this is the reverse operation to install(). Only previously
-	 * installed policy rule may be deleted!. 
+	 * Note that this is the reverse operation to create(). Only previously
+	 * created auction sessions may be deleted!. 
 	 */
 	virtual auction_rule * remove(const auction_rule * mt_object) = 0;
+
+	/**
+	 * executes an auction interaction between two parties.
+	 *	 
+	 * Subclasses have to use operating system dependent code to access the
+	 * local auctioning application. 
+	 *
+	 * After calling this method two nodes have exchanged a ipap_message. 
+	 */
+	virtual auction_rule * auction_interaction(const auction_rule *mt_object) = 0;
 
 	virtual bool remove_all() = 0;
 	
@@ -126,9 +137,7 @@ class auction_rule_installer {
 	std::string get_xsl() const { return config->get_auctioneer_xsl(); } 
 	
 	uint32 get_port() const { return config->get_auctioneer_port(); } 
-	
-	std::string get_export_directory() const { return config->get_export_directory(); }
-	
+		
 	std::string to_string() const;
   
   private:

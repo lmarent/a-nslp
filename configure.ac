@@ -165,10 +165,12 @@ AC_SUBST([pkgconfigdir])
 AC_MSG_NOTICE([pkgconfig directory is ${pkgconfigdir}])
 
 AC_CONFIG_FILES([Makefile
-                 src/msg/Makefile
+                 libanslp-0.0.pc
                  libanslp_msg-0.0.pc
+                 src/msg/Makefile
                  src/Makefile
-                 test/Makefile])
+                 test/Makefile
+                 test_main/Makefile])
 
 
 AC_OUTPUT

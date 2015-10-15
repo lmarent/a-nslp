@@ -213,7 +213,7 @@ libanslp_msg_la-anslp_msg.lo: anslp_msg.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/stdexcept /usr/local/include/ipap/Logger.h \
- /usr/local/include/ipap/Error.h /usr/local/include/ipap/Constants.h \
+ /usr/local/include/ipap/Error.h /usr/local/include/ipap/ConstantsIpAp.h \
  /usr/local/include/ipap/IpAp_def.h /usr/local/include/ipap/IpAp_field.h \
  /usr/local/include/ipap/IpAp_value_field.h \
  /usr/local/include/ipap/IpAp_exception.h \
@@ -804,7 +804,7 @@ libanslp_msg_la-anslp_msg.lo: anslp_msg.cpp /usr/include/stdc-predef.h \
 
 /usr/local/include/ipap/Error.h:
 
-/usr/local/include/ipap/Constants.h:
+/usr/local/include/ipap/ConstantsIpAp.h:
 
 /usr/local/include/ipap/IpAp_def.h:
 

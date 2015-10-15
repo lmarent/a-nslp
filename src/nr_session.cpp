@@ -56,7 +56,7 @@ using protlib::uint32;
  * Use this if the session ID is known in advance.
  */
 nr_session::nr_session(const session_id &id, anslp_config *conf)
-		: session(id), state(STATE_CLOSE), config(conf),
+		: session(id), state(STATE_ANSLP_CLOSE), config(conf),
 		  lifetime(0), max_lifetime(0), state_timer(this) 
 {
 
@@ -161,7 +161,8 @@ nr_session::save_auction_rule(dispatcher *d,
 		const anslp_mspec_object *object = *it_objects;
 		if (check_participating(create->get_selection_auctioning_entities())){
 			if (d->check(object)){
-			   rule->set_object(object->copy());
+			   rule->set_request_object(object->copy());
+			   missing_objects.push_back(object->copy());
 			}
 			else{
 			   missing_objects.push_back(object->copy());
@@ -184,7 +185,7 @@ nr_session::save_auction_rule(dispatcher *d,
 
 
 /*
- * state: STATE_CLOSE
+ * state: STATE_ANSLP_CLOSE
  */
 nr_session::state_t 
 nr_session::handle_state_close(dispatcher *d, event *evt) 
@@ -214,7 +215,7 @@ nr_session::handle_state_close(dispatcher *d, event *evt)
 		catch ( request_error &exp ) {
 			LogError(exp);
 			d->send_message( msg->create_error_response(exp) );
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 		catch ( override_lifetime &exp) {
 			lifetime = get_max_lifetime();
@@ -224,69 +225,58 @@ nr_session::handle_state_close(dispatcher *d, event *evt)
 			set_lifetime(lifetime);
 			set_msg_sequence_number(msn);
 			std::vector<msg::anslp_mspec_object *> missing_objects;
-	
 			save_auction_rule(d, e, missing_objects);
 			
-			if (missing_objects.size() > 0){
-				// Error at least one object could not be installed.
-				d->send_message( msg->create_response(
-								 information_code::sc_permanent_failure, 
-								 information_code::fail_internal_error) );
-				return STATE_CLOSE;
-			}
+			auction_rule * result = d->install_auction_rules(rule);
+			if (result->get_number_mspec_request_objects() ==
+					rule->get_number_mspec_response_objects() ){
+				// free the space allocated to the rule to be installed.
+				delete(rule);
+				// Assign the response as the rule installed.
+				rule = result;
+				ntlp_msg *resp = msg->create_success_response(lifetime);
+				d->send_message(resp);
+				state_timer.start(d, lifetime);
+				return STATE_ANSLP_AUCTIONING;
+			}	
 			else
 			{
-				auction_rule * result = d->install_auction_rules(rule);
-				if (result->get_number_mspec_objects() ==
-					rule->get_number_mspec_objects() ){
-					// free the space allocated to the rule to be installed.
-					delete(rule);
-					// Assign the response as the rule installed.
-					rule = result;
-					ntlp_msg *resp = msg->create_success_response(lifetime);
-					d->send_message(resp);
-					state_timer.start(d, lifetime);
-					return STATE_AUCTIONING;
-				}	
-				else
-				{
-					set_lifetime(0);
-					delete(rule);
-					// Assign the response as the rule installed.
-					rule = result;
-					// Uninstall the previous rules.
-					if (rule->get_number_rule_keys() > 0)
-						d->remove_auction_rules(rule);
+				set_lifetime(0);
+				delete(rule);
+				// Assign the response as the rule installed.
+				rule = result;
+				// Uninstall the previous rules.
+				if (rule->get_number_mspec_response_objects() > 0)
+					d->remove_auction_rules(rule);
 					
-					d->send_message( msg->create_response(
-										information_code::sc_permanent_failure, 
-										information_code::fail_internal_error) );
-					return STATE_CLOSE;
-				}				
-			}
+				d->send_message( msg->create_response(
+								information_code::sc_permanent_failure, 
+								information_code::fail_internal_error) );
+				return STATE_ANSLP_CLOSE;
+			}				
 		}
 		else {
 			LogWarn("invalid lifetime.");
 			d->send_message( msg->create_response(
 								 information_code::sc_permanent_failure, 
 								 information_code::fail_configuration_failed) );
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 	}
 	else {
 		LogInfo("discarding unexpected event " << *evt);
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 }
 
 
 /*
- * state: STATE_AUCTIONING
+ * state: STATE_ANSLP_AUCTIONING
  */
 nr_session::state_t nr_session::handle_state_auctioning(
 		dispatcher *d, event *evt) 
 {
-	LogDebug("Starting handle_STATE_AUCTIONING ");
+	LogDebug("Starting handle_STATE_ANSLP_AUCTIONING ");
 
 	/*
 	 * A msg_event arrived which contains a ANSLP REFRESH message.
@@ -311,12 +301,12 @@ nr_session::state_t nr_session::handle_state_auctioning(
 		catch ( request_error &exp ) {
 			LogError(exp);
 			d->send_message( msg->create_error_response(exp) );
-			return STATE_AUCTIONING;
+			return STATE_ANSLP_AUCTIONING;
 		}
 
 		if ( ! is_greater_than(msn, get_msg_sequence_number()) ) {
 			LogWarn("duplicate response received.");
-			return STATE_AUCTIONING; // no change
+			return STATE_ANSLP_AUCTIONING; // no change
 		}
 		else if ( lifetime > 0 ) {
 			LogDebug("authentication succesful.");
@@ -330,14 +320,14 @@ nr_session::state_t nr_session::handle_state_auctioning(
 
 			state_timer.restart(d, lifetime);
 
-			return STATE_AUCTIONING; // no change
+			return STATE_ANSLP_AUCTIONING; // no change
 		}
 		else if ( lifetime == 0 ) 
 		{
 			LogInfo("terminating session on NI request.");
 		
 			// Uninstall the previous rules.
-			if (rule->get_number_rule_keys() > 0)
+			if (rule->get_number_mspec_response_objects() > 0)
 				d->remove_auction_rules(rule);
 			
 			ntlp_msg *resp = msg->create_success_response(lifetime);
@@ -346,13 +336,13 @@ nr_session::state_t nr_session::handle_state_auctioning(
 			
 			state_timer.stop();
 
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 		else 
 		{
 			LogWarn("invalid lifetime.");
 
-			return STATE_AUCTIONING; // no change
+			return STATE_ANSLP_AUCTIONING; // no change
 		}
 	}
 	/*
@@ -361,11 +351,11 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	else if ( is_timer(evt, state_timer) ) {
 		LogWarn("session timed out.");
 		// Uninstall the previous rules.
-		if (rule->get_number_rule_keys() > 0)
+		if (rule->get_number_mspec_response_objects() > 0)
 			d->remove_auction_rules(rule);
 
 		d->report_async_event("session timed out");
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 	
 	/*
@@ -373,13 +363,13 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	 */
 	else if ( is_timer(evt) ) 
 	{
-		return STATE_AUCTIONING;// no change
+		return STATE_ANSLP_AUCTIONING;// no change
 	}
 	else 
 	{
 		LogInfo("discarding unexpected event " << *evt);
 
-		return STATE_AUCTIONING; // no change
+		return STATE_ANSLP_AUCTIONING; // no change
 	}
 }
 
@@ -395,11 +385,11 @@ void nr_session::process_event(dispatcher *d, event *evt)
 	
 	switch ( get_state() ) {
 
-		case nr_session::STATE_CLOSE:
+		case nr_session::STATE_ANSLP_CLOSE:
 			state = handle_state_close(d, evt);
 			break;
 
-		case nr_session::STATE_AUCTIONING:
+		case nr_session::STATE_ANSLP_AUCTIONING:
 			state = handle_state_auctioning(d, evt);
 			break;
 

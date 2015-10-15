@@ -77,12 +77,12 @@ class ni_session : public session {
 	 * States of a session.
 	 */
 	enum state_t {
-		STATE_CLOSE	= 0,
-		STATE_PENDING	= 1,
-		STATE_AUCTIONING	= 2
+		STATE_ANSLP_CLOSE	= 0,
+		STATE_ANSLP_PENDING	= 1,
+		STATE_ANSLP_AUCTIONING	= 2
 	};
 
-	ni_session(state_t s=STATE_CLOSE);
+	ni_session(state_t s=STATE_ANSLP_CLOSE);
 
 	void process_event(dispatcher *d, event *evt);
 	
@@ -194,7 +194,7 @@ std::ostream &operator<<(std::ostream &out, const ni_session &s);
 
 inline bool ni_session::is_final() const 
 {
-	return get_state() == STATE_CLOSE;
+	return get_state() == STATE_ANSLP_CLOSE;
 }
 
 inline void ni_session::inc_create_counter() 

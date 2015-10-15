@@ -26,12 +26,14 @@ class anslp_ipap_xml_message_Test : public CppUnit::TestCase {
   public:
 	void setUp();
 	void tearDown();
+	void buildRequestMessage(anslp_ipap_message *message);
 	void buildAuctionMessage(anslp_ipap_message *message);
 	void buildBidMessage(anslp_ipap_message *message);
 	void buildAllocationMessage(anslp_ipap_message *message);
 	void testExport();
 
   private:  
+    anslp_ipap_message *request;
     anslp_ipap_message *auction;
     anslp_ipap_message *bid;
     anslp_ipap_message *allocation;
@@ -54,8 +56,8 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 
 	uint16_t templatedataid = 0;
 	uint16_t templateoptiondataid = 0;
-	uint32_t starttime = 100;
-	uint32_t endtime = 200;
+	uint64_t starttime = 100;
+	uint64_t endtime = 200;
 
 	double maxvaluation = 0.15;
 	double unitvalue = 0.13;
@@ -78,11 +80,12 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 
 		nfields = 5;
 		templatedataid = (message->ip_message).new_data_template( nfields, IPAP_SETID_BID_TEMPLATE );
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDBID, 128);
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDRECORD, 128);
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_MAXUNITVALUATION, 8);
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_UNITVALUE, 8);	
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_QUANTITY, 4);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDBID);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDRECORD);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_MAXUNITVALUATION);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_UNITVALUE);	
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_QUANTITY);
 		
 		/// insert Values for data record 1.
 		ipap_field field1 = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBID );
@@ -91,21 +94,25 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		ipap_field field2 = (message->ip_message).get_field_definition( 0, IPAP_FT_IDRECORD );
 		ipap_value_field fvalue2 = field2.get_ipap_value_field( buf2, 4 );
 
-		ipap_field field3 = (message->ip_message).get_field_definition( 0, IPAP_FT_MAXUNITVALUATION );
-		ipap_value_field fvalue3 = field3.get_ipap_value_field( maxvaluation );
+		ipap_field field3 = (message->ip_message).get_field_definition( 0, IPAP_FT_IDAUCTION );
+		ipap_value_field fvalue3 = field3.get_ipap_value_field( buf2, 4 );
 
-		ipap_field field4 = (message->ip_message).get_field_definition( 0, IPAP_FT_UNITVALUE );
-		ipap_value_field fvalue4 = field4.get_ipap_value_field( unitvalue );
+		ipap_field field4 = (message->ip_message).get_field_definition( 0, IPAP_FT_MAXUNITVALUATION );
+		ipap_value_field fvalue4 = field4.get_ipap_value_field( maxvaluation );
 
-		ipap_field field5 = (message->ip_message).get_field_definition( 0, IPAP_FT_QUANTITY );
-		ipap_value_field fvalue5 = field5.get_ipap_value_field( quantity );
+		ipap_field field5 = (message->ip_message).get_field_definition( 0, IPAP_FT_UNITVALUE );
+		ipap_value_field fvalue5 = field5.get_ipap_value_field( unitvalue );
+
+		ipap_field field6 = (message->ip_message).get_field_definition( 0, IPAP_FT_QUANTITY );
+		ipap_value_field fvalue6 = field6.get_ipap_value_field( quantity );
 	
 		ipap_data_record data(templatedataid);
 		data.insert_field(0, IPAP_FT_IDBID, fvalue1);
 		data.insert_field(0, IPAP_FT_IDRECORD, fvalue2);
-		data.insert_field(0, IPAP_FT_MAXUNITVALUATION, fvalue3);
-		data.insert_field(0, IPAP_FT_UNITVALUE, fvalue4);
-		data.insert_field(0, IPAP_FT_QUANTITY, fvalue5);
+		data.insert_field(0, IPAP_FT_IDAUCTION, fvalue3);
+		data.insert_field(0, IPAP_FT_MAXUNITVALUATION, fvalue4);
+		data.insert_field(0, IPAP_FT_UNITVALUE, fvalue5);
+		data.insert_field(0, IPAP_FT_QUANTITY, fvalue6);
 
 #ifdef DEBUG
 		log->dlog(ch, "BuildBidMessage - Finish data record 1 %s", data.to_string().c_str() );
@@ -129,6 +136,9 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 
 		ipap_field field5a = (message->ip_message).get_field_definition( 0, IPAP_FT_QUANTITY );
 		ipap_value_field fvalue5a = field5a.get_ipap_value_field(  quantity );
+
+		ipap_field field6a = (message->ip_message).get_field_definition( 0, IPAP_FT_IDAUCTION );
+		ipap_value_field fvalue6a = field6a.get_ipap_value_field( buf2a, 4 );
 		
 		ipap_data_record data2(templatedataid);
 		data2.insert_field(0, IPAP_FT_IDBID, fvalue1a);
@@ -136,6 +146,8 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		data2.insert_field(0, IPAP_FT_MAXUNITVALUATION, fvalue3a);
 		data2.insert_field(0, IPAP_FT_UNITVALUE, fvalue4a);
 		data2.insert_field(0, IPAP_FT_QUANTITY, fvalue5a);
+		data2.insert_field(0, IPAP_FT_IDAUCTION, fvalue6a);
+		
 		(message->ip_message).include_data(templatedataid, data2);
 
 #ifdef DEBUG
@@ -156,6 +168,9 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 
 		ipap_field field5b = (message->ip_message).get_field_definition( 0, IPAP_FT_QUANTITY );
 		ipap_value_field fvalue5b = field5b.get_ipap_value_field(  quantity );
+
+		ipap_field field6b = (message->ip_message).get_field_definition( 0, IPAP_FT_IDAUCTION );
+		ipap_value_field fvalue6b = field6b.get_ipap_value_field( buf2b, 4 );
 		
 		ipap_data_record data3(templatedataid);
 		data3.insert_field(0, IPAP_FT_IDBID, fvalue1b);
@@ -163,6 +178,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		data3.insert_field(0, IPAP_FT_MAXUNITVALUATION, fvalue3b);
 		data3.insert_field(0, IPAP_FT_UNITVALUE, fvalue4b);
 		data3.insert_field(0, IPAP_FT_QUANTITY, fvalue5b);
+		data3.insert_field(0, IPAP_FT_IDAUCTION, fvalue6b);
 		(message->ip_message).include_data(templatedataid, data3);
 
 #ifdef DEBUG
@@ -171,11 +187,11 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 
 		nfields = 5;
 		templateoptiondataid = (message->ip_message).new_data_template( nfields, IPAP_OPTNS_BID_TEMPLATE );
-		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDBID, 128);
-		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDAUCTION, 128);
-		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDRECORD, 128);		
-		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_STARTSECONDS, 4);
-		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_ENDSECONDS, 4);
+		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDBID);
+		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDAUCTION);
+		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDRECORD);
+		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_STARTSECONDS);
+		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_ENDSECONDS);
 
 
 		/// insert Values for option data record 4.
@@ -240,14 +256,93 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 
 }
 
+void 
+anslp_ipap_xml_message_Test::buildRequestMessage(anslp_ipap_message *message)
+{
+
+	uint16_t optionTemplateId;
+	time_t now = time(NULL);
+		
+	// Add the option bid template
+	int nfields = 6;
+	optionTemplateId = (message->ip_message).new_data_template( nfields, IPAP_OPTNS_AUCTION_TEMPLATE );
+
+	// put the AUCTIONID.
+	(message->ip_message).add_field(optionTemplateId, 0, IPAP_FT_IDAUCTION);
+	// put the RECORDID.
+	(message->ip_message).add_field(optionTemplateId, 0, IPAP_FT_IDRECORD);
+	// put the ResourceID
+	(message->ip_message).add_field(optionTemplateId, 0, IPAP_FT_IDRESOURCE);
+	// put the starttime
+	(message->ip_message).add_field(optionTemplateId, 0, IPAP_FT_STARTSECONDS);
+	// put the endtime
+	(message->ip_message).add_field(optionTemplateId, 0, IPAP_FT_ENDSECONDS);
+	// put the interval
+	(message->ip_message).add_field(optionTemplateId, 0, IPAP_FT_INTERVALSECONDS);
+
+	cout << "asdasd 2" << endl;
+	
+	ipap_data_record dataOption(optionTemplateId);
+
+	// Add the Auction Id
+	string auctionId = "";
+	ipap_field idauctionIdF = (message->ip_message).get_field_definition( 0, IPAP_FT_IDAUCTION );
+	ipap_value_field fvalue1 = idauctionIdF.get_ipap_value_field( 
+									strdup(auctionId.c_str()), auctionId.size() );
+	dataOption.insert_field(0, IPAP_FT_IDAUCTION, fvalue1);
+
+
+	// Add the Record Id
+	string recordId = "setRecord.record1";
+	ipap_field idRecordIdF = (message->ip_message).get_field_definition( 0, IPAP_FT_IDRECORD );
+	ipap_value_field fvalue2 = idRecordIdF.get_ipap_value_field( 
+									strdup(recordId.c_str()), recordId.size() );
+	dataOption.insert_field(0, IPAP_FT_IDRECORD, fvalue2);
+
+	// Add the Resource Id
+	string resourceId = "Resource1";
+	ipap_field resourceIdF = (message->ip_message).get_field_definition( 0, IPAP_FT_IDRESOURCE );
+	ipap_value_field fvalue3 = resourceIdF.get_ipap_value_field( 
+									strdup(resourceId.c_str()), resourceId.size() );
+	dataOption.insert_field(0, IPAP_FT_IDRESOURCE, fvalue3);
+	
+	// Add the start datetime
+	assert (sizeof(uint64_t) >= sizeof(time_t));
+	time_t time = now;
+	uint64_t timeUint64 = *reinterpret_cast<uint64_t*>(&time);
+	ipap_field idStartF = (message->ip_message).get_field_definition( 0, IPAP_FT_STARTSECONDS );
+	ipap_value_field fvalue4 = idStartF.get_ipap_value_field( timeUint64 );
+	dataOption.insert_field(0, IPAP_FT_STARTSECONDS, fvalue4);
+	
+	cout << "asdasd 3" << endl;
+	
+	// Add the endtime
+	ipap_field idStopF = (message->ip_message).get_field_definition( 0, IPAP_FT_ENDSECONDS );
+	time = now + 100;	
+	timeUint64 = *reinterpret_cast<uint64_t*>(&time);
+	ipap_value_field fvalue5 = idStopF.get_ipap_value_field( timeUint64 );
+	dataOption.insert_field(0, IPAP_FT_ENDSECONDS, fvalue5);
+	
+	// Add the interval.
+	assert (sizeof(uint64_t) >= sizeof(unsigned long));
+	uint64_t uinter = 100;
+	ipap_field idIntervalF = (message->ip_message).get_field_definition( 0, IPAP_FT_INTERVALSECONDS );
+	ipap_value_field fvalue6 = idIntervalF.get_ipap_value_field( uinter );
+	dataOption.insert_field(0, IPAP_FT_INTERVALSECONDS, fvalue6);
+		
+	(message->ip_message).include_data(optionTemplateId, dataOption);
+	
+	cout << "asdasd 4" << endl;
+	
+}
 
 void
 anslp_ipap_xml_message_Test::buildAuctionMessage(anslp_ipap_message *message) 
 {
 
 	uint16_t templatedataid = 0;
-	uint32_t starttime = 100;
-	uint32_t endtime = 200;
+	uint64_t starttime = 100;
+	uint64_t endtime = 200;
 	unsigned char *buf1  = (unsigned char *) "1";
 	unsigned char *buf1a = (unsigned char *) "2";
 	unsigned char *buf2  = (unsigned char *) "bas";
@@ -260,10 +355,10 @@ anslp_ipap_xml_message_Test::buildAuctionMessage(anslp_ipap_message *message)
 		(message->ip_message).delete_all_templates();
 
 		templatedataid = (message->ip_message).new_data_template( nfields, IPAP_SETID_AUCTION_TEMPLATE );
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION, 65535);
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS, 4);
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS, 4);	
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME, 65535);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS);	
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME);
 
 		ipap_field field1 = (message->ip_message).get_field_definition( 0, IPAP_FT_IDAUCTION );
 		ipap_value_field fvalue1 = field1.get_ipap_value_field( buf1, 1 );
@@ -306,8 +401,8 @@ anslp_ipap_xml_message_Test::buildAllocationMessage(anslp_ipap_message *message)
 {
 
 	uint16_t templatedataid = 0;
-	uint32_t starttime = 100;
-	uint32_t endtime = 200;
+	uint64_t starttime = 100;
+	uint64_t endtime = 200;
 	unsigned char *buf1  = (unsigned char *) "1";
 	unsigned char *buf1a = (unsigned char *) "2";
 	unsigned char *buf2  = (unsigned char *) "bas";
@@ -320,10 +415,10 @@ anslp_ipap_xml_message_Test::buildAllocationMessage(anslp_ipap_message *message)
 		(message->ip_message).delete_all_templates();
 
 		templatedataid = (message->ip_message).new_data_template( nfields, IPAP_SETID_AUCTION_TEMPLATE );
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION, 65535);
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS, 4);
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS, 4);	
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME, 65535);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME);
 
 		ipap_field field1 = (message->ip_message).get_field_definition( 0, IPAP_FT_IDAUCTION );
 		ipap_value_field fvalue1 = field1.get_ipap_value_field( buf1, 1 );
@@ -374,6 +469,7 @@ anslp_ipap_xml_message_Test::setUp() {
 		log->dlog(ch, "Starting setUp" );
 #endif 			
 
+		request = new anslp_ipap_message();
 		auction = new anslp_ipap_message();
 		bid = new anslp_ipap_message();
 		allocation = new anslp_ipap_message();
@@ -398,22 +494,57 @@ void
 anslp_ipap_xml_message_Test::testExport()
 {
 #ifdef DEBUG
-	log->dlog(ch, "Starting testDataRecords" );
+	log->dlog(ch, "Starting testExport" );
 #endif
-	
-	buildBidMessage(bid);
-	(bid->ip_message).output();
+	try
+	{ 
+		buildBidMessage(bid);
+		(bid->ip_message).output();
 
 #ifdef DEBUG
-	log->dlog(ch, "End Building message" );
+		log->dlog(ch, "End Building message" );
 #endif
 
-	anslp_ipap_xml_message mes(*bid);
+		anslp_ipap_xml_message mes;
 	
-	string xmlMessage = mes.get_message(IPAP_BID);
-	cout << xmlMessage << endl;
+		string xmlMessage = mes.get_message(*bid);	
+		
+		anslp_ipap_message *other_message = mes.from_message(xmlMessage);
+	
+#ifdef DEBUG
+		log->dlog(ch, "After reading message %d",( (other_message->ip_message).get_template_list()).size() );
+#endif
+	
+		anslp_ipap_xml_message mes2;
+		string xmlMessage2= mes2.get_message(*other_message);
+				
+		CPPUNIT_ASSERT( xmlMessage == xmlMessage2 );
+	
+		saveDelete(other_message);
 
-				 
+#ifdef DEBUG
+	log->dlog(ch, "Read and write ok" );
+#endif
+    
+		buildRequestMessage(request);
+		anslp_ipap_xml_message mes3;
+
+#ifdef DEBUG
+	log->dlog(ch, "it is going to get the message" );
+#endif
+    
+		string xmlMessage3 = mes3.get_message(*request);
+		cout << xmlMessage3 << endl;
+    
+    
+#ifdef DEBUG
+		log->dlog(ch, "Ending testExport" );
+#endif	
+	} catch (Error &e) {
+		cout << e.getError() << endl;
+		throw e;
+	}	
+	
 }
 
 void 
@@ -425,6 +556,7 @@ anslp_ipap_xml_message_Test::tearDown()
 	saveDelete(auction);
 	saveDelete(bid);
 	saveDelete(allocation);
+	saveDelete(request);
 
 #ifdef DEBUG
 	log->dlog(ch, "Ending teardown" );

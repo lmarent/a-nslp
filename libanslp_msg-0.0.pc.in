@@ -1,9 +1,9 @@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
-includedir=@includedir@/libanslp_msg
+includedir=@includedir@/a-nslp/msg
 
-Name:libipap
+Name:libanslp_msg
 Description: Auction processing protocol message library
 Version: 0.0.0
 Cflags: -I${includedir}

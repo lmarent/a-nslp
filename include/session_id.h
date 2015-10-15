@@ -59,6 +59,15 @@ class session_id {
 		return id;
 	}
 
+	session_id &operator=(const session_id &other){
+		id.w1 = other.id.w1;
+		id.w2 = other.id.w2;
+		id.w3 = other.id.w3;
+		id.w4 = other.id.w4;
+		
+		return *this;
+	}
+
 	inline bool operator==(const session_id &other) const {
 		return id.w1 == other.id.w1 && id.w2 == other.id.w2
 			&& id.w3 == other.id.w3 && id.w4 == other.id.w4;

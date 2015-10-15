@@ -41,6 +41,11 @@
 using namespace anslp::msg;
 using namespace protlib::log;
 
+#define LogError(msg) ERRLog("anslp_response", msg)
+#define LogWarn(msg) WLog("anslp_response", msg)
+#define LogInfo(msg) ILog("anslp_response", msg)
+#define LogDebug(msg) DLog("anslp_response", msg)
+
 
 /**
  * Constructor.
@@ -379,7 +384,25 @@ bool anslp_response::is_response_to(const anslp_refresh *msg) const
  * In other words, the first inserted message is the message number one and so on.
  * 
  * @param message object to be inserted.
- */void anslp_response::set_anslp_ipap_message(anslp_ipap_message *message)
+ */void anslp_response::set_mspec_object(anslp_mspec_object *message)
 {
 	set_object(message);
+}
+
+void anslp_response::get_mspec_objects(vector<anslp_mspec_object *> &list_return)
+{
+	
+	LogDebug("Starting get_mspec_objects");	
+	
+	for ( obj_iter i = objects.begin(); i != objects.end(); i++ ) {
+		const ie_object_key key = i->first;
+		const anslp_mspec_object *obj = dynamic_cast<const anslp_mspec_object *>( i->second);
+		
+		if ((key.get_object_type() != information_code::OBJECT_TYPE) 
+		    and (key.get_object_type() != msg_sequence_number::OBJECT_TYPE)
+		    and (key.get_object_type() != session_lifetime::OBJECT_TYPE)){
+			LogDebug("Starting get_mspec_objects");	
+			list_return.push_back(obj->copy());
+		}
+	}
 }

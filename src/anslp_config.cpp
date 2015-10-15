@@ -52,8 +52,8 @@ anslp_config::setRepository(configpar_repository* cfp_rep)
 		throw  configParExceptionNoRepository();
 	
 	// register the realm
-	cfgpar_rep->registerRealm(anslp_realm, "a-nslp", anslpconf_maxparno);
-	DLog("anslp_config", "registered mnslp realm with realm id " << (int) anslp_realm);
+	cfgpar_rep->registerRealm(anslp_realm, "anslp-nslp", anslpconf_maxparno);
+	DLog("anslp_config", "registered anslp realm with realm id " << (int) anslp_realm);
 	
 	// now register all parameters
 	registerAllPars();
@@ -74,19 +74,14 @@ anslp_config::registerAllPars()
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_ni_msg_hop_count, "ni-msg-hop-count", "NI Message Hop Count", true, 20, "s") );  
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_nf_max_session_lifetime, "nf-max-session-lifetime", "NF max session lifetime in seconds", true, 60, "s") );
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_nf_response_timeout, "nf-response-timeout", "NF response timeout", true, 2, "s") );
-  registerPar( new configpar<bool>(anslp_realm, anslpconf_is_auctioneer, "is-auctioneer", "NE is auctioneer", true, true) );
-  registerPar( new configpar<bool>(anslp_realm, anslpconf_install_auction_rules, "install-auction-rules", "ME install auction rules", true, true) );
-  registerPar( new configpar<string>(anslp_realm, anslpconf_export_config_file, "export-config-file", "export configuration file name", true, "/home/luis/NSIS/nsis-ka-0.97/etc/export.xml") );
-  registerPar( new configpar<string>(anslp_realm, anslpconf_configuration_file, "filter-config-file", "configuration file name", true, "/home/luis/NSIS/nsis-ka-0.97/etc/configuration.xml") );
-  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioning_application, "auctioning-application", "auctioning applicartion name", true, "netmate") );
-  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_user, "auctioneer-user", "auctioneer application user", true, "admin") );
-  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_password, "auctioneer-password", "auctioneer user password", true, "admin") );  
-  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_server, "auctioneer-server", "auctioneer http server", true, "localhost") );
-  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_def_xsl, "auctioneer-def-xsl", "auctioneer results decoding", true, "/home/luis/NSIS/nsis-ka-0.97/etc/reply2.xsl") );
-  registerPar( new configpar<uint32>(anslp_realm, anslpconf_auctioneer_port, "auctioneer-port", "auctioneer port", true, 12244) );
-  registerPar( new configpar<string>(anslp_realm, anslpconf_export_directory, "export-directory", "export directory", true, "/tmp/") );
-
+  registerPar( new configpar<bool>(anslp_realm, anslpconf_is_auctioneer, "as-is-auctioneer", "NE is auctioneer", false, false) );
+  registerPar( new configpar<bool>(anslp_realm, anslpconf_install_auction_rules, "as-install-auction-rules", "ME install auction rules", false, false) );
+  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_application, "as-auctioneer-application", "auctioneer application name", true, "auctionManager") );
+  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_user, "as-auctioneer-user", "auctioneer application user", true, "admin") );
+  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_password, "as-auctioneer-password", "auctioneer user password", true, "admin") );  
+  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_server, "as-auctioneer-server", "auctioneer http server", true, "localhost") );
+  registerPar( new configpar<uint32>(anslp_realm, anslpconf_auctioneer_port, "as-auctioneer-port", "auctioneer port", true, 12244) );
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_nr_max_session_lifetime, "nr-max-session-lifetime", "NR max session lifetime in seconds", true, 60, "s") );
   
-  DLog("anslp_config::registerAllPars", "finished registering mnslp parameters.");
+  DLog("anslp_config::registerAllPars", "finished registering anslp parameters.");
 }

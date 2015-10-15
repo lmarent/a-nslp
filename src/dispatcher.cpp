@@ -224,7 +224,7 @@ session *dispatcher::create_session(event *evt) const throw () {
 
 
 /**
- * Send a MNSLP message.
+ * Send a A-NSLP message.
  *
  * This method will delete the msg object after it is done with it.
  *
@@ -316,7 +316,7 @@ dispatcher::install_auction_rules(const auction_rule *act_rule)
 	if ( act_rule != NULL )
 		LogDebug("installing ANSLP policy rule " << *act_rule);
 
-	auction_rule * result = rule_installer->install(act_rule);
+	auction_rule * result = rule_installer->create(act_rule);
 	return result;
 }
 
@@ -334,8 +334,8 @@ void dispatcher::remove_auction_rules(const auction_rule *act_rule)
 
 	auction_rule * result = rule_installer->remove(act_rule);
 	
-	if (result->get_number_rule_keys() != 
-			act_rule->get_number_rule_keys())
+	if (result->get_number_mspec_request_objects() != 
+			act_rule->get_number_mspec_response_objects() )
 			throw auction_rule_installer_error("Invalid ipap message",
 				msg::information_code::sc_signaling_session_failures,
 				msg::information_code::sigfail_wrong_conf_message); 

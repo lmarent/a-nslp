@@ -18238,7 +18238,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: pkgconfig directory is ${pkgconfigdir}" >&5
 $as_echo "$as_me: pkgconfig directory is ${pkgconfigdir}" >&6;}
 
-ac_config_files="$ac_config_files Makefile src/msg/Makefile libanslp_msg-0.0.pc src/Makefile test/Makefile"
+ac_config_files="$ac_config_files Makefile libanslp-0.0.pc libanslp_msg-0.0.pc src/msg/Makefile src/Makefile test/Makefile test_main/Makefile"
 
 
 
@@ -19374,10 +19374,12 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "src/msg/Makefile") CONFIG_FILES="$CONFIG_FILES src/msg/Makefile" ;;
+    "libanslp-0.0.pc") CONFIG_FILES="$CONFIG_FILES libanslp-0.0.pc" ;;
     "libanslp_msg-0.0.pc") CONFIG_FILES="$CONFIG_FILES libanslp_msg-0.0.pc" ;;
+    "src/msg/Makefile") CONFIG_FILES="$CONFIG_FILES src/msg/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
+    "test_main/Makefile") CONFIG_FILES="$CONFIG_FILES test_main/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

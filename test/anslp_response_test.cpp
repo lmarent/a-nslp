@@ -163,8 +163,8 @@ void AnslpResponseTest::testManager02() {
      * Builds the ipfix message
      */
 	uint16_t templatedataid = 0;
-	uint32_t starttime = 100;
-	uint32_t endtime = 200;
+	uint64_t starttime = 100;
+	uint64_t endtime = 200;
 	unsigned char   *buf1  = (unsigned char *) "1";
 	unsigned char   *buf1a  = (unsigned char *) "2";
 	unsigned char   *buf1b  = (unsigned char *) "3";
@@ -176,10 +176,10 @@ void AnslpResponseTest::testManager02() {
 
 	int nfields = 4;
 	templatedataid = (mess->ip_message).new_data_template( nfields, IPAP_SETID_AUCTION_TEMPLATE );
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION, 65535);
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS, 4);
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS, 4);	
-	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME, 65535);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_STARTSECONDS);
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS);	
+	(mess->ip_message).add_field(templatedataid, 0, IPAP_FT_AUCTIONINGALGORITHMNAME);
 
 	ipap_field field1 = (mess->ip_message).get_field_definition( 0, IPAP_FT_STARTSECONDS );
 	ipap_value_field fvalue1 = field1.get_ipap_value_field( starttime );

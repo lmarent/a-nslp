@@ -34,15 +34,6 @@ namespace anslp
 {
   namespace msg {
 
-typedef map<ipap_templ_type_t, ipap_field_key> 			 		templateListKeys_t;
-typedef map<ipap_templ_type_t, ipap_field_key>::iterator 		templateListIterKeys_t;
-typedef map<ipap_templ_type_t, ipap_field_key>::const_iterator 	templateListConstIterKeys_t;
-
-
-typedef map<ipap_templ_type_t, ipap_field_key>					recordListKeys_t;
-typedef map<ipap_templ_type_t, ipap_field_key>::iterator 		recordListIterKeys_t;
-typedef map<ipap_templ_type_t, ipap_field_key>::const_iterator 	recordListConstIterKeys_t;
-
 
 class anslp_ipap_message : public anslp_mspec_object
 {
@@ -50,29 +41,12 @@ class anslp_ipap_message : public anslp_mspec_object
 private:
 	/// Name of the object.
 	static const char *const 			ie_name;
-	
-	/// list of keys by template
-	templateListKeys_t    				templateKeys;
-	
-	/// list of keys by record
-	recordListKeys_t					recordKeys;
-		
+				
 	Logger *log; //!< link to global logger object
 	int ch;      //!< logging channel number used by objects of this class												
-	
-	/// Load the fields used as key for templates 
-	void load_template_keys(void);
-	
-	/// Load the fields used as key for records. 
-	void load_record_keys(void);
-	
+			
 public:
 
-	/// name of Header elements by object type.
-	static char *OBJECT_HEADER_XML_TAGS[];
-
-	/// name of Line elements by object type.
-	static char *OBJECT_LINE_XML_TAGS[];
 	
 	ipap_message ip_message;
 	
@@ -86,12 +60,19 @@ public:
     */
    explicit anslp_ipap_message();
 
+   /**
+    * Create a new class anslp_ipap_message
+    * @param By it is built from an ipap_message.
+    */
+   explicit anslp_ipap_message( const ipap_message &message );
+
 	/**
 	 * Create a new class anslp_ipap_message
-	 * @param ipap_version 	 - message version. 
+	 * @param  domain_id		- domain id
+	 * 		   ipap_version 	- message version. 
 	 *  	  _encode_network - establish whether the message is going to be network encoded or not. 
 	 */
-	explicit anslp_ipap_message( int ipap_version, bool _encode_network = true);
+	explicit anslp_ipap_message( int domain_id, int ipap_version, bool _encode_network = true);
 	   
 	/**
 	 * Create a new class anslp_ipap_message
@@ -116,10 +97,6 @@ public:
 	 * Get the internal buffer that was exported
 	 */
 	uchar * get_message(void) const;
-
-	ipap_field_key get_template_key(ipap_templ_type_t temp_type) const;
-
-	ipap_field_key get_record_key(ipap_templ_type_t temp_type) const;
 	
 	/**
 	 *  Equals operator. 

@@ -88,7 +88,7 @@ nop_auction_rule_installer::check(const msg::anslp_mspec_object *object)
 
 
 auction_rule * 
-nop_auction_rule_installer::install(const auction_rule *rule) 
+nop_auction_rule_installer::create(const auction_rule *rule) 
 {
 
 	LogDebug("NOP: installing policy rule " << *rule);
@@ -98,10 +98,10 @@ nop_auction_rule_installer::install(const auction_rule *rule)
 		rule_return = rule->copy(); 
 		
 		objectListConstIter_t i;
-		for ( i = rule_return->getObjects()->begin(); i != rule_return->getObjects()->end(); i++){
-			std::vector<std::string> rule_keys;
-			rule_keys.push_back((i->first).to_string());
-			rule_return->set_commands(i->first, rule_keys);
+		for ( i = rule_return->get_request_objects()->begin(); 
+					i != rule_return->get_request_objects()->end(); i++)
+		{
+			rule_return->set_response_object(i->second);
 		}
 	}
 	else{
@@ -135,6 +135,11 @@ bool nop_auction_rule_installer::remove_all()
 	return true;
 }
 
+auction_rule * 
+nop_auction_rule_installer::auction_interaction(const auction_rule *mt_object)
+{
+
+}
 
 
 // EOF

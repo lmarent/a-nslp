@@ -57,7 +57,7 @@ using protlib::uint32;
  * Use this if the session ID is known in advance.
  */
 ni_session::ni_session(const session_id &id, const anslp_config *conf)
-		: session(id), state(STATE_CLOSE), routing_info(NULL),
+		: session(id), state(STATE_ANSLP_CLOSE), routing_info(NULL),
 		  last_create_msg(NULL), last_refresh_msg(NULL), lifetime(0),
 		  refresh_interval(20), response_timeout(0), create_counter(0),
 		  refresh_counter(0), max_retries(0), proxy_session(false),
@@ -150,7 +150,7 @@ msg::ntlp_msg *ni_session::build_create_message(api_create_event *e,
 	assert( get_mri() != NULL );
 
 	/*
-	 * Build a MNSLP Configure message.
+	 * Build a A-NSLP Create message.
 	 */
 	anslp_create *create = new anslp_create();
 
@@ -183,7 +183,7 @@ msg::ntlp_msg *ni_session::build_create_message(api_create_event *e,
 
 
 /**
- * Build a MNSLP Refresh message based on the session's state.
+ * Build a A-NSLP Refresh message based on the session's state.
  *
  * This will fetch the session lifetime and also increment the MSN.
  */
@@ -194,14 +194,14 @@ msg::ntlp_msg *ni_session::build_refresh_message()
 	assert( get_mri() != NULL );
 
 	/*
-	 * Build a MNSLP Configure message.
+	 * Build a A-NSLP Refresh message.
 	 */
 	anslp_refresh *refresh = new anslp_refresh();
 	refresh->set_session_lifetime(get_lifetime());
 	refresh->set_msg_sequence_number(next_msg_sequence_number());
 	
 	/*
-	 * Wrap the Configure inside an ntlp_msg and add session ID and MRI.
+	 * Wrap the Refresh inside an ntlp_msg and add session ID and MRI.
 	 */
 	ntlp_msg *msg = new ntlp_msg(get_id(), refresh, get_mri()->copy(), 0);
 
@@ -249,28 +249,13 @@ ni_session::setup_session(dispatcher *d, api_create_event *e,
 
 	set_response_timeout( t );
 
-	// Check which metering object could be installed in this node.
+	// In this node we do not install any policy.
 	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
-	for ( it_objects = e->get_metering_objects().begin(); 
-			it_objects != e->get_metering_objects().end(); it_objects++)
+	for ( it_objects = e->get_auctioning_objects().begin(); 
+			it_objects != e->get_auctioning_objects().end(); it_objects++)
 	{
 		anslp_mspec_object *object = *it_objects;
-		if (check_participating(e->get_selection_auctioning_entities())){
-			try{
-				if (d->check(object)){
-				   rule->set_object(object->copy());
-				}
-				else{
-				   missing_objects.push_back(object->copy());
-				}
-			}catch(std::invalid_argument &e){
-				missing_objects.push_back(object->copy());
-			}
-		}
-		else
-        {
-		    missing_objects.push_back(object->copy());
-		}
+		missing_objects.push_back(object->copy());
 	}
 	
 	LogDebug("using lifetime: " << get_lifetime() << " seconds");
@@ -287,7 +272,7 @@ ni_session::setup_session(dispatcher *d, api_create_event *e,
 
 
 /*
- * state: STATE_CONFIGURE
+ * state: HANDLE STATE_CLOSE
  */
 ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt) 
 {
@@ -305,6 +290,7 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 		// Initialize the session based on user-provided parameters
 		setup_session(d, e, missing_objects);
 
+		// Build the new create message based on those objects not installed.
 		set_last_create_message( build_create_message(e, missing_objects) );
 
 		d->send_message( get_last_create_message()->copy() );
@@ -326,7 +312,7 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 		missing_objects.clear();
 		
 		LogDebug("Ending state handle_state_close - New State PENDING ");
-		return STATE_PENDING;
+		return STATE_ANSLP_PENDING;
 		
 	}
 	/*
@@ -334,13 +320,13 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 	 */
 	else {
 		LogInfo("discarding unexpected event " << *evt);
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 }
 
 
 /*
- * state: STATE_PENDING
+ * state: STATE_ANSLP_PENDING
  */
 ni_session::state_t ni_session::handle_state_pending(
 		dispatcher *d, event *evt) {
@@ -362,21 +348,28 @@ ni_session::state_t ni_session::handle_state_pending(
 
 			response_timer.start(d, get_response_timeout());
 
-			return STATE_PENDING; // no change
+			return STATE_ANSLP_PENDING; // no change
 		}
 		// Retry count exceeded, abort.
 		else {
-			d->report_async_event("got no response for our Configure");
-			return STATE_CLOSE;
+			if (rule->get_number_mspec_response_objects() > 0){
+				d->remove_auction_rules(rule);
+			}
+			d->report_async_event("got no response for our Create Message");
+			return STATE_ANSLP_CLOSE;
 		}
 	}
 	/*
 	 * The NTLP can't reach the destination.
 	 */
 	else if ( is_no_next_node_found_event(evt) ) {
+		if (rule->get_number_mspec_response_objects() > 0){
+			d->remove_auction_rules(rule);
+		}
+		
 		LogInfo("cannot reach destination");
 
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 	
 	/*
@@ -390,19 +383,20 @@ ni_session::state_t ni_session::handle_state_pending(
 		set_last_create_message(NULL);
 
 		// Uninstall the previous rules.
-		if (rule->get_number_rule_keys() > 0)
+		if (rule->get_number_mspec_response_objects() > 0){
 			d->remove_auction_rules(rule);
+		}
 			
 		d->send_message( build_refresh_message() );
 
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 	
 	/*
 	 * Outdated timer event, discard and don't log.
 	 */
 	else if ( is_timer(evt) ) {
-		return STATE_PENDING; // no change
+		return STATE_ANSLP_PENDING; // no change
 	}
 	
 	/*
@@ -414,17 +408,17 @@ ni_session::state_t ni_session::handle_state_pending(
 
 		LogDebug("received response " << *resp);
 
-		// Discard if this is no RESPONSE to our original CONFIGURE.
+		// Discard if this is no RESPONSE to our original CREATE.
 		anslp_create *c = get_last_create_message()->get_anslp_create();
 		if ( ! resp->is_response_to(c) ) {
-			LogWarn("RESPONSE doesn't match CONFIGURE, discarding");
-			return STATE_PENDING; // no change
+			LogWarn("RESPONSE doesn't match CREATE, discarding");
+			return STATE_ANSLP_PENDING; // no change
 		}
 
 		if ( resp->is_success() ) {
 			
 			LogDebug("initiated session " << get_id());
-			d->report_async_event("CONFIGURE session initiated");
+			d->report_async_event("CREATE session initiated");
 			response_timer.stop();
 			
 			// Check whether someone in the path change the initial lifetime
@@ -436,39 +430,34 @@ ni_session::state_t ni_session::handle_state_pending(
 			
 			refresh_timer.start(d, get_refresh_interval());
 	
-			auction_rule * result = d->install_auction_rules(rule);
+					
+			// free the space allocated to the rule to be installed.
+			delete(rule);
 			
-			// Verify that every rule that passed the checking process could be installed.
-			if (result->get_number_mspec_objects() == rule->get_number_mspec_objects() )
-			{
-				// free the space allocated to the rule to be installed.
-				delete(rule);
-				// Assign the response as the rule installed.
-				rule = result;
-				set_create_counter(0);
-				LogDebug("Ending state handle pending - New State METERING ");
-				return STATE_AUCTIONING;
+			set_create_counter(0);
+				
+			// Group response messages from respose and 
+			// messages from policies locally installed
+			//ntlp::mri mriData = e->get_mri();
+			vector<anslp_mspec_object *> responseObjects;
+				
+			// Insert objects returned from other routers along the path.
+			resp->get_mspec_objects(responseObjects);
+			objectList_t responseList =*rule->get_response_objects();
+			objectListIter_t iter;
+			for (iter = responseList.begin(); iter != responseList.end(); ++iter){
+				responseObjects.push_back((iter->second)->copy());
+			}
+				
+			// post the objects into the client application.
+				
+			LogDebug("Ending state handle pending - New State AUCTIONING ");
+			return STATE_ANSLP_AUCTIONING;
 				  
-			}
-			else{
-				LogDebug("Error installing the policy rule ");
-				// teardown the session because an error occurs
-				set_lifetime(0);
-				set_last_create_message(NULL);
-				delete(rule);
-				// Assign the response as the rule installed.
-				rule = result;
-
-				// Uninstall the previous rules.
-				if (rule->get_number_rule_keys() > 0)
-					d->remove_auction_rules(rule);
-				rule = result;
-				d->send_message( build_refresh_message());
-			}
 		}
 		else {
-			d->report_async_event("cannot initiate Configure session");
-			return STATE_CLOSE;
+			d->report_async_event("cannot initiate Create session");
+			return STATE_ANSLP_CLOSE;
 		}
 	}
 	
@@ -477,13 +466,13 @@ ni_session::state_t ni_session::handle_state_pending(
 	 */
 	else {
 		LogInfo("discarding unexpected event " << *evt);
-		return STATE_PENDING; // no change
+		return STATE_ANSLP_PENDING; // no change
 	}
 }
 
 
 /*
- * state: STATE_AUCTIONING
+ * state: STATE_ANSLP_AUCTIONING
  */
 ni_session::state_t ni_session::handle_state_auctioning(
 		dispatcher *d, event *evt) {
@@ -510,7 +499,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 
 		response_timer.start(d, get_response_timeout());
 
-		return STATE_AUCTIONING; // no change
+		return STATE_ANSLP_AUCTIONING; // no change
 
 	}
 	/*
@@ -528,17 +517,17 @@ ni_session::state_t ni_session::handle_state_auctioning(
 
 			response_timer.start(d, get_response_timeout());
 
-			return STATE_AUCTIONING; // no change
+			return STATE_ANSLP_AUCTIONING; // no change
 		}
 		// Retry count exceeded, abort.
 		else {
 			// Uninstall the previous rules.
-			if (rule->get_number_rule_keys() > 0)
+			if (rule->get_number_mspec_response_objects() > 0)
 				d->remove_auction_rules(rule);
 			
 			LogDebug("no response to our REFRESH message");
 			d->report_async_event("got no response to our REFRESH message");
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 	}
 	/*
@@ -552,18 +541,18 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		set_last_refresh_message(NULL);
 
 		// Uninstall the previous rules.
-		if (rule->get_number_rule_keys() > 0) 
+		if (rule->get_number_mspec_response_objects() > 0) 
 			d->remove_auction_rules(rule);
 
 		d->send_message( build_refresh_message() );
 		LogDebug("Ending state metering - api teardown");
-		return STATE_CLOSE;
+		return STATE_ANSLP_CLOSE;
 	}
 	/*
 	 * Outdated timer event, discard and don't log.
 	 */
 	else if ( is_timer(evt) ) {
-		return STATE_AUCTIONING; // no change
+		return STATE_ANSLP_AUCTIONING; // no change
 	}
 	/*
 	 * A Anslp_response message arrived in response to our Refresh message.
@@ -580,7 +569,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		anslp_refresh *c = get_last_refresh_message()->get_anslp_refresh();
 		if ( ! resp->is_response_to(c) ) {
 			LogWarn("RESPONSE doesn't match REFRESH, discarding");
-			return STATE_AUCTIONING; // no change
+			return STATE_ANSLP_AUCTIONING; // no change
 		}
 
 		if ( resp->is_success() ) {
@@ -591,16 +580,16 @@ ni_session::state_t ni_session::handle_state_auctioning(
 
 			set_refresh_counter(0);
 
-			return STATE_AUCTIONING; // no change
+			return STATE_ANSLP_AUCTIONING; // no change
 		}
 		else {
 
 			// Uninstall the previous rules.
-			if (rule->get_number_rule_keys() > 0)
+			if (rule->get_number_mspec_response_objects() > 0)
 				d->remove_auction_rules(rule);
 
 			d->report_async_event("REFRESH session died");
-			return STATE_CLOSE;
+			return STATE_ANSLP_CLOSE;
 		}
 
 	}
@@ -609,7 +598,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 	 */
 	else {
 		LogInfo("discarding unexpected event " << *evt);
-		return STATE_AUCTIONING; // no change
+		return STATE_ANSLP_AUCTIONING; // no change
 	}
 }
 
@@ -625,15 +614,15 @@ void ni_session::process_event(dispatcher *d, event *evt) {
 		
 	switch ( get_state() ) {
 
-		case ni_session::STATE_CLOSE:
+		case ni_session::STATE_ANSLP_CLOSE:
 			state = handle_state_close(d, evt);
 			break;
 
-		case ni_session::STATE_PENDING:
+		case ni_session::STATE_ANSLP_PENDING:
 			state = handle_state_pending(d, evt);
 			break;
 
-		case ni_session::STATE_AUCTIONING:
+		case ni_session::STATE_ANSLP_AUCTIONING:
 			state = handle_state_auctioning(d, evt);
 			break;
 

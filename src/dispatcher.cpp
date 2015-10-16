@@ -216,7 +216,11 @@ session *dispatcher::create_session(event *evt) const throw () {
 		if ( e->is_for_this_node() )
 			s = session_mgr->create_nr_session(*id);
 		else
-			s = session_mgr->create_nf_session(*id);
+			if (config->is_nf_edge()){
+				s = session_mgr->create_nr_session(*id);
+			} else {
+				s = session_mgr->create_nf_session(*id);
+			}
 	}
 
 	return s;

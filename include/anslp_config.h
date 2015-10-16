@@ -167,7 +167,7 @@ class anslp_config {
 	uint32 get_nf_response_timeout() const { 
 	  return getpar<uint32>(anslpconf_nf_response_timeout); }
 
-	bool get_nf_is_edge() const {
+	bool is_nf_edge() const {
 	  return getpar<bool>(anslpconf_nf_is_edge); }
 	
 	bool get_install_auction_rules() const {

@@ -325,6 +325,7 @@ void anslp::init_framework() {
 	tsdb::init();
 	SSL_library_init();		// TODO: seed random generator
 	OpenSSL_add_ssl_algorithms();
+	OpenSSL_add_all_digests();
 	SSL_load_error_strings();
 	ANSLP_IEManager::register_known_ies();
 }

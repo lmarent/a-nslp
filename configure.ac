@@ -167,6 +167,7 @@ AC_MSG_NOTICE([pkgconfig directory is ${pkgconfigdir}])
 AC_CONFIG_FILES([Makefile
                  libanslp-0.0.pc
                  libanslp_msg-0.0.pc
+                 etc/Makefile
                  src/msg/Makefile
                  src/Makefile
                  test/Makefile

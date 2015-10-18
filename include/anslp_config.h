@@ -26,12 +26,11 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 //
 // ===========================================================
-#ifndef ANSLP_MNSLP_CONFIG_H
-#define ANSLP_MNSLP_CONFIG_H
+#ifndef ANSLP_ANSLP_CONFIG_H
+#define ANSLP_ANSLP_CONFIG_H
 
 #include "messages.h"
 #include "address.h"
-
 #include "configpar.h"
 #include "configpar_repository.h"
 
@@ -54,7 +53,7 @@ namespace anslp {
     anslpconf_is_auctioneer,
     anslpconf_install_auction_rules,    
     
-    /* Metering application parameters */
+    /* Auctioneer application parameters */
     anslpconf_auctioneer_application,
 	anslpconf_auctioneer_user,
 	anslpconf_auctioneer_password,
@@ -72,6 +71,7 @@ namespace anslp {
     /* NF  */
     anslpconf_nf_max_session_lifetime,
     anslpconf_nf_response_timeout,
+    anslpconf_nf_is_edge,
     /* NR  */
     anslpconf_nr_max_session_lifetime,
     anslpconf_maxparno
@@ -167,6 +167,9 @@ class anslp_config {
 	uint32 get_nf_response_timeout() const { 
 	  return getpar<uint32>(anslpconf_nf_response_timeout); }
 
+	bool is_nf_edge() const {
+	  return getpar<bool>(anslpconf_nf_is_edge); }
+	
 	bool get_install_auction_rules() const {
 		return getpar<bool>(anslpconf_install_auction_rules); }
 
@@ -242,4 +245,4 @@ anslp_config::getparname(anslp_configpar_id_t configparid)
 
 } // namespace anslp
 
-#endif // ANSLP_MNSLP_CONFIG_H
+#endif // ANSLP_ANSLP_CONFIG_H

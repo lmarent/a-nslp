@@ -191,15 +191,21 @@ IE *anslp_object::deserialize(NetMsg &msg, coding_t coding,
 	bytes_read = 0;
 	uint32 start_pos = msg.get_pos();
 
+	LogDebug("deserialize start_post:" << start_pos);
+
 	// check if coding is supported
 	uint32 tmp;
 	if ( ! check_deser_args(CODING, err, tmp) )
 		return NULL;
 
+	LogDebug("deserialize supported Coding");
+
 	// Parse header
 	uint16 body_length = 0;
 	if ( ! deserialize_header(msg, body_length, err, skip) )
 		return NULL;
+
+	LogDebug("deserialize header parsed");
 
 	// Parse body
 	if ( ! deserialize_body(msg, body_length, err, skip) ){

@@ -149,6 +149,8 @@ bool anslp_object::deserialize_header(NetMsg &msg, uint16 &body_length,
 		IEErrorList &errorlist, bool skip) 
 {
 
+	LogDebug("Starting Serialize header");
+
 	uint32 start_pos = msg.get_pos();
 
 	uint32 header_raw;
@@ -168,6 +170,9 @@ bool anslp_object::deserialize_header(NetMsg &msg, uint16 &body_length,
 	// The header's value is in 32bit words, we convert it to bytes.
 	body_length = (header_raw & 0xFFF) * 4u;
 
+	LogDebug("Serialize header- body len:" << body_length);
+
+
 	// Error: Message is shorter than the length field makes us believe.
 	if ( msg.get_bytes_left() < body_length ) {
 		catch_bad_alloc( errorlist.put(
@@ -176,6 +181,8 @@ bool anslp_object::deserialize_header(NetMsg &msg, uint16 &body_length,
 		msg.set_pos(start_pos);
 		return false;
 	}
+	
+	LogDebug("Ending Serialize header - start pos:" << start_pos);
 
 	return true;
 }

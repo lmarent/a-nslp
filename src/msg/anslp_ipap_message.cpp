@@ -291,7 +291,13 @@ anslp_ipap_message::deserialize_body(NetMsg &msg, uint16 body_length,
 	msg.copy_to(messdef, start_pos, body_length);
 	ip_message.close();
 	
-	num_read = ip_message.ipap_import(messdef, body_length );
+	try{ 
+		num_read = ip_message.ipap_import(messdef, body_length );
+	
+	} catch (ipap_bad_argument &e){
+		log->elog(ch, "Error importing the message: %s", e.what() );
+		throw IEMsgTooShort(CODING, get_category(), msg.get_pos());
+	}
 
 	// Manage the possible padding added in the origin.
 	num_padding = body_length - num_read;	

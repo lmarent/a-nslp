@@ -84,6 +84,10 @@ anslp_daemon::~anslp_daemon() {
 void anslp_daemon::startup() {
 	LogInfo("starting A-NSLP daemon ...");
 
+
+	LogInfo("A-NSLP configure as installer:" << config.get_install_auction_rules() );
+	LogInfo("A-NSLP configure as auctioneer:" << config.is_auctioneer() );
+	
 	/*
 	 * Instantiate a operating system dependent auction rule installer.
 	 */
@@ -107,13 +111,13 @@ void anslp_daemon::startup() {
 	hostaddresslist_t& ntlpv4addr= ntlp::gconf.getparref< protlib::hostaddresslist_t >(ntlp::gistconf_localaddrv4);
 
 #ifdef DEBUG
-	LogInfo("EStoy aqui 1 ");
+	LogInfo("EStoy aqui 1 " << ntlpv4addr.size());
 #endif
 	
     hostaddresslist_t& ntlpv6addr= ntlp::gconf.getparref< protlib::hostaddresslist_t >(ntlp::gistconf_localaddrv6);
 
 #ifdef DEBUG
-	LogInfo("EStoy aqui 2 ");
+	LogInfo("EStoy aqui 2 " << ntlpv6addr.size());
 #endif
 	cout << "LLgue hasta qui" << endl;
 

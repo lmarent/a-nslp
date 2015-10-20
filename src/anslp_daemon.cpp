@@ -106,8 +106,6 @@ void anslp_daemon::startup() {
 
     AddressList *addresses = new AddressList();
 	
-	LogInfo("starting it is going to read parameters 1");
-
 	hostaddresslist_t& ntlpv4addr= ntlp::gconf.getparref< protlib::hostaddresslist_t >(ntlp::gistconf_localaddrv4);
 
 #ifdef DEBUG

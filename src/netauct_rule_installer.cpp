@@ -120,7 +120,8 @@ int netauct_rule_installer::getNumberAuctions(string response)
 		int pos2 = response.find(tofind2);
 		if (pos2!=std::string::npos){
 			LogDebug("pos:" << pos << " pos2:" << pos2);
-			val_return = atoi(response.substr(pos, pos2-pos));
+			string snbr = response.substr(pos, pos2-pos);
+			val_return = atoi(snbr.c_str());
 		}
 	}
 	LogDebug("ending getNumberAuctions" << val_return);
@@ -145,13 +146,13 @@ netauct_rule_installer::check(const msg::anslp_mspec_object *object)
 	if (!responseOk(response)){
 		throw auction_rule_installer_error(response,
 			msg::information_code::sc_signaling_session_failures,
-			msg::information_code::sigfail_wrong_create_message);
+			msg::information_code::sigfail_wrong_conf_message);
 	} else  {
 		
 		if (getNumberAuctions(response) <= 0){
 			throw auction_rule_installer_error("No auction satisfying filter criteria",
 				msg::information_code::sc_signaling_session_failures,
-				msg::information_code::sigfail_filter_action_not_applicable);
+				msg::information_code::sigfail_auction_not_applicable);
 		}
 	}
 	

@@ -120,7 +120,7 @@ int netauct_rule_installer::getNumberAuctions(string response)
 		int pos2 = response.find(tofind2);
 		if (pos2!=std::string::npos){
 			LogDebug("pos:" << pos << " pos2:" << pos2);
-			val_return = atoi(str.substr(pos, pos2-pos));
+			val_return = atoi(response.substr(pos, pos2-pos));
 		}
 	}
 	LogDebug("ending getNumberAuctions" << val_return);
@@ -154,7 +154,8 @@ netauct_rule_installer::check(const msg::anslp_mspec_object *object)
 				msg::information_code::sigfail_filter_action_not_applicable);
 		}
 	}
-			
+	
+	LogDebug("end check()");		
 }
 
 

@@ -90,6 +90,42 @@ netauct_rule_installer::setup() throw (auction_rule_installer_error)
 
 }
 
+bool netauct_rule_installer::responseOk(string response)
+{
+	 LogDebug("start responseOk - " << response);
+	 bool val_return = false;
+	 
+	 std::size_t found = response.find("OK");
+	 if (found!=std::string::npos){
+		val_return =  true;
+	 }
+	 
+	 LogDebug("ending responseOk" << val_return);
+	 return val_return;
+	
+}
+
+int netauct_rule_installer::getNumberAuctions(string response)
+{
+	
+	LogDebug("start getNumberAuctions - " << response);
+	
+	int val_return = 0;
+	string tofind("<NbrAuctions>");
+	string tofind2("</NbrAuctions>");
+	
+	std::size_t found = response.find(tofind);
+	if (found!=std::string::npos){
+		int pos = found + tofind.length() + 1;
+		int pos2 = response.find(tofind2);
+		if (pos2!=std::string::npos){
+			LogDebug("pos:" << pos << " pos2:" << pos2);
+			val_return = atoi(str.substr(pos, pos2-pos));
+		}
+	}
+	LogDebug("ending getNumberAuctions" << val_return);
+	return val_return;
+}
 
 void 
 netauct_rule_installer::check(const msg::anslp_mspec_object *object)
@@ -105,21 +141,20 @@ netauct_rule_installer::check(const msg::anslp_mspec_object *object)
 	response = execute_command(action, postfield);
 	LogDebug("Reponse" + response);
 		
-	/*
+	
 	if (!responseOk(response)){
 		throw auction_rule_installer_error(response,
 			msg::information_code::sc_signaling_session_failures,
 			msg::information_code::sigfail_wrong_create_message);
-	}
+	} else  {
 		
-	if (responseOk(response)){
 		if (getNumberAuctions(response) <= 0){
 			throw auction_rule_installer_error("No auction satisfying filter criteria",
 				msg::information_code::sc_signaling_session_failures,
 				msg::information_code::sigfail_filter_action_not_applicable);
 		}
 	}
-	*/		
+			
 }
 
 
@@ -244,8 +279,9 @@ netauct_rule_installer::execute_command(std::string action, std::string post_fie
 	CURLcode res;
 	xsltStylesheetPtr cur = NULL;
 	xmlDocPtr doc, out;
+
+	LogDebug("Starting execute command - action: " << action);
     
-    std::cout << "The action given is:" << action << std::endl;
 	// initialize libcurl
 	curl = curl_easy_init();
 	if (curl == NULL) {

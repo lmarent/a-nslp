@@ -78,6 +78,10 @@ class netauct_rule_installer : public auction_rule_installer
 	//! the requested command.
 	string execute_command(string action, string post_fields);
 
+	bool responseOk(string response);
+	
+	int getNumberAuctions(string response);
+
 };
 
 } // namespace anslp

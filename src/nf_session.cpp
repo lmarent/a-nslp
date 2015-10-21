@@ -198,20 +198,20 @@ void nf_session::set_auction_rule(dispatcher *d,
 		if (check_participating(
 			   create->get_selection_auctioning_entities()))
 		{
-			try{
-				if (d->check(object)){
+			try {
+				if (d->check(object))
+				{
 				   rule->set_request_object(object->copy());
 				   missing_objects.push_back(object->copy());
 				}
 				else{
 				   missing_objects.push_back(object->copy());
 				}
-			}catch(std::invalid_argument &e){
+			} catch(std::invalid_argument &e) {
 				missing_objects.push_back(object->copy());
 			}
 		}
-		else
-		{
+		else {
 			missing_objects.push_back(object->copy());
 		}
 	}

@@ -29,6 +29,7 @@
 #ifndef ANSLP_ANSLP_CONFIG_H
 #define ANSLP_ANSLP_CONFIG_H
 
+#include "config.h"
 #include "messages.h"
 #include "address.h"
 #include "configpar.h"

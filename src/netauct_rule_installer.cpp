@@ -139,6 +139,9 @@ netauct_rule_installer::check(const msg::anslp_mspec_object *object)
 	
 	msg::anslp_ipap_xml_message mess;
 	string postfield = mess.get_message( *(get_ipap_message(object)) );
+	
+	LogDebug("check - message:" << postfield);
+	
 	response = execute_command(action, postfield);
 	LogDebug("Reponse" + response);
 		

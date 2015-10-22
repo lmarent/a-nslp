@@ -37,6 +37,7 @@ test_runner_SOURCES =  @top_srcdir@/src/benchmark_journal.cpp \
 					   @top_srcdir@/test/anslp_notify_test.cpp \
 					   @top_srcdir@/test/anslp_refresh_test.cpp \
 					   @top_srcdir@/test/anslp_response_test.cpp \
+					   @top_srcdir@/test/session_id_test.cpp \
 					   @top_srcdir@/test/ni_session_test.cpp \
 					   @top_srcdir@/test/nf_session_test.cpp \
 					   @top_srcdir@/test/nr_session_test.cpp \

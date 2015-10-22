@@ -961,7 +961,7 @@ anslp_ipap_xml_message::from_message(const string str)
 	try{
 
 #ifdef DEBUG
-		log->dlog(ch, "DTD name: %s root:% \n message:%s", DTD_FILENAME.c_str(), IPAP_XML_ROOT.c_str(), str.c_str() );
+		log->dlog(ch, "DTD name: %s root:%s \n message:%s", DTD_FILENAME.c_str(), IPAP_XML_ROOT.c_str(), str.c_str() );
 #endif	
 		
 		XMLParserValidate(DTD_FILENAME, str.c_str(), str.length(), IPAP_XML_ROOT);

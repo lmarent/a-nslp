@@ -128,12 +128,36 @@ int netauct_rule_installer::getNumberAuctions(string response)
 	return val_return;
 }
 
+string 
+netauct_rule_installer::getMessage(string response)
+{
+	LogDebug("start getMessage - " << response);
+	
+	string val_return;
+	string tofind("<?xml version=");
+	string tofind2("</IPAP_MESSAGE>");
+	
+	std::size_t pos = response.find(tofind);
+	if (pos!=std::string::npos){
+		std::size_t pos2 = response.find(tofind2);
+		if (pos2!=std::string::npos){
+			LogDebug("pos:" << pos << " pos2:" << pos2);
+			val_return = response.substr(pos, pos2 + tofind2.length());
+		}
+	}
+	
+	LogDebug("ending getMessage" << val_return);
+	return val_return;
+			
+}		
+
 void 
 netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_object *object)
 		throw (auction_rule_installer_error) 
 {
 	LogDebug("start check()");
-
+	
+	
 	string response;
 	string action = "/check_session";
 	
@@ -182,17 +206,19 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 		
 		msg::anslp_ipap_xml_message mess;
 		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
-		try
-		{
-			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-			response = execute_command(action, postfield);
-			LogDebug("Reponse" + response);
-			msg::anslp_ipap_message *ipap_response = mess.from_message(response);
+		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
+		response = execute_command(action, postfield);
+				
+		if (!responseOk(response)){
+			throw auction_rule_installer_error(response,
+				msg::information_code::sc_signaling_session_failures,
+				msg::information_code::sigfail_wrong_conf_message);
+
+		} else {
+			string responseMsg = getMessage(response);
+			msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
 			auc_return->set_response_object(ipap_response);
 		}
-		catch(auction_rule_installer_error &e){
-			std::cout << "It cannot install the object" << std::endl;
-		}	
 	}	
 	
 	return auc_return;

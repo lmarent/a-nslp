@@ -81,6 +81,8 @@ class netauct_rule_installer : public auction_rule_installer
 	bool responseOk(string response);
 	
 	int getNumberAuctions(string response);
+	
+	string getMessage(string response);
 
 };
 

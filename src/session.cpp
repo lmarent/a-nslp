@@ -40,6 +40,10 @@ using namespace anslp;
 using namespace protlib::log;
 using protlib::uint32;
 
+#define LogWarn(msg) Log(WARNING_LOG, LOG_NORMAL, "session", msg)
+#define LogInfo(msg) Log(INFO_LOG, LOG_NORMAL, "session", msg)
+#define LogDebug(msg) Log(DEBUG_LOG, LOG_NORMAL, "session", msg)
+
 
 /**
  * Constructor.
@@ -72,10 +76,18 @@ session::session(const session_id &sid) : rule(NULL), id(sid), msn(0)
  */
 session::~session() 
 {
+	
+	LogDebug("Starting destroy session");
+	
 	pthread_mutex_destroy(&mutex);
 	
-	if (rule != NULL)
+	
+	if (rule != NULL){
 		delete rule;
+	}
+	
+	LogDebug("Ending destroy session");
+	
 }
 
 

@@ -79,7 +79,7 @@ nop_auction_rule_installer::setup() throw (auction_rule_installer_error)
 
 
 void 
-nop_auction_rule_installer::check(const msg::anslp_mspec_object *object)
+nop_auction_rule_installer::check(const string sessionId, const msg::anslp_mspec_object *object)
 		throw (auction_rule_installer_error) 
 {
 
@@ -88,7 +88,7 @@ nop_auction_rule_installer::check(const msg::anslp_mspec_object *object)
 
 
 auction_rule * 
-nop_auction_rule_installer::create(const auction_rule *rule) 
+nop_auction_rule_installer::create(const string sessionId, const auction_rule *rule) 
 {
 
 	LogDebug("NOP: installing policy rule " << *rule);
@@ -112,7 +112,7 @@ nop_auction_rule_installer::create(const auction_rule *rule)
 }
 
 
-auction_rule * nop_auction_rule_installer::remove(const auction_rule *rule) 
+auction_rule * nop_auction_rule_installer::remove(const string sessionId, const auction_rule *rule) 
 {
 
 	LogDebug("NOP: removing auction rule " << *rule);

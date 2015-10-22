@@ -70,7 +70,7 @@ class ntlp_msg {
 	ntlp_msg *copy() const;
 	ntlp_msg *copy_for_forwarding(ntlp::mri *new_mri=NULL) const;
 
-	ntlp_msg *create_response(uint8 severity, uint8 response_code) const;
+	ntlp_msg *create_response(uint8 severity, uint8 response_code ) const;
 	ntlp_msg *create_error_response(const request_error &e) const;
 	ntlp_msg *create_success_response(uint32 session_lifetime) const;
 

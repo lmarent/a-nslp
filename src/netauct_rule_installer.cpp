@@ -129,7 +129,7 @@ int netauct_rule_installer::getNumberAuctions(string response)
 }
 
 void 
-netauct_rule_installer::check(const msg::anslp_mspec_object *object)
+netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_object *object)
 		throw (auction_rule_installer_error) 
 {
 	LogDebug("start check()");
@@ -141,7 +141,7 @@ netauct_rule_installer::check(const msg::anslp_mspec_object *object)
 	string postfield = mess.get_message( *(get_ipap_message(object)) );
 	
 	LogDebug("check - message:" << postfield);
-	
+	postfield = "SessionID=" +  sessionId + "&" + postfield;
 	response = execute_command(action, postfield);
 	LogDebug("Reponse" + response);
 		
@@ -164,7 +164,7 @@ netauct_rule_installer::check(const msg::anslp_mspec_object *object)
 
 
 auction_rule * 
-netauct_rule_installer::create(const auction_rule *rule) 
+netauct_rule_installer::create(const string sessionId, const auction_rule *rule) 
 {
 
 	LogDebug("Creating auction session " << *rule);
@@ -198,7 +198,7 @@ netauct_rule_installer::create(const auction_rule *rule)
 
 
 auction_rule * 
-netauct_rule_installer::remove(const auction_rule *rule) 
+netauct_rule_installer::remove(const string sessionId, const auction_rule *rule) 
 {
 
 	LogDebug("Starting removing auction rule " << *rule);

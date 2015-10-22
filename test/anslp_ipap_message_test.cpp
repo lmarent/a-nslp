@@ -65,10 +65,11 @@ Anslp_IpAp_Message_Test::buildMessage(anslp_ipap_message *message) const
 	unsigned char *buf2  = (unsigned char *) "bas";
 	unsigned char *buf2a = (unsigned char *) "bas2";
 
-	int nfields = 4;
+	
 	try
 	{
 				
+		int nfields = 4;
 		(message->ip_message).delete_all_templates();
 
 		templatedataid = (message->ip_message).new_data_template( nfields, IPAP_SETID_AUCTION_TEMPLATE );

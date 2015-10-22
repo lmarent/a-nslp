@@ -134,6 +134,8 @@ nr_session::save_auction_rule(dispatcher *d,
 	using ntlp::mri_pathcoupled;
 
 	LogDebug("Starting save_mt_policy_rule ");
+	
+	string session_id;
 
 	std::vector<msg::anslp_mspec_object *> objects;
 
@@ -151,7 +153,8 @@ nr_session::save_auction_rule(dispatcher *d,
 			information_code::sc_permanent_failure,
 			information_code::fail_configuration_failed); // failure
 	}
-
+	
+	session_id = get_id().to_string();
 	create->get_mspec_objects(objects);
 	
 	// Check which metering object could be installed in this node.
@@ -160,7 +163,7 @@ nr_session::save_auction_rule(dispatcher *d,
 	{
 		const anslp_mspec_object *object = *it_objects;
 		if (check_participating(create->get_selection_auctioning_entities())){
-			if (d->check(object)){
+			if (d->check(session_id, object)){
 			   rule->set_request_object(object->copy());
 			   missing_objects.push_back(object->copy());
 			}
@@ -193,6 +196,8 @@ nr_session::handle_state_close(dispatcher *d, event *evt)
 	using namespace msg;
 
 	LogDebug("Starting handle_state_close ");
+	
+	string session_id = get_id().to_string();
 
 	/*
 	 * A msg_event arrived which contains a ANSLP create message.
@@ -227,7 +232,7 @@ nr_session::handle_state_close(dispatcher *d, event *evt)
 			std::vector<msg::anslp_mspec_object *> missing_objects;
 			save_auction_rule(d, e, missing_objects);
 			
-			auction_rule * result = d->install_auction_rules(rule);
+			auction_rule * result = d->install_auction_rules(session_id, rule);
 			if (result->get_number_mspec_request_objects() ==
 					rule->get_number_mspec_response_objects() ){
 				// free the space allocated to the rule to be installed.
@@ -235,19 +240,29 @@ nr_session::handle_state_close(dispatcher *d, event *evt)
 				// Assign the response as the rule installed.
 				rule = result;
 				ntlp_msg *resp = msg->create_success_response(lifetime);
+				
+				// Copy anslp messages into teh response message.
+				objectListIter_t iter;
+				for (iter = result->get_response_objects()->begin(); 
+						iter != result->get_response_objects()->end(); ++iter){
+					dynamic_cast<anslp_response *>(msg->get_anslp_msg())->set_mspec_object((iter->second)->copy());
+				}
+
 				d->send_message(resp);
 				state_timer.start(d, lifetime);
 				return STATE_ANSLP_AUCTIONING;
 			}	
 			else
 			{
+				
 				set_lifetime(0);
 				delete(rule);
 				// Assign the response as the rule installed.
 				rule = result;
 				// Uninstall the previous rules.
-				if (rule->get_number_mspec_response_objects() > 0)
-					d->remove_auction_rules(rule);
+				if (rule->get_number_mspec_response_objects() > 0){
+					d->remove_auction_rules(session_id, rule);
+				}
 					
 				d->send_message( msg->create_response(
 								information_code::sc_permanent_failure, 
@@ -277,6 +292,8 @@ nr_session::state_t nr_session::handle_state_auctioning(
 		dispatcher *d, event *evt) 
 {
 	LogDebug("Starting handle_STATE_ANSLP_AUCTIONING ");
+
+	string session_id;
 
 	/*
 	 * A msg_event arrived which contains a ANSLP REFRESH message.
@@ -326,9 +343,11 @@ nr_session::state_t nr_session::handle_state_auctioning(
 		{
 			LogInfo("terminating session on NI request.");
 		
+			session_id = get_id().to_string();
+			
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0)
-				d->remove_auction_rules(rule);
+				d->remove_auction_rules(session_id, rule);
 			
 			ntlp_msg *resp = msg->create_success_response(lifetime);
 		
@@ -350,9 +369,12 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	 */
 	else if ( is_timer(evt, state_timer) ) {
 		LogWarn("session timed out.");
+		
+		session_id = get_id().to_string();
+		
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0)
-			d->remove_auction_rules(rule);
+			d->remove_auction_rules(session_id, rule);
 
 		d->report_async_event("session timed out");
 		return STATE_ANSLP_CLOSE;

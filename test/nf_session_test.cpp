@@ -263,10 +263,19 @@ void ForwarderTest::testClose() {
 
 void ForwarderTest::testPending() {
 	
+
+	ntlp::mri_pathcoupled *ntlp_mri1 = new ntlp::mri_pathcoupled(
+		hostaddress("192.168.0.4"), 32, 0,
+		hostaddress("192.168.0.5"), 32, 0,
+		"tcp", 0, 0, 0, true
+	);
+
+
 	/*
 	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_AUCTIONING
 	 */
 	nf_session_test s1(nf_session::STATE_ANSLP_PENDING, conf);
+	s1.set_ni_mri(ntlp_mri1);
 	s1.set_last_create_message(create_anslp_create());
 
 	ntlp_msg *resp1 = create_anslp_response(information_code::sc_success,

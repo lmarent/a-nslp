@@ -254,7 +254,7 @@ void dispatcher::send_receive_answer(
 
 	// convert session ID
 	session_id *sid = evt->get_session_id();
-	uint128 sid_raw = sid->get_id();
+
 	ntlp::sessionid *ntlp_sid = mapper.create_ntlp_session_id(*sid);
 
 	ntlp::APIMsg *reply = new ntlp::APIMsg();
@@ -312,15 +312,15 @@ void dispatcher::report_async_event(std::string msg) throw () {
  * Install the given policy rules.
  */
 auction_rule * 
-dispatcher::install_auction_rules(const auction_rule *act_rule)
+dispatcher::install_auction_rules(const string session_id, const auction_rule *act_rule)
 		throw (auction_rule_installer_error) {
 
 	assert( rule_installer != NULL );
 
 	if ( act_rule != NULL )
 		LogDebug("installing ANSLP policy rule " << *act_rule);
-
-	auction_rule * result = rule_installer->create(act_rule);
+	
+	auction_rule * result = rule_installer->create(session_id, act_rule);
 	return result;
 }
 
@@ -328,7 +328,7 @@ dispatcher::install_auction_rules(const auction_rule *act_rule)
 /**
  * Remove the given policy rules.
  */
-void dispatcher::remove_auction_rules(const auction_rule *act_rule)
+void dispatcher::remove_auction_rules(const string session_id, const auction_rule *act_rule)
 		throw (auction_rule_installer_error) {
 
 	assert( rule_installer != NULL );
@@ -336,7 +336,7 @@ void dispatcher::remove_auction_rules(const auction_rule *act_rule)
 	if ( act_rule != NULL )
 		LogDebug("removing ANSLP policy rule " << *act_rule);
 
-	auction_rule * result = rule_installer->remove(act_rule);
+	auction_rule * result = rule_installer->remove(session_id, act_rule);
 	
 	if (result->get_number_mspec_request_objects() != 
 			act_rule->get_number_mspec_response_objects() )
@@ -346,7 +346,7 @@ void dispatcher::remove_auction_rules(const auction_rule *act_rule)
 				
 }
 
-bool dispatcher::check(const msg::anslp_mspec_object *object) {	
+bool dispatcher::check(const string session_id, const msg::anslp_mspec_object *object) {	
 		
 	assert( rule_installer != NULL );
 	
@@ -357,7 +357,7 @@ bool dispatcher::check(const msg::anslp_mspec_object *object) {
 	
 		try 
 		{
-			rule_installer->check(object);
+			rule_installer->check(session_id, object);
 			return true;
 		}
 		catch (auction_rule_installer_error &e){

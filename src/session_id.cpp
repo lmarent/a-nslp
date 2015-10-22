@@ -72,3 +72,23 @@ std::ostream &anslp::operator<<(std::ostream &out, const session_id &sid)
 
 	return out;
 }
+
+string session_id::to_string() 
+{
+	char str1[11];
+	char str2[11];
+	char str3[11];
+	char str4[11];
+	string separator = ".";
+	
+	snprintf(str1, sizeof str1, "%lu", (unsigned long)id.w1);
+	snprintf(str2, sizeof str2, "%lu", (unsigned long)id.w2);
+	snprintf(str3, sizeof str3, "%lu", (unsigned long)id.w3);
+	snprintf(str4, sizeof str4, "%lu", (unsigned long)id.w4);
+	
+	string val_result = string(str1) + separator + string(str2) 
+						+ separator + string(str3) + separator + string(str4);
+	
+	return val_result;
+
+}

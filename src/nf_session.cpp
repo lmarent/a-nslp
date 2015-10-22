@@ -183,6 +183,7 @@ void nf_session::set_auction_rule(dispatcher *d,
 {
 	
 	LogDebug( "Begin set_auction_rule()");
+	string session_id;
 	
 	std::vector<msg::anslp_mspec_object *> objects;
 	assert( evt != NULL );
@@ -198,13 +199,14 @@ void nf_session::set_auction_rule(dispatcher *d,
 		if (check_participating(
 			   create->get_selection_auctioning_entities()))
 		{
-			try {
-				if (d->check(object))
-				{
+			try 
+			{
+				session_id = get_id().to_string();
+				
+				if (d->check(session_id, object)) {
 				   rule->set_request_object(object->copy());
 				   missing_objects.push_back(object->copy());
-				}
-				else{
+				} else {
 				   missing_objects.push_back(object->copy());
 				}
 			} catch(std::invalid_argument &e) {
@@ -431,6 +433,7 @@ nf_session::state_t
 nf_session::handle_state_pending(dispatcher *d, event *evt) {
 
 	using namespace anslp::msg;
+	string session_id;
 
 	LogDebug("begin handle_state_pending(): " << *this);
 	
@@ -536,22 +539,27 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 			return STATE_ANSLP_PENDING; // no change
 		}
 
-		if ( resp->is_success() ) {
+		if ( resp->is_success() ) 
+		{
+			
 			LogDebug("initiated session " << get_id());
-
-			auction_rule * result = d->install_auction_rules(rule);
+			session_id = get_id().to_string();
+			auction_rule * result = d->install_auction_rules(session_id, rule);
+			
 			// Verify that every rule that passed the checking process could be installed.
 			if (result->get_number_mspec_request_objects() 
 					== rule->get_number_mspec_response_objects() )
 			{
+			
 				// free the space allocated to the rule to be installed.
 				delete(rule);
-			
-				// Assign the response with local rules installed.
+				// Assign the response as the rule installed.
+				rule = result;
+				
 				
 				anslp_response *response = resp->copy();
 				
-				rule = result;
+				// Copy the messages that comes from routers in the path.
 				objectListIter_t iter;
 				for (iter = result->get_response_objects()->begin(); 
 						iter != result->get_response_objects()->end(); ++iter){
@@ -570,13 +578,15 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 			else
 			{
 				set_lifetime(0);
-				delete(rule);
+
 				// Assign the response as the rule installed.
 				rule = result;
-				// Uninstall the previous rules.
-				if (rule->get_number_mspec_response_objects() > 0)
-					d->remove_auction_rules(rule);
 				
+				// Uninstall the previous rules.
+				if (rule->get_number_mspec_response_objects() > 0){
+					session_id = get_id().to_string();
+					d->remove_auction_rules(session_id, rule);
+				}
 				// Create message towards nr to teardown what we have done before 
 				ntlp_msg * tear_down = build_teardown_message();
 				d->send_message( tear_down );
@@ -620,6 +630,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		dispatcher *d, event *evt) {
 
 	using namespace anslp::msg;
+	string session_id;
   
 	LogDebug("Begining handle_STATE_ANSLP_AUCTIONING(): " << *this);
   
@@ -710,8 +721,10 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		state_timer.stop();
 		
 		// Uninstall the previous rules.
-		if (rule->get_number_mspec_response_objects() > 0)
-			d->remove_auction_rules(rule);
+		if (rule->get_number_mspec_response_objects() > 0){
+			session_id = get_id().to_string();
+			d->remove_auction_rules(session_id, rule);
+		}
 
 		// TODO: check the spec!
 		ntlp_msg *response = get_last_refresh_message()->create_response(
@@ -732,9 +745,10 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		response_timer.stop();
 
 		// Uninstall the previous rules.
-		if (rule->get_number_mspec_response_objects() > 0)
-			d->remove_auction_rules(rule);
-
+		if (rule->get_number_mspec_response_objects() > 0){
+			session_id = get_id().to_string();
+			d->remove_auction_rules(session_id, rule);
+		}
 		// TODO: ReportAsyncEvent()
 
 		return STATE_ANSLP_CLOSE;
@@ -747,8 +761,10 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		LogUnimp("route to the NI or to the NR is no longer usable");
 
 		// Uninstall the previous rules.
-		if (rule->get_number_mspec_response_objects() > 0)
-			d->remove_auction_rules(rule);
+		if (rule->get_number_mspec_response_objects() > 0){
+			session_id = get_id().to_string();
+			d->remove_auction_rules(session_id, rule);
+		}
 
 		return STATE_ANSLP_CLOSE;
 	}	
@@ -779,8 +795,10 @@ nf_session::state_t nf_session::handle_state_auctioning(
 			{
 				state_timer.stop();	
 				// Uninstall the previous rules.
-				if (rule->get_number_mspec_response_objects() > 0)
-					d->remove_auction_rules(rule);	
+				if (rule->get_number_mspec_response_objects() > 0){
+					session_id = get_id().to_string();
+					d->remove_auction_rules(session_id, rule);	
+				}
 				return STATE_ANSLP_CLOSE;
 			}
 			else
@@ -793,8 +811,10 @@ nf_session::state_t nf_session::handle_state_auctioning(
 			LogWarn("error message received.");
 			state_timer.stop();
 			// Uninstall the previous rules.
-			if (rule->get_number_mspec_response_objects() > 0)
-				d->remove_auction_rules(rule);
+			if (rule->get_number_mspec_response_objects() > 0){
+				session_id = get_id().to_string();
+				d->remove_auction_rules(session_id, rule);
+			}
 			
 			d->send_message( create_msg_for_ni(msg) );
 

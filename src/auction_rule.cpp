@@ -65,17 +65,28 @@ auction_rule::~auction_rule()
 	
 	// Delete requests
 	objectListIter_t it;
+	
+	LogDebug("Starting destructor object_request:" << object_requests.size());
+	
 	for ( it = object_requests.begin(); it != object_requests.end(); it++)
 	{
-		delete(it->second);
+		LogDebug("Entro 2" << (it->first).to_string());
+		if (it->second != NULL)
+			delete(it->second);
 	}
 
+	LogDebug("Starting destructor object_responses:" << object_responses.size());
+	
 	// Delete responses.
 	for ( it = object_responses.begin(); it != object_responses.end(); it++)
 	{
-		delete(it->second);
+		LogDebug("Entro 2" << (it->first).to_string());
+		if (it->second != NULL){
+			delete(it->second);
+		}
 	}
-
+	
+	LogDebug("Ending destructor auction_rule");
 }
 
 /**

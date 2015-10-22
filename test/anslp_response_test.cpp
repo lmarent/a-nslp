@@ -216,7 +216,7 @@ void AnslpResponseTest::testManager02() {
 	anslp_response *m1 = new anslp_response();
 	m1->set_session_lifetime(30);
 	m1->set_msg_sequence_number(47);
-	m1->set_anslp_ipap_message(mess);
+	m1->set_mspec_object(mess);
     
     
 	NetMsg msg( m1->get_serialized_size(IE::protocol_v1) );

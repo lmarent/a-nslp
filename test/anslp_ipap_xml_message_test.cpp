@@ -78,7 +78,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 				
 		(message->ip_message).delete_all_templates();
 
-		nfields = 5;
+		nfields = 6;
 		templatedataid = (message->ip_message).new_data_template( nfields, IPAP_SETID_BID_TEMPLATE );
 		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDBID);
 		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDRECORD);

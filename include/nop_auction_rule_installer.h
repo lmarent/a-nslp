@@ -51,14 +51,14 @@ class nop_auction_rule_installer : public auction_rule_installer
 
 	void setup() throw (auction_rule_installer_error);
 
-	virtual void check(const msg::anslp_mspec_object *object)
+	virtual void check(const string sessionId, const msg::anslp_mspec_object *object)
 		throw (auction_rule_installer_error);
 
-	virtual auction_rule * create(const auction_rule *mt_object);
+	virtual auction_rule * create(const string sessionId, const auction_rule *mt_object);
 	
 	virtual auction_rule * auction_interaction(const auction_rule *mt_object);
 
-	virtual auction_rule * remove(const auction_rule *mt_object);
+	virtual auction_rule * remove(const string sessionId, const auction_rule *mt_object);
 
 	virtual bool remove_all();
 

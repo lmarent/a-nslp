@@ -99,6 +99,8 @@ ni_session::ni_session(state_t s)
  */
 ni_session::~ni_session() 
 {
+	LogDebug("Starting destroy ni_session");
+	
 	if (routing_info != NULL){
 		delete routing_info;
 	}
@@ -110,6 +112,8 @@ ni_session::~ni_session()
 	if (last_refresh_msg != NULL){
 		delete last_refresh_msg;
 	}
+	
+	LogDebug("Ending destroy ni_session");
 }
 
 
@@ -334,6 +338,7 @@ ni_session::state_t ni_session::handle_state_pending(
 	
 	LogDebug("Initiating state pending ");
 	using namespace anslp::msg;
+	string session_id;
 
 	/*
 	 * A response timeout was triggered.
@@ -353,7 +358,8 @@ ni_session::state_t ni_session::handle_state_pending(
 		// Retry count exceeded, abort.
 		else {
 			if (rule->get_number_mspec_response_objects() > 0){
-				d->remove_auction_rules(rule);
+				session_id = get_id().to_string();
+				d->remove_auction_rules(session_id, rule);
 			}
 			d->report_async_event("got no response for our Create Message");
 			return STATE_ANSLP_CLOSE;
@@ -364,7 +370,8 @@ ni_session::state_t ni_session::handle_state_pending(
 	 */
 	else if ( is_no_next_node_found_event(evt) ) {
 		if (rule->get_number_mspec_response_objects() > 0){
-			d->remove_auction_rules(rule);
+			session_id = get_id().to_string();
+			d->remove_auction_rules(session_id, rule);
 		}
 		
 		LogInfo("cannot reach destination");
@@ -384,7 +391,8 @@ ni_session::state_t ni_session::handle_state_pending(
 
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
-			d->remove_auction_rules(rule);
+			session_id = get_id().to_string();
+			d->remove_auction_rules(session_id, rule);
 		}
 			
 		d->send_message( build_refresh_message() );
@@ -429,11 +437,7 @@ ni_session::state_t ni_session::handle_state_pending(
 			}
 			
 			refresh_timer.start(d, get_refresh_interval());
-	
-					
-			// free the space allocated to the rule to be installed.
-			delete(rule);
-			
+				
 			set_create_counter(0);
 				
 			// Group response messages from respose and 
@@ -449,7 +453,9 @@ ni_session::state_t ni_session::handle_state_pending(
 				responseObjects.push_back((iter->second)->copy());
 			}
 				
-			// post the objects into the client application.
+			// post the objects into client's application.
+			
+			LogDebug("WE ARE READY TO POST MESSAGES- TO IMPLEMENT ");
 				
 			LogDebug("Ending state handle pending - New State AUCTIONING ");
 			return STATE_ANSLP_AUCTIONING;
@@ -480,6 +486,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 	using namespace anslp::msg;
 	
 	LogDebug("Initiating state metering");
+	string session_id;
 	
 	/*
 	 * A refresh timer was triggered.
@@ -522,8 +529,10 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		// Retry count exceeded, abort.
 		else {
 			// Uninstall the previous rules.
-			if (rule->get_number_mspec_response_objects() > 0)
-				d->remove_auction_rules(rule);
+			if (rule->get_number_mspec_response_objects() > 0){
+				session_id = get_id().to_string();
+				d->remove_auction_rules(session_id, rule);
+			}
 			
 			LogDebug("no response to our REFRESH message");
 			d->report_async_event("got no response to our REFRESH message");
@@ -541,8 +550,10 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		set_last_refresh_message(NULL);
 
 		// Uninstall the previous rules.
-		if (rule->get_number_mspec_response_objects() > 0) 
-			d->remove_auction_rules(rule);
+		if (rule->get_number_mspec_response_objects() > 0){ 
+			session_id = get_id().to_string();
+			d->remove_auction_rules(session_id, rule);
+		}
 
 		d->send_message( build_refresh_message() );
 		LogDebug("Ending state metering - api teardown");
@@ -585,8 +596,10 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		else {
 
 			// Uninstall the previous rules.
-			if (rule->get_number_mspec_response_objects() > 0)
-				d->remove_auction_rules(rule);
+			if (rule->get_number_mspec_response_objects() > 0){
+				session_id = get_id().to_string();
+				d->remove_auction_rules(session_id, rule);
+			}
 
 			d->report_async_event("REFRESH session died");
 			return STATE_ANSLP_CLOSE;

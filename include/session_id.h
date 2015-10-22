@@ -76,6 +76,9 @@ class session_id {
 	inline bool operator!=(const session_id &other) const {
 		return ! (*this == other);
 	}
+	
+	string to_string();
+	
   private:
 	uint128 id;
 };

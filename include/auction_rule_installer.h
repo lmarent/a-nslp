@@ -88,7 +88,7 @@ class auction_rule_installer {
 	 *
 	 * If they are not, an exception is thrown.
 	 */
-	virtual void check(const msg::anslp_mspec_object *object)
+	virtual void check(const string sessionId, const msg::anslp_mspec_object *object)
 		throw (auction_rule_installer_error) = 0;
 
 	/**
@@ -99,7 +99,7 @@ class auction_rule_installer {
 	 * After calling this method, the auction session is created in 
 	 * the auctioning application and nodes can start the auction process.
 	 */
-	virtual auction_rule * create(const auction_rule *mt_object) = 0;
+	virtual auction_rule * create(const string sessionId, const auction_rule *mt_object) = 0;
 
 	/**
 	 * Remove the given auction session.
@@ -110,7 +110,7 @@ class auction_rule_installer {
 	 * Note that this is the reverse operation to create(). Only previously
 	 * created auction sessions may be deleted!. 
 	 */
-	virtual auction_rule * remove(const auction_rule * mt_object) = 0;
+	virtual auction_rule * remove(const string sessionId, const auction_rule * mt_object) = 0;
 
 	/**
 	 * executes an auction interaction between two parties.

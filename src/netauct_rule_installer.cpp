@@ -200,6 +200,7 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 	objectListConstIter_t i;
 	objectList_t * requestObjectList = auc_return->get_request_objects();
 	
+	LogDebug("Nbr objects to install: " << requestObjectList->size());
 	
 	// Loop through the objects and install them.
 	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){

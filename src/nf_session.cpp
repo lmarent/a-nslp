@@ -217,7 +217,9 @@ void nf_session::set_auction_rule(dispatcher *d,
 			missing_objects.push_back(object->copy());
 		}
 	}
-	LogDebug("End set_auction_rule() ");
+	
+	LogDebug("End set_auction_rule - objects inserted:" 
+					<< rule->get_request_objects()->size());
 }
 
 

@@ -93,7 +93,7 @@ anslp_ipap_xml_message::XMLParserValidate(string _dtdname, const char *buf, int 
         XMLDoc = xmlParseMemory(buf, len); 	    
 	
         if (XMLDoc == NULL) {
-            throw Error("XML document parse error");
+            throw Error("XML document parse error:" + err);
         }
 
         validate(root);
@@ -189,7 +189,6 @@ void anslp_ipap_xml_message::XMLErrorCB(void *ctx, const char *msg, ...)
 
     va_start( argp, msg );
     vsprintf(buf, msg, argp);
-    vfprintf(stderr, msg, argp);
     va_end( argp );
 
     err += buf;

@@ -191,7 +191,7 @@ auction_rule::set_response_object(msg::anslp_mspec_object *obj)
 	
 	if (obj != NULL){
 		mspec_rule_key key;
-		object_requests[key] = obj;
+		object_responses[key] = obj;
 		return key;
 	}
 	else{

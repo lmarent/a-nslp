@@ -317,10 +317,13 @@ dispatcher::install_auction_rules(const string session_id, const auction_rule *a
 
 	assert( rule_installer != NULL );
 
-	if ( act_rule != NULL )
-		LogDebug("installing ANSLP policy rule " << *act_rule);
+	if ( act_rule != NULL ){
+		LogDebug("installing ANSLP policy rule - objects to install " 
+					<< act_rule->get_request_objects()->size());
+	}
 	
 	auction_rule * result = rule_installer->create(session_id, act_rule);
+	
 	return result;
 }
 

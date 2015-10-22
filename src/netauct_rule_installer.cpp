@@ -220,6 +220,7 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 		} else {
 			string responseMsg = getMessage(response);
 			msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
+			(ipap_response->ip_message).output();
 			auc_return->set_response_object(ipap_response);
 		}
 	}	

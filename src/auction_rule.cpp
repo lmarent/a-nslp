@@ -165,6 +165,8 @@ auction_rule::set_response_object(mspec_rule_key key, msg::anslp_mspec_object *o
 		delete old;
 
 	object_responses[key] = obj;
+	
+	LogDebug("Ending set_response_object");
 }
 
 mspec_rule_key 

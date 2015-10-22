@@ -205,6 +205,8 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 	// Loop through the objects and install them.
 	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
 		
+		LogDebug("Installing object");
+		
 		msg::anslp_ipap_xml_message mess;
 		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
 		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
@@ -221,6 +223,8 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 			auc_return->set_response_object(ipap_response);
 		}
 	}	
+	
+	LogDebug("Finishing, put nbr objects:" << auc_return->get_response_objects());
 	
 	return auc_return;
 }

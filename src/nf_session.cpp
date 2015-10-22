@@ -556,7 +556,6 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 				// Assign the response as the rule installed.
 				rule = result;
 				
-				
 				anslp_response *response = resp->copy();
 				
 				// Copy the messages that comes from routers in the path.
@@ -569,7 +568,12 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 				/*
 				* Wrap the Response inside an ntlp_msg and add session ID and MRI.
 				*/
-				ntlp_msg *msgRsp = new ntlp_msg(get_id(), response, get_ni_mri()->copy(), 0);
+				
+				ntlp_msg *msgRsp = new ntlp_msg(get_id(), response, msg->get_mri()->copy(), 0);
+				
+				LogDebug("Before sending response to previous hop " << get_id());
+				LogDebug("response SourceAddress:" << msg->get_mri()->get_sourceaddress() 
+									<< "DestinationAddress:" << msg->get_mri()->get_destaddress());
 				
 				d->send_message( msgRsp );
 				state_timer.start(d, get_lifetime());

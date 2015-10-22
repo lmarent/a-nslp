@@ -141,7 +141,7 @@ netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_obj
 	string postfield = mess.get_message( *(get_ipap_message(object)) );
 	
 	LogDebug("check - message:" << postfield);
-	postfield = "SessionID=" +  sessionId + "&" + postfield;
+	postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
 	response = execute_command(action, postfield);
 	LogDebug("Reponse" + response);
 		

@@ -233,8 +233,8 @@ nr_session::handle_state_close(dispatcher *d, event *evt)
 			save_auction_rule(d, e, missing_objects);
 			
 			auction_rule * result = d->install_auction_rules(session_id, rule);
-			if (result->get_number_mspec_request_objects() ==
-					rule->get_number_mspec_response_objects() ){
+			if (rule->get_number_mspec_request_objects() ==
+					result->get_number_mspec_response_objects() ){
 				// free the space allocated to the rule to be installed.
 				delete(rule);
 				// Assign the response as the rule installed.

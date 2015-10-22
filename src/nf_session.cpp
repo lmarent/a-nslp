@@ -545,10 +545,14 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 			LogDebug("initiated session " << get_id());
 			session_id = get_id().to_string();
 			auction_rule * result = d->install_auction_rules(session_id, rule);
+
+			LogDebug("After Session Installation, requested objects:" << rule->get_number_mspec_request_objects()
+						<< "installed objects:" << result->get_number_mspec_response_objects());
+
 			
 			// Verify that every rule that passed the checking process could be installed.
-			if (result->get_number_mspec_request_objects() 
-					== rule->get_number_mspec_response_objects() )
+			if (rule->get_number_mspec_request_objects() 
+					== result->get_number_mspec_response_objects() )
 			{
 			
 				// free the space allocated to the rule to be installed.

@@ -184,6 +184,7 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
 		try
 		{
+			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
 			response = execute_command(action, postfield);
 			msg::anslp_ipap_message *ipap_response = mess.from_message(response);
 			auc_return->set_response_object(ipap_response);

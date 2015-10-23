@@ -84,6 +84,11 @@ anslp_config::registerAllPars()
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_ni_max_retries, "ni-max-retries", "NI max retries", true, 3) );
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_ni_msg_hop_count, "ni-msg-hop-count", "NI Message Hop Count", true, 20, "s") );  
 
+  registerPar( new configpar<string>(anslp_realm, anslpconf_ni_user, "ni-user", "bid user", true, "admin") );
+  registerPar( new configpar<string>(anslp_realm, anslpconf_ni_password, "ni-password", "bid user password", true, "admin") );  
+  registerPar( new configpar<string>(anslp_realm, anslpconf_ni_server, "ni-server", "bid http server", true, "localhost") );
+  registerPar( new configpar<uint32>(anslp_realm, anslpconf_ni_port, "ni-port", "bid port", true, 12248) );
+
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_nf_max_session_lifetime, "nf-max-session-lifetime", "NF max session lifetime in seconds", true, 60, "s") );
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_nf_response_timeout, "nf-response-timeout", "NF response timeout", true, 2, "s") );
   registerPar( new configpar<bool>(anslp_realm, anslpconf_nf_is_edge, "nf-is-edge", "NF is an ege", false, false) );

@@ -329,6 +329,25 @@ dispatcher::install_auction_rules(const string session_id, const auction_rule *a
 
 
 /**
+ * Install the given policy rules.
+ */
+auction_rule * 
+dispatcher::send_response(const string session_id, const auction_rule *act_rule)
+		throw (auction_rule_installer_error) {
+
+	assert( rule_installer != NULL );
+
+	if ( act_rule != NULL ){
+		LogDebug("installing ANSLP policy rule - objects to send as response " 
+					<< act_rule->get_number_mspec_request_objects());
+	}
+	
+	auction_rule * result = rule_installer->put_response(session_id, act_rule);
+	
+	return result;
+}
+
+/**
  * Remove the given policy rules.
  */
 void dispatcher::remove_auction_rules(const string session_id, const auction_rule *act_rule)

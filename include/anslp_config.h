@@ -68,6 +68,10 @@ namespace anslp {
     anslpconf_ni_max_session_lifetime,
     anslpconf_ni_max_retries,
     anslpconf_ni_msg_hop_count,
+    anslpconf_ni_user,
+	anslpconf_ni_password,
+	anslpconf_ni_server,			
+	anslpconf_ni_port,					
 
     /* NF  */
     anslpconf_nf_max_session_lifetime,
@@ -149,6 +153,18 @@ class anslp_config {
 
 	uint32 get_auctioneer_port() const {
 		return getpar<uint32>(anslpconf_auctioneer_port); }
+
+	string get_bid_user() const {
+		return getpar<string>(anslpconf_ni_user); }
+	
+	string get_bid_password() const {
+		return getpar<string>(anslpconf_ni_password); }
+
+	string get_bid_server() const {
+		return getpar<string>(anslpconf_ni_server); }
+
+	uint32 get_bid_port() const {
+		return getpar<uint32>(anslpconf_ni_port); }
 
     uint32 get_ni_session_lifetime() const { 
 		return getpar<uint32>(anslpconf_ni_max_session_lifetime); }

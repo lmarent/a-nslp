@@ -301,6 +301,8 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 		
 		response_timer.start(d, get_response_timeout());
 
+		// Send the response saying that an event was processed for the
+		// new session id.
 		if ( e->get_return_queue() != NULL ) {
 			message *m = new anslp_event_msg(get_id(), NULL);
 			e->get_return_queue()->enqueue(m);
@@ -445,20 +447,47 @@ ni_session::state_t ni_session::handle_state_pending(
 			//ntlp::mri mriData = e->get_mri();
 			vector<anslp_mspec_object *> responseObjects;
 				
-			// Insert objects returned from other routers along the path.
+			// Insert objects returned from other routers along the path into the rule.
 			resp->get_mspec_objects(responseObjects);
-			objectList_t responseList =*rule->get_response_objects();
-			objectListIter_t iter;
-			for (iter = responseList.begin(); iter != responseList.end(); ++iter){
-				responseObjects.push_back((iter->second)->copy());
+
+			vector<anslp_mspec_object *>::iterator iter;
+			for (iter = responseObjects.begin(); iter != responseObjects.end(); ++iter)
+			{
+				rule->set_request_object(*iter);
 			}
-				
-			// post the objects into client's application.
+			session_id = get_id().to_string();
+			auction_rule * result = d->send_response(session_id, rule);
 			
-			LogDebug("WE ARE READY TO POST MESSAGES- TO IMPLEMENT ");
+			if (rule->get_number_mspec_request_objects() 
+					== result->get_number_mspec_response_objects() )
+			{
+				// Assign the response as the rule installed.
+				delete(rule);
+				rule = result;
+						
+				LogDebug("Ending state handle pending - New State AUCTIONING ");
+				return STATE_ANSLP_AUCTIONING;
+			
+			} else {
 				
-			LogDebug("Ending state handle pending - New State AUCTIONING ");
-			return STATE_ANSLP_AUCTIONING;
+				// Assign the response as the rule installed.
+				delete(rule);
+				rule = result;
+				
+				// Send a Refresh message with a session lifetime of 0.
+				set_lifetime(0);
+				set_last_create_message(NULL);
+
+				// Uninstall the previous rules.
+				if (rule->get_number_mspec_response_objects() > 0) {
+					session_id = get_id().to_string();
+					d->remove_auction_rules(session_id, result);
+				}
+			
+				d->send_message( build_refresh_message() );
+
+				return STATE_ANSLP_CLOSE;
+			}
 				  
 		}
 		else {

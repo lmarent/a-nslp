@@ -112,6 +112,16 @@ class auction_rule_installer {
 	 */
 	virtual auction_rule * remove(const string sessionId, const auction_rule * mt_object) = 0;
 
+	
+	/**
+	 * put the response into the client application.
+	 *	 
+	 * Subclasses have to use operating system dependent code to access the
+	 * local client application. 
+	 *
+	 */
+	virtual auction_rule * put_response(const string sessionId, const auction_rule * mt_object) = 0;
+
 	/**
 	 * executes an auction interaction between two parties.
 	 *	 
@@ -130,13 +140,21 @@ class auction_rule_installer {
 		
 	std::string get_user() const { return config->get_user(); }
 	
+	std::string get_bid_user() const {return config->get_bid_user(); }
+	
 	std::string get_password() const { return config->get_password(); } 
 	
+	std::string get_bid_password() const {return config->get_bid_password(); }
+	
 	std::string get_server() const { return config->get_auctioneer_server(); } 
+	
+	std::string get_bid_server() const { return config->get_bid_server(); }
 	
 	std::string get_xsl() const { return config->get_auctioneer_xsl(); } 
 	
 	uint32 get_port() const { return config->get_auctioneer_port(); } 
+	
+	uint32 get_bid_port() const { return config->get_bid_port(); }
 		
 	std::string to_string() const;
   

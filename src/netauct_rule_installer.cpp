@@ -166,7 +166,7 @@ netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_obj
 	
 	LogDebug("check - message:" << postfield);
 	postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-	response = execute_command(action, postfield);
+	response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
 	LogDebug("Reponse" + response);
 		
 	
@@ -210,7 +210,51 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 		msg::anslp_ipap_xml_message mess;
 		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
 		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-		response = execute_command(action, postfield);
+		response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
+				
+		if (!responseOk(response)){
+			throw auction_rule_installer_error(response,
+				msg::information_code::sc_signaling_session_failures,
+				msg::information_code::sigfail_wrong_conf_message);
+
+		} else {
+			string responseMsg = getMessage(response);
+			msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
+			(ipap_response->ip_message).output();
+			auc_return->set_response_object(ipap_response);
+		}
+	}	
+	
+	LogDebug("Finishing, put nbr objects:" << auc_return->get_response_objects());
+	
+	return auc_return;
+}
+
+
+auction_rule * 
+netauct_rule_installer::put_response(const string sessionId, const auction_rule *rule) 
+{
+
+	LogDebug("Putting response " << *rule);
+	
+	string response;
+	string action = "/res_add_session";
+	
+	auction_rule *auc_return = new auction_rule(*rule);
+	objectListConstIter_t i;
+	objectList_t * requestObjectList = auc_return->get_request_objects();
+	
+	LogDebug("Nbr objects to install: " << requestObjectList->size());
+	
+	// Loop through the objects and install them.
+	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+		
+		LogDebug("Installing object");
+		
+		msg::anslp_ipap_xml_message mess;
+		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
+		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
+		response = execute_command(RULE_INSTALLER_CLIENT, action, postfield);
 				
 		if (!responseOk(response)){
 			throw auction_rule_installer_error(response,
@@ -297,17 +341,20 @@ std::string getErr(char *e)
 
 
 string 
-netauct_rule_installer::execute_command(std::string action, std::string post_fields)
+netauct_rule_installer::execute_command(rule_installer_destination_type_t destination, 
+											std::string action, std::string post_fields)
 {
 
+    
     char cebuf[CURL_ERROR_SIZE], *ctype;
 	char *post_body = NULL;
-	string userpwd;
-	string server = get_server();
+	string userpwd, stylesheet, server;
+	int port;
+	
 	string response;
 	string input, input2;
-	string stylesheet = get_xsl();
-	int port = get_port();
+	
+	
 	unsigned long rcode;
 	bool val_return = true;
 	
@@ -320,6 +367,25 @@ netauct_rule_installer::execute_command(std::string action, std::string post_fie
 	xmlDocPtr doc, out;
 
 	LogDebug("Starting execute command - action: " << action);
+
+
+    stylesheet = get_xsl();
+    switch (destination)
+    {
+		case RULE_INSTALLER_SERVER:
+			server = get_server();
+			port = get_port();
+			userpwd = get_user() + ":" + get_password();
+			
+          break;
+        case RULE_INSTALLER_CLIENT:
+			server = get_bid_server();
+			port = get_bid_port();
+			userpwd = get_bid_user() + ":" + get_bid_password();
+          break;
+	}
+
+
     
 	// initialize libcurl
 	curl = curl_easy_init();
@@ -354,7 +420,6 @@ netauct_rule_installer::execute_command(std::string action, std::string post_fie
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &response);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writedata);
    
-    userpwd = get_user() + ":" + get_password();
     curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd.c_str());
   
     ostringstream url;

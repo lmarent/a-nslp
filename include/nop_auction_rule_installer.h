@@ -56,6 +56,8 @@ class nop_auction_rule_installer : public auction_rule_installer
 
 	virtual auction_rule * create(const string sessionId, const auction_rule *mt_object);
 	
+	virtual auction_rule * put_response(const string sessionId, const auction_rule * mt_object);
+	
 	virtual auction_rule * auction_interaction(const auction_rule *mt_object);
 
 	virtual auction_rule * remove(const string sessionId, const auction_rule *mt_object);

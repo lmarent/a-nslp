@@ -35,6 +35,12 @@
 namespace anslp 
 {
 
+typedef enum 
+{
+    RULE_INSTALLER_SERVER = 0, 
+    RULE_INSTALLER_CLIENT
+} rule_installer_destination_type_t;
+
 /**
  * An auction rule installer which defines the methods to implement.
  *
@@ -59,6 +65,9 @@ class netauct_rule_installer : public auction_rule_installer
 	//! Create a new auction session in an auction manager server.
 	virtual auction_rule * create(const string sessionId, const auction_rule *mt_object);
 
+	//! put the responses that come to the client.
+	virtual auction_rule * put_response(const string sessionId, const auction_rule * mt_object);
+
 	//! This method is used every time that any actor wants to post or push
 	//! Information for an auction.
 	virtual auction_rule * auction_interaction(const auction_rule *mt_object);
@@ -76,7 +85,8 @@ class netauct_rule_installer : public auction_rule_installer
 	
 	//! Creates a connection to the auction manager server and execute 
 	//! the requested command.
-	string execute_command(string action, string post_fields);
+	string execute_command(rule_installer_destination_type_t destination, 
+								string action, string post_fields);
 
 	bool responseOk(string response);
 	

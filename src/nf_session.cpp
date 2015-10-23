@@ -590,6 +590,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 				set_lifetime(0);
 
 				// Assign the response as the rule installed.
+				delete(rule);
 				rule = result;
 				
 				// Uninstall the previous rules.

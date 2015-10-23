@@ -295,10 +295,8 @@ netauct_rule_installer::put_response(const string sessionId, const auction_rule 
 					msg::information_code::sigfail_wrong_conf_message);
 
 			} else {
-				string responseMsg = getMessage(response);
-				msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
-				(ipap_response->ip_message).output();
-				auc_return->set_response_object(ipap_response);
+				// Copy the object as the response.
+				auc_return->set_response_object(i->second);
 			}
 		}	
 		

@@ -91,12 +91,13 @@ void anslp_daemon::startup() {
 	/*
 	 * Instantiate a operating system dependent auction rule installer.
 	 */
-	if ( config.get_install_auction_rules() == true
-			&& (config.is_auctioneer() ) )
+	if ( (config.is_auctioneer() == true) || 
+		   (config.get_install_auction_rules() == true) ){
 		rule_installer = new netauct_rule_installer(&config);
-	else
+	} else {
 		rule_installer = new nop_auction_rule_installer(&config);
-
+	}
+	
 	try {
 		rule_installer->setup();
 	}

@@ -157,33 +157,39 @@ netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_obj
 {
 	LogDebug("start check()");
 	
+	if (get_install_auction_rules()){
 	
-	string response;
-	string action = "/check_session";
-	
-	msg::anslp_ipap_xml_message mess;
-	string postfield = mess.get_message( *(get_ipap_message(object)) );
-	
-	LogDebug("check - message:" << postfield);
-	postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-	response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
-	LogDebug("Reponse" + response);
+		string response;
+		string action = "/check_session";
 		
-	
-	if (!responseOk(response)){
-		throw auction_rule_installer_error(response,
-			msg::information_code::sc_signaling_session_failures,
-			msg::information_code::sigfail_wrong_conf_message);
-	} else  {
+		msg::anslp_ipap_xml_message mess;
+		string postfield = mess.get_message( *(get_ipap_message(object)) );
 		
-		if (getNumberAuctions(response) <= 0){
-			throw auction_rule_installer_error("No auction satisfying filter criteria",
+		LogDebug("check - message:" << postfield);
+		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
+		response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
+		LogDebug("Reponse" + response);
+			
+		
+		if (!responseOk(response)){
+			throw auction_rule_installer_error(response,
 				msg::information_code::sc_signaling_session_failures,
-				msg::information_code::sigfail_auction_not_applicable);
+				msg::information_code::sigfail_wrong_conf_message);
+		} else  {
+			
+			if (getNumberAuctions(response) <= 0){
+				throw auction_rule_installer_error("No auction satisfying filter criteria",
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_auction_not_applicable);
+			}
 		}
+	
+		LogDebug("end check()");		
+	
+	} else {
+		LogDebug("NOP: check()");
 	}
 	
-	LogDebug("end check()");		
 }
 
 
@@ -193,85 +199,117 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 
 	LogDebug("Creating auction session " << *rule);
 	
-	string response;
-	string action = "/add_session";
+	if (get_install_auction_rules()){
 	
-	auction_rule *auc_return = new auction_rule(*rule);
-	objectListConstIter_t i;
-	objectList_t * requestObjectList = auc_return->get_request_objects();
-	
-	LogDebug("Nbr objects to install: " << requestObjectList->size());
-	
-	// Loop through the objects and install them.
-	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+		string response;
+		string action = "/add_session";
 		
-		LogDebug("Installing object");
+		auction_rule *auc_return = new auction_rule(*rule);
+		objectListConstIter_t i;
+		objectList_t * requestObjectList = auc_return->get_request_objects();
 		
-		msg::anslp_ipap_xml_message mess;
-		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
-		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-		response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
-				
-		if (!responseOk(response)){
-			throw auction_rule_installer_error(response,
-				msg::information_code::sc_signaling_session_failures,
-				msg::information_code::sigfail_wrong_conf_message);
+		LogDebug("Nbr objects to install: " << requestObjectList->size());
+		
+		// Loop through the objects and install them.
+		for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+			
+			LogDebug("Installing object");
+			
+			msg::anslp_ipap_xml_message mess;
+			string postfield = mess.get_message( *(get_ipap_message(i->second)) );
+			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
+			response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
+					
+			if (!responseOk(response)){
+				throw auction_rule_installer_error(response,
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);
 
-		} else {
-			string responseMsg = getMessage(response);
-			msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
-			(ipap_response->ip_message).output();
-			auc_return->set_response_object(ipap_response);
+			} else {
+				string responseMsg = getMessage(response);
+				msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
+				(ipap_response->ip_message).output();
+				auc_return->set_response_object(ipap_response);
+			}
+		}	
+		
+		LogDebug("Finishing, put nbr objects:" << auc_return->get_response_objects());
+	
+		return auc_return;
+	} else {
+
+		LogDebug("NOP: installing policy rule " << *rule);
+		auction_rule *rule_return;
+		
+		if ( rule != NULL ){
+			rule_return = rule->copy(); 
+			
+			objectListConstIter_t i;
+			for ( i = rule_return->get_request_objects()->begin(); 
+						i != rule_return->get_request_objects()->end(); i++)
+			{
+				rule_return->set_response_object(i->second);
+			}
 		}
-	}	
+		else{
+			rule_return = NULL;
+		}	
+		
+		return rule_return;
 	
-	LogDebug("Finishing, put nbr objects:" << auc_return->get_response_objects());
+	}
 	
-	return auc_return;
 }
 
 
 auction_rule * 
 netauct_rule_installer::put_response(const string sessionId, const auction_rule *rule) 
 {
+	if ( is_auctioneer() )
+	{
+	
+		LogDebug("Putting response " << *rule);
+		
+		string response;
+		string action = "/res_add_session";
+		
+		auction_rule *auc_return = new auction_rule(*rule);
+		objectListConstIter_t i;
+		objectList_t * requestObjectList = auc_return->get_request_objects();
+		
+		LogDebug("Nbr objects to install: " << requestObjectList->size());
+		
+		// Loop through the objects and install them.
+		for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+			
+			LogDebug("Installing object");
+			
+			msg::anslp_ipap_xml_message mess;
+			string postfield = mess.get_message( *(get_ipap_message(i->second)) );
+			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
+			response = execute_command(RULE_INSTALLER_CLIENT, action, postfield);
+					
+			if (!responseOk(response)){
+				throw auction_rule_installer_error(response,
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);
 
-	LogDebug("Putting response " << *rule);
-	
-	string response;
-	string action = "/res_add_session";
-	
-	auction_rule *auc_return = new auction_rule(*rule);
-	objectListConstIter_t i;
-	objectList_t * requestObjectList = auc_return->get_request_objects();
-	
-	LogDebug("Nbr objects to install: " << requestObjectList->size());
-	
-	// Loop through the objects and install them.
-	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+			} else {
+				string responseMsg = getMessage(response);
+				msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
+				(ipap_response->ip_message).output();
+				auc_return->set_response_object(ipap_response);
+			}
+		}	
 		
-		LogDebug("Installing object");
+		LogDebug("Finishing, put nbr objects:" << auc_return->get_response_objects());
 		
-		msg::anslp_ipap_xml_message mess;
-		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
-		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-		response = execute_command(RULE_INSTALLER_CLIENT, action, postfield);
-				
-		if (!responseOk(response)){
-			throw auction_rule_installer_error(response,
+		return auc_return;
+	} else {
+		throw auction_rule_installer_error("The Ni-Session agent is not configured as auctioneer",
 				msg::information_code::sc_signaling_session_failures,
-				msg::information_code::sigfail_wrong_conf_message);
-
-		} else {
-			string responseMsg = getMessage(response);
-			msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
-			(ipap_response->ip_message).output();
-			auc_return->set_response_object(ipap_response);
-		}
-	}	
-	
-	LogDebug("Finishing, put nbr objects:" << auc_return->get_response_objects());
-	
-	return auc_return;
+				msg::information_code::sigfail_wrong_conf_message); 
+	}
 }
 
 
@@ -279,26 +317,47 @@ auction_rule *
 netauct_rule_installer::remove(const string sessionId, const auction_rule *rule) 
 {
 
-	LogDebug("Starting removing auction rule " << *rule);
-	string action = "/del_session";
+	if (get_install_auction_rules()){
 
-	auction_rule *rule_return = new auction_rule(*rule);
-	
-	// Iterate over the set of sessions associated with the auction
-	
-		//create the command with the session 
-	//
-	
-	LogDebug("Ending removing auction rule " << *rule);
-	return rule_return;
-	
+		LogDebug("Starting removing auction rule " << *rule);
+		string action = "/del_session";
+
+		auction_rule *rule_return = new auction_rule(*rule);
+		
+		// Iterate over the set of sessions associated with the auction
+		
+			//create the command with the session 
+		//
+		
+		LogDebug("Ending removing auction rule " << *rule);
+		return rule_return;
+	} else {
+
+		LogDebug("NOP: removing auction rule " << *rule);
+		
+		
+		auction_rule *rule_return;
+		
+		if ( rule != NULL ){
+			rule_return = rule->copy(); 
+		}
+		else{
+			rule_return = NULL;
+		}	
+
+		return rule_return;
+
+	}
 }
 
 bool netauct_rule_installer::remove_all() 
 {
-
-	LogDebug("NOP: removing all auction rules ");
-	return true;
+	if (get_install_auction_rules()){
+		LogDebug("Removing all auction rules ");
+		return true;
+	} else {
+	
+	}
 }
 
 

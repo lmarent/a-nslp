@@ -134,6 +134,10 @@ class auction_rule_installer {
 
 	virtual bool remove_all() = 0;
 	
+	bool get_install_auction_rules(){ return config->get_install_auction_rules(); }
+	
+	bool is_auctioneer(){ return config->is_auctioneer(); }
+	
 	std::string get_auctioning_application(){ return config->get_auctioning_application(); }
 
 	std::string get_auctioning_application() const { return config->get_auctioning_application(); }

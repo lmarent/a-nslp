@@ -75,7 +75,7 @@ anslp_config::registerAllPars()
   registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_user, "as-auctioneer-user", "auctioneer application user", true, "admin") );
   registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_password, "as-auctioneer-password", "auctioneer user password", true, "admin") );  
   registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_server, "as-auctioneer-server", "auctioneer http server", true, "localhost") );
-  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_def_xsl, "as-auctioneer-def-xsl", "auctioneer results decoding", true, DEF_SYSCONFDIR "reply2.xsl") );
+  registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_def_xsl, "as-auctioneer-def-xsl", "auctioneer results decoding", true, DEF_SYSCONFDIR "/reply2.xsl") );
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_auctioneer_port, "as-auctioneer-port", "auctioneer port", true, 12244) );
 
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_ni_session_lifetime, "ni-session-lifetime", "NI session lifetime in seconds", true, 30, "s") );

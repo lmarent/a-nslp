@@ -191,15 +191,15 @@ void nf_session::set_auction_rule(dispatcher *d,
 	assert( create != NULL );
 	create->get_mspec_objects(objects);
 	
-	LogDebug( "Nbr objects to check:" << objects.size());
+	LogDebug( "Nbr objects to check:" << objects.size() 
+			   << "sel auct entities:" << create->get_selection_auctioning_entities() );
 	
 	// Check which metering object could be installed in this node.
 	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
 	for ( it_objects = objects.begin(); it_objects != objects.end(); it_objects++)
 	{
 		const anslp_mspec_object *object = *it_objects;
-		if (check_participating(
-			   create->get_selection_auctioning_entities()))
+		if (check_participating( create->get_selection_auctioning_entities()))
 		{
 			try 
 			{

@@ -457,6 +457,12 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
     xmlLoadExtDtdDefaultValue = 1;
     cur = xsltParseStylesheetFile((const xmlChar *)stylesheet.c_str());
 
+	if (cur == NULL){
+		throw auction_rule_installer_error("Error opening the xls",
+			msg::information_code::sc_signaling_session_failures,
+			msg::information_code::sigfail_auction_connection_broken);
+	}
+
 #ifdef USE_SSL
     use_ssl = 1;
     curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");

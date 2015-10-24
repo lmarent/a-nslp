@@ -372,7 +372,7 @@ bool dispatcher::check(const string session_id, const msg::anslp_mspec_object *o
 		
 	assert( rule_installer != NULL );
 	
-	if (config->is_auctioneer())
+	if (config->get_install_auction_rules())
 	{	
 		if ( object != NULL )
 			LogDebug("Checking mspec object " << *object);

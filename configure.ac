@@ -162,16 +162,22 @@ AC_ARG_WITH(pkgconfigdir,
 	[pkgconfigdir='${exec_prefix}/lib/pkgconfig'])
 
 AC_SUBST([pkgconfigdir])
+AC_SUBST(DEF_SYSCONFDIR)
+AC_SUBST(DEF_STATEDIR)
+AC_SUBST(DEF_LIBDIR)
+AC_SUBST(DEF_BINDIR)
+
+
 AC_MSG_NOTICE([pkgconfig directory is ${pkgconfigdir}])
 
 AC_CONFIG_FILES([Makefile
                  libanslp-0.0.pc
                  libanslp_msg-0.0.pc
                  etc/Makefile
+                 etc/nsis.ka.conf
                  src/msg/Makefile
                  src/Makefile
                  test/Makefile
                  test_main/Makefile])
-
 
 AC_OUTPUT

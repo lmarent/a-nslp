@@ -204,6 +204,8 @@ void nf_session::set_auction_rule(dispatcher *d,
 			try 
 			{
 				session_id = get_id().to_string();
+
+				LogDebug( "Checking element:" );
 				
 				if (d->check(session_id, object)) {
 				   rule->set_request_object(object->copy());

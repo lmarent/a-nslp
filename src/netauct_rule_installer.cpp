@@ -571,6 +571,13 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
       
        doc = xmlParseMemory(response.c_str(), response.length());
        out = xsltApplyStylesheet(cur, doc, NULL);
+       
+       if (out == NULL){
+			throw auction_rule_installer_error("RESULT output could not be transformed",
+			msg::information_code::sc_signaling_session_failures,
+			msg::information_code::sigfail_auction_connection_broken);
+	   }
+	   
        xsltSaveResultToString(&output, &len, out, cur);         
        string strReturn (reinterpret_cast<char*>(output));
        response = strReturn;

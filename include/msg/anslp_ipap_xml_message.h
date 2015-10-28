@@ -91,7 +91,6 @@ private:
 						string elementName);
 	
 	void writeElement(xmlTextWriterPtr &writer, string elementName);
-
     
     void XMLParserValidate(string dtdname, const char *buf, int len, string root);
 	

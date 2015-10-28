@@ -60,6 +60,10 @@ void anslp_ipap_message_splitter::split( const anslp_ipap_message &message )
 
     for ( iter = (message.ip_message).begin(); iter != (message.ip_message).end(); iter++)
 	{
+
+#ifdef DEBUG
+		log->dlog(ch, "data record to split");
+#endif
 		
 		ipap_data_record g_data = *iter;
 		templid = g_data.get_template_id();

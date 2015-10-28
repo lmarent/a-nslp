@@ -48,7 +48,7 @@ namespace ntlp {
 gistconf gconf;
 }
 
-anslp_config conf;
+anslp_config * conf;
 
 using namespace ntlp;
 
@@ -72,7 +72,7 @@ void parse_commandline(int argc, char *argv[]) {
 
 		switch ( c ) {
 			case 'c':
-				conf.getparref<string>(anslpconf_conffilename) = optarg;
+				conf->getparref<string>(anslpconf_conffilename) = optarg;
 				break;
 			default:
 				std::cerr << usage;
@@ -80,7 +80,7 @@ void parse_commandline(int argc, char *argv[]) {
 		}
 	}
 
-	if ( conf.getparref<string>(anslpconf_conffilename) == "" ) {
+	if ( conf->getparref<string>(anslpconf_conffilename) == "" ) {
 		std::cerr << usage;
 		exit(1);
 	}
@@ -100,14 +100,20 @@ void parse_commandline(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 	
+	conf = new anslp_config();
+	
 	// create the global configuration parameter repository 
-	conf.repository_init();
+	conf->repository_init();
 
-	// register all MNSLP configuration parameters at the registry
-	conf.setRepository();
+	// register all A-NSLP configuration parameters at the registry
+	conf->setRepository();
 
 	// register all GIST configuration parameters at the registry
 	ntlp::gconf.setRepository();
+
+
+	// read all config values from config file
+	configfile cfgfile(configpar_repository::instance());
 
 	/*
 	 * Initialize protlib, openssl, etc.
@@ -115,11 +121,10 @@ int main(int argc, char *argv[]) {
 	parse_commandline(argc, argv);
 	init_framework();
 
-	// read all config values from config file
-	configfile cfgfile(configpar_repository::instance());
+	cout << "configuration file:" << conf->getparref<string>(anslpconf_conffilename) << endl;
 
 	try {
-		cfgfile.load(conf.getparref<string>(anslpconf_conffilename));
+		cfgfile.load(conf->getparref<string>(anslpconf_conffilename));
 	}
 	catch(configParException& cfgerr)
 	{
@@ -132,9 +137,9 @@ int main(int argc, char *argv[]) {
 	 * Start the A-NSLP daemon thread. It will in turn start the other
 	 * threads it requires.
 	 */
-	anslp_daemon_param param("anslp", conf);
+	anslp_daemon_param param("anslp", *conf);
 	ThreadStarter<anslp_daemon, anslp_daemon_param> anslp_thread(
-		conf.get_num_dispatcher_threads(), param);
+		conf->get_num_dispatcher_threads(), param);
 	
 	anslp_thread.start_processing();
 
@@ -144,6 +149,10 @@ int main(int argc, char *argv[]) {
 	/*
 	 * Free all resources.
 	 */
+	 
+	if (conf)
+		delete conf;
+		
 	cleanup_framework();
 }
 

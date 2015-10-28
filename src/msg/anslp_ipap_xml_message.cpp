@@ -587,32 +587,33 @@ void
 anslp_ipap_xml_message::writeTemplate(xmlTextWriterPtr &writer, 
 											ipap_template *templ)
 {
+	
 	char *buff = (char *) malloc(sizeof(char) * 50);
-	 
+		 
 	sprintf(buff, "%u", templ->get_template_id());
 	createElement(writer, "TEMPLATE", buff);
-	
+		
 	sprintf(buff, "%u", templ->get_type());
 	writeAttribute(writer, "TYPE",	buff);
-	
+		
 	int numFields = templ->get_numfields();
 	
 	sprintf(buff, "%u", templ->get_numfields());
 	writeAttribute(writer, "NUM_FIELDS", buff);
-	
+		
 	for (int i = 0; i < numFields; ++i )
 	{
 		ipap_field field = (templ->get_field(i)).elem;
 		ipap_field_type_t type = field.get_field_type();
-		
+			
 		createElement(writer, "TFIELD");
-	
+		
 		sprintf(buff, "%d", type.eno);
 		writeAttribute(writer, "ENO", buff);		
 
 		sprintf(buff, "%d", type.ftype);
 		writeAttribute(writer, "FTYPE", buff);
-		
+			
 		sprintf(buff, "%d", type.coding);
 		writeAttribute(writer, "CODING", buff);
 
@@ -622,7 +623,6 @@ anslp_ipap_xml_message::writeTemplate(xmlTextWriterPtr &writer,
 		writeAttribute(writer, "XML_NAME",	type.xml_name);
 
 		writeFieldValue(writer, type.name);
-
 		closeElement(writer);
 
 	}
@@ -756,7 +756,6 @@ anslp_ipap_xml_message::writeNotRelatedTemplates(xmlTextWriterPtr &writer)
 	log->dlog(ch, "Starting writeNotRelatedTemplates");
 #endif
 
-	
 	std::list<int> intList = templates.get_template_list();
 	std::list<int>::iterator tmplIter;
 	for (tmplIter = intList.begin(); tmplIter != intList.end(); ++tmplIter){
@@ -805,7 +804,11 @@ anslp_ipap_xml_message::get_message(const anslp_ipap_message &mes)
 		// Write the Seq_no
 		sprintf(buff,"%lu", (unsigned long) (mes.ip_message).get_seqno());
 		writeAttribute(writer, "SEQ_NO", buff);
-		
+
+		// Write the Ack_Seq_no
+		sprintf(buff,"%lu", (unsigned long) (mes.ip_message).get_ackseqno());
+		writeAttribute(writer, "ACK_SEQ_NO", buff);
+
 		// Copy templates no related with data record.
 		writeNotRelatedTemplates(writer);
 
@@ -955,7 +958,7 @@ anslp_ipap_xml_message::from_message(const string str)
 	anslp_ipap_message *message = NULL;
 	uint16_t lastTemplId;
 	int domainId, version; 
-	uint32_t exportTime, seqNo;
+	uint32_t exportTime, seqNo, ackseqNo;
 	
 	try{
 
@@ -988,12 +991,17 @@ anslp_ipap_xml_message::from_message(const string str)
 				string sseqNo = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"SEQ_NO"));
 				seqNo = atoi(sseqNo.c_str());
 				
+				string sackseqNo = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ACK_SEQ_NO"));
+				ackseqNo = atoi(sackseqNo.c_str());
+				
+				
 			}
 			cur = cur->next;
 		}
 
 		message = new anslp_ipap_message(domainId, version); 		
 		(message->ip_message).set_seqno(seqNo);
+		(message->ip_message).set_ackseqno(ackseqNo);
 		(message->ip_message).set_exporttime(exportTime);
 		
 		
@@ -1025,7 +1033,7 @@ anslp_ipap_xml_message::from_message(const string str)
 					cur2 = cur->xmlChildrenNode;
 					ReadTemplateFields(cur2, uid, fields);
 					
-					cout << "We are going to read a template with type:" << itype << endl;
+					cout << "We are going to read template:" << uid << " with type:" << itype << endl;
 					(message->ip_message).make_template(fields, inumFields, (ipap_templ_type_t) itype , uid);
 					
 					

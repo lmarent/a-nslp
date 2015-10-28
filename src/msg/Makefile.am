@@ -45,6 +45,7 @@ libanslp_msg_la_SOURCES = ie_object_key.cpp \
 						  anslp_notify.cpp \
 						  anslp_refresh.cpp \
 					      anslp_response.cpp \
+					      anslp_bidding.cpp \
 					      anslp_mspec_object.cpp 
 
 
@@ -62,6 +63,7 @@ pkginclude_HEADERS   = 	$(INC_DIR)/anslp_create.h \
 						$(INC_DIR)/anslp_object.h \
 						$(INC_DIR)/anslp_refresh.h \
 						$(INC_DIR)/anslp_response.h \
+						$(INC_DIR)/anslp_bidding.h \
 						$(INC_DIR)/ie_object_key.h \
 						$(INC_DIR)/ie_store.h \
 						$(INC_DIR)/information_code.h \

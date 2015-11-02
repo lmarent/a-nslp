@@ -193,6 +193,7 @@ class msg_event : public event {
 	anslp_msg *get_anslp_msg() const;
 	anslp_response *get_response() const;
 	anslp_create *get_create() const;
+	anslp_bidding *get_bidding() const;
 	anslp_refresh *get_refresh() const;
 	anslp_notify *get_notify() const;
 	
@@ -230,6 +231,11 @@ inline anslp_response *msg_event::get_response() const {
 inline anslp_create *msg_event::get_create() const {
 	assert( msg != NULL );
 	return dynamic_cast<anslp_create *>(msg->get_anslp_msg());
+}
+
+inline anslp_bidding *msg_event::get_bidding() const {
+	assert( msg != NULL );
+	return dynamic_cast<anslp_bidding *>(msg->get_anslp_msg());
 }
 
 inline anslp_refresh *msg_event::get_refresh() const {
@@ -441,6 +447,55 @@ class api_notify_event : public api_event {
 	FastQueue *return_queue;
 };
 
+/**
+ * An API request to send a Bidding Message.
+ *
+ * Conditions: 
+ */
+class api_bidding_event : public api_event {
+	
+  public:
+  
+	api_bidding_event(session_id sid, const hostaddress &source, const hostaddress &dest,
+					  uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0, 
+					  std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(),
+					  FastQueue *rq=NULL) : 
+		  api_event(), sid(sid), source_addr(source), dest_addr(dest),source_port(source_port), 
+		  dest_port(dest_port), protocol(protocol), mspec_objects(mspec_objects), return_queue(rq) { }
+
+	virtual ~api_bidding_event() { }
+
+	inline session_id get_session_id() const { return sid; }
+
+	inline hostaddress get_source_address() const { return source_addr; }
+	inline uint16 get_source_port() const { return source_port; }
+
+	inline hostaddress get_destination_address() const { return dest_addr; }
+	inline uint16 get_destination_port() const { return dest_port; }
+
+	inline uint8 get_protocol() const { return protocol; }
+
+	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
+		return mspec_objects; }
+		
+	inline FastQueue *get_return_queue() const { return return_queue; }
+
+	virtual ostream &print(ostream &out) const {
+		return out << "[api_bidding_event]"; }
+
+  private:
+  
+	session_id sid;
+	hostaddress source_addr;
+	hostaddress dest_addr;
+	uint16 source_port;
+	uint16 dest_port;
+	uint8 protocol;
+	std::vector<msg::anslp_mspec_object *> mspec_objects;
+	
+	FastQueue *return_queue;
+};
+
 
 /**
  * An API request to send a Response Message.
@@ -544,6 +599,11 @@ inline bool is_api_create(const event *evt)
 	return dynamic_cast<const api_create_event *>(evt) != NULL;
 }
 
+inline bool is_api_bidding(const event *evt) 
+{
+	return dynamic_cast<const api_bidding_event *>(evt) != NULL;
+}
+
 inline bool is_api_refresh(const event *evt) 
 {
 	return dynamic_cast<const api_refresh_event *>(evt) != NULL;
@@ -579,6 +639,7 @@ inline bool is_no_next_node_found_event(const event *evt)
 	return dynamic_cast<const no_next_node_found_event *>(evt) != NULL;
 }
 
+
 inline bool is_anslp_create(const event *evt) 
 {
 	const msg_event *e = dynamic_cast<const msg_event *>(evt);
@@ -587,6 +648,16 @@ inline bool is_anslp_create(const event *evt)
 		return false;
 	else
 		return e->get_create() != NULL;
+}
+
+inline bool is_anslp_bidding(const event *evt) 
+{
+	const msg_event *e = dynamic_cast<const msg_event *>(evt);
+
+	if ( e == NULL )
+		return false;
+	else
+		return e->get_bidding() != NULL;
 }
 
 inline bool is_anlsp_response(const event *evt) 

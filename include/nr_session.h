@@ -125,7 +125,7 @@ class nr_session : public session {
 	
 	auction_rule *get_auction_rule_copy() const;
 	
-	
+	auction_rule * create_auction_rule(anslp_bidding *bidding);
 };
 
 std::ostream &operator<<(std::ostream &out, const nr_session &s);

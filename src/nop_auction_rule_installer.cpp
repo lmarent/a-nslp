@@ -101,7 +101,7 @@ nop_auction_rule_installer::create(const string sessionId, const auction_rule *r
 		for ( i = rule_return->get_request_objects()->begin(); 
 					i != rule_return->get_request_objects()->end(); i++)
 		{
-			rule_return->set_response_object(i->second);
+			rule_return->set_response_object((i->second)->copy());
 		}
 	}
 	else{
@@ -126,7 +126,7 @@ nop_auction_rule_installer::put_response(const string sessionId, const auction_r
 		for ( i = rule_return->get_request_objects()->begin(); 
 					i != rule_return->get_request_objects()->end(); i++)
 		{
-			rule_return->set_response_object(i->second);
+			rule_return->set_response_object((i->second)->copy());
 		}
 	}
 	else{
@@ -161,8 +161,27 @@ bool nop_auction_rule_installer::remove_all()
 }
 
 auction_rule * 
-nop_auction_rule_installer::auction_interaction(const auction_rule *mt_object)
+nop_auction_rule_installer::auction_interaction(const string sessionId, const auction_rule *rule)
 {
+
+	LogDebug("NOP: auction interaction " << *rule);
+	auction_rule *rule_return;
+	
+	if ( rule != NULL ){
+		rule_return = rule->copy(); 
+		
+		objectListConstIter_t i;
+		for ( i = rule_return->get_request_objects()->begin(); 
+					i != rule_return->get_request_objects()->end(); i++)
+		{
+			rule_return->set_response_object((i->second)->copy());
+		}
+	}
+	else{
+		rule_return = NULL;
+	}	
+	
+	return rule_return;
 
 }
 

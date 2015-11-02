@@ -111,11 +111,11 @@ private:
 	void writeTemplate(xmlTextWriterPtr &writer, ipap_template *templ);
 	
 	void writeTemplates(xmlTextWriterPtr &writer,
-						ipap_xml_object_type_t object_type,
+						ipap_object_type_t object_type,
 						map<xml_object_key, xml_object_key> &keys);
 					
 	void writeRecords(xmlTextWriterPtr &writer, 
-					  ipap_xml_object_type_t object_type,
+					  ipap_object_type_t object_type,
 					  map<xml_object_key, xml_object_key> &keys);
 	
 	void writeFieldValue(xmlTextWriterPtr &writer, string value);
@@ -130,7 +130,7 @@ private:
 						string elementName);
 
 	void writeObjectTypeData(xmlTextWriterPtr &writer, 
-							 ipap_xml_object_type_t object_type);
+							 ipap_object_type_t object_type);
 
 	void writeNotRelatedTemplates(xmlTextWriterPtr &writer);
 		

@@ -66,6 +66,8 @@ class ResponderTest : public CppUnit::TestCase {
 	
 	msg::ntlp_msg *create_anslp_refresh(uint32 msn, uint32 lt) const;
 
+	msg::ntlp_msg *create_anslp_bidding(uint32 msn=START_MSN) const;
+
 	mock_anslp_config *conf;
 	nop_auction_rule_installer *auction_installer;
 	mock_dispatcher *d;
@@ -208,6 +210,24 @@ ResponderTest::create_anslp_refresh(uint32 msn, uint32 lt) const {
 	return msg;
 }
 
+msg::ntlp_msg *
+ResponderTest::create_anslp_bidding(uint32 msn) const 
+{
+
+	msg::anslp_bidding *bidding = new anslp_bidding();
+	bidding->set_msg_sequence_number(msn);
+	bidding->set_mspec_object(mess1->copy());
+	bidding->set_mspec_object(mess2->copy());
+	bidding->set_mspec_object(mess3->copy());
+	
+	ntlp::mri *ntlp_mri = new ntlp::mri_pathcoupled(
+		hostaddress("192.168.0.4"), 32, 0,
+		hostaddress("192.168.0.5"), 32, 0,
+		"tcp", 0, 0, 0, true
+	);
+
+	return new msg::ntlp_msg(session_id(), bidding, ntlp_mri, 0);
+}
 
 void 
 ResponderTest::testClose() {
@@ -238,6 +258,18 @@ ResponderTest::testClose() {
 	ASSERT_RESPONSE_MESSAGE_SENT(d,
 		information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
+
+	/*
+	 * CLOSE ---[rx_BIDDING ]---> CLOSE
+	 */
+	nr_session_test s3(nr_session::STATE_ANSLP_CLOSE);
+	event *e3 = new msg_event(NULL,
+		create_anslp_bidding(START_MSN+1), true);
+	
+	process(s3, e3);
+	ASSERT_STATE(s3, nr_session::STATE_ANSLP_CLOSE);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
 	
 }
 
@@ -293,6 +325,18 @@ ResponderTest::testAuctioning() {
 	ASSERT_STATE(s4, nr_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
+	
+	/*
+	 * STATE_AUCTIONING_PART ---[rx_BIDDING ]---> STATE_AUCTIONING_PART
+	 */
+	nr_session_test s5(nr_session::STATE_ANSLP_AUCTIONING, START_MSN);
+	event *e5 = new msg_event(NULL, create_anslp_bidding(START_MSN + 1), true);
+
+	process(s5, e5);
+	ASSERT_STATE(s5, nr_session::STATE_ANSLP_AUCTIONING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+		
 }
 
 void 

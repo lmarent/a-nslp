@@ -38,6 +38,11 @@ class mock_auction_rule_installer;
     ( d->get_message() != NULL && dynamic_cast<anslp::msg::anslp_notify *>( \
 	d->get_message()->get_anslp_msg()) != NULL ) )
 
+#define ASSERT_BIDDING_MESSAGE_SENT(d) \
+  CPPUNIT_ASSERT_MESSAGE("no bidding message sent", \
+    ( d->get_message() != NULL && dynamic_cast<anslp::msg::anslp_bidding *>( \
+	d->get_message()->get_anslp_msg()) != NULL ) )
+
 #define ASSERT_REFRESH_MESSAGE_SENT(d) \
   CPPUNIT_ASSERT_MESSAGE("no refresh message sent", \
     ( d->get_message() != NULL && dynamic_cast<anslp::msg::anslp_refresh *>( \

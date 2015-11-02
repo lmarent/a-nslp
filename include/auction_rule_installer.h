@@ -130,7 +130,7 @@ class auction_rule_installer {
 	 *
 	 * After calling this method two nodes have exchanged a ipap_message. 
 	 */
-	virtual auction_rule * auction_interaction(const auction_rule *mt_object) = 0;
+	virtual auction_rule * auction_interaction(const string sessionId, const auction_rule *mt_object) = 0;
 
 	virtual bool remove_all() = 0;
 	

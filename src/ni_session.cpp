@@ -185,6 +185,64 @@ msg::ntlp_msg *ni_session::build_create_message(api_create_event *e,
 	return msg;
 }
 
+/**
+ * Build a A-NSLP bidding message based the api bidding event.
+ *  This function makes a deep copy of the mspec_objects. So the session
+ *  object can destroy them.
+ *
+ */
+msg::ntlp_msg *ni_session::build_bidding_message(api_bidding_event *e ) 
+{
+	using namespace anslp::msg;
+
+	/*
+	 * Create the message routing information (MRI) which we're going to
+	 * use for all messages.
+	 */
+	uint8 src_prefix = 32;
+	uint8 dest_prefix = 32;
+	uint16 flow_label = 0;
+	uint16 traffic_class = 0;		// DiffServ CodePoint
+	uint32 ipsec_spi = 0;			// IPsec SPI
+	bool downstream = true;
+
+	ntlp::mri *nslp_mri = new ntlp::mri_pathcoupled(
+		e->get_source_address(), src_prefix,
+		e->get_source_port(),
+		e->get_destination_address(), dest_prefix,
+		e->get_destination_port(),
+		e->get_protocol(), flow_label, traffic_class, ipsec_spi,
+		downstream
+	);
+
+
+	/*
+	 * Build a A-NSLP bidding message.
+	 */
+	anslp_bidding *bidding = new anslp_bidding();
+		
+	bidding->set_msg_sequence_number(next_msg_sequence_number());
+
+	// Set the objects to install.
+	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
+	for ( it_objects = e->get_auctioning_objects().begin(); 
+			it_objects != e->get_auctioning_objects().end(); it_objects++)
+	{
+		anslp_mspec_object *object = *it_objects;
+		bidding->set_mspec_object(object->copy());
+	}
+	
+
+	/*
+	 * Wrap the bidding inside an ntlp_msg and add session ID and MRI.
+	 */
+	ntlp_msg *msg = new ntlp_msg(get_id(), bidding, nslp_mri->copy(), 0);
+	
+	saveDelete(nslp_mri);
+	
+	return msg;
+}
+
 
 /**
  * Build a A-NSLP Refresh message based on the session's state.
@@ -267,6 +325,7 @@ ni_session::setup_session(dispatcher *d, api_create_event *e,
 	LogDebug("using response timeout: " << t << " seconds");
 
 }
+
 
 /****************************************************************************
  *
@@ -514,7 +573,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 
 	using namespace anslp::msg;
 	
-	LogDebug("Initiating state metering");
+	LogDebug("Initiating state auctioning");
 	string session_id;
 	
 	/*
@@ -587,6 +646,29 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		d->send_message( build_refresh_message() );
 		LogDebug("Ending state metering - api teardown");
 		return STATE_ANSLP_CLOSE;
+	}
+	/*
+	 * API bidding event received. The user wants to send an object to the auction server.
+	 */
+	else if ( is_api_bidding(evt) ) {
+		LogDebug("received API bidding event");
+				
+		api_bidding_event *e = dynamic_cast<api_bidding_event *>(evt);
+		
+		// Build the bidding message based on those objects not installed.
+		d->send_message( build_bidding_message(e) );
+		
+		// Send the response saying that an event was processed for the
+		// session id.
+		if ( e->get_return_queue() != NULL ) {
+			message *m = new anslp_event_msg(get_id(), NULL);
+			e->get_return_queue()->enqueue(m);
+		}
+		
+		LogDebug("Ending state handle_state_auctioning - bidding event ");
+		
+		return STATE_ANSLP_AUCTIONING; // no change
+		
 	}
 	/*
 	 * Outdated timer event, discard and don't log.

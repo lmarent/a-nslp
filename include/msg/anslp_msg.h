@@ -128,6 +128,7 @@ class anslp_msg : public IE {
  * Include all known messages for convenience.
  */
 #include "anslp_create.h"
+#include "anslp_bidding.h"
 #include "anslp_refresh.h"
 #include "anslp_notify.h"
 

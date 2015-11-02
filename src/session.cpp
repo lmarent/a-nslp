@@ -252,3 +252,5 @@ appladdress session::get_nr_address(msg_event *e) const {
 	 */
 	throw request_error("unknown MRM: " + int(e->get_mri()->get_mrm()));
 }
+
+

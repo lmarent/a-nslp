@@ -149,7 +149,7 @@ class session {
 	void set_request_mspec_object(msg::anslp_mspec_object *object);
 	
 	size_t get_number_mspec_request_objects();
-	
+		
   protected:
   
 	session();

@@ -248,7 +248,7 @@ netauct_rule_installer::create(const string sessionId, const auction_rule *rule)
 			for ( i = rule_return->get_request_objects()->begin(); 
 						i != rule_return->get_request_objects()->end(); i++)
 			{
-				rule_return->set_response_object(i->second);
+				rule_return->set_response_object((i->second)->copy());
 			}
 		}
 		else{
@@ -360,8 +360,64 @@ bool netauct_rule_installer::remove_all()
 
 
 auction_rule * 
-netauct_rule_installer::auction_interaction(const auction_rule *mt_object)
+netauct_rule_installer::auction_interaction(const string sessionId, const auction_rule *rule)
 {
+
+	LogDebug("Creating auction interaction " << *rule);
+	
+	if (get_install_auction_rules()){
+	
+		string response;
+		string action = "/auct_interact";
+		
+		auction_rule *auc_return = new auction_rule(*rule);
+		objectListConstIter_t i;
+		objectList_t * requestObjectList = auc_return->get_request_objects();
+		
+		LogDebug("Nbr objects to post: " << requestObjectList->size());
+		
+		// Loop through the objects and install them.
+		for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+			
+			LogDebug("Posting object");
+			
+			msg::anslp_ipap_xml_message mess;
+			string postfield = mess.get_message( *(get_ipap_message(i->second)) );
+			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
+			response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
+					
+			if (!responseOk(response)){
+				throw auction_rule_installer_error(response,
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);
+
+			} else {
+				string responseMsg = getMessage(response);
+				msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
+				(ipap_response->ip_message).output();
+				auc_return->set_response_object(ipap_response);
+			}
+		}	
+		
+		LogDebug("Finishing, nbr objects posted:" << auc_return->get_response_objects());
+	
+		return auc_return;
+	} else {
+
+		LogDebug("Generates errors as objects should be posted" << *rule);
+		auction_rule *rule_return;
+		
+		if ( rule != NULL ){
+			rule_return = rule->copy(); 
+			
+		}
+		else{
+			rule_return = NULL;
+		}	
+		
+		return rule_return;
+	
+	}
 
 }
 

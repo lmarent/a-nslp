@@ -163,6 +163,8 @@ class nf_session : public session {
 						 msg_event *evt,
 						 std::vector<msg::anslp_mspec_object *> &missing_objects);
 
+	auction_rule * create_auction_rule(anslp_bidding *bidding);
+
 	friend std::ostream &operator<<(std::ostream &out, const nf_session &s);
 };
 

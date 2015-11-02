@@ -227,6 +227,42 @@ void nf_session::set_auction_rule(dispatcher *d,
 }
 
 
+/**
+ * Create an auctioning rule from the given event and return it.
+ *
+ */
+auction_rule * 
+nf_session::create_auction_rule(anslp_bidding *bidding) 
+{
+	
+	LogDebug( "Begin create_auction_rule()");
+	string session_id;
+
+	assert( bidding != NULL );
+	
+	auction_rule *to_post = new auction_rule();
+	
+	std::vector<msg::anslp_mspec_object *> objects;
+
+	bidding->get_mspec_objects(objects);
+	
+	LogDebug( "Nbr objects to check:" << objects.size() );
+	
+	// Check which metering object could be installed in this node.
+	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
+	for ( it_objects = objects.begin(); it_objects != objects.end(); it_objects++)
+	{
+		const anslp_mspec_object *object = *it_objects;
+		to_post->set_request_object(object->copy());
+	}
+	
+	LogDebug("End create_auction_rule - objects inserted:" 
+					<< to_post->get_request_objects()->size());
+	
+	return to_post;
+}
+
+
 // For implementation of auctioning interface.
 
 
@@ -531,7 +567,7 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 	}
 
 	/*
-	 * A msg_event arrived which contains a ANSLP RESPONSE message.
+	 * A msg_event arrived which contains a A-NSLP RESPONSE message.
 	 */
 	else if ( is_anslp_response(evt, get_last_create_message()) ) {
 		msg_event *e = dynamic_cast<msg_event *>(evt);
@@ -650,7 +686,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 	LogDebug("Begining handle_STATE_ANSLP_AUCTIONING(): " << *this);
   
 	/*
-	 * A msg_event arrived which contains a MNSLP REFRESH message.
+	 * A msg_event arrived which contains a A-NSLP REFRESH message.
 	 */
 	if ( is_anslp_refresh(evt) ) 
 	{
@@ -720,6 +756,48 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 		}
 	}
+
+	/*
+	 * API bidding event received. The user wants to send an object to the auction server.
+	 */
+	else if ( is_anslp_bidding(evt) ) {
+		LogDebug("received API bidding event");
+
+		msg_event *e = dynamic_cast<msg_event *>(evt);
+		ntlp_msg *msg = e->get_ntlp_msg();
+		anslp_bidding *bidding = e->get_bidding();
+						
+		if (e->is_for_this_node()) {
+			// The message is for us, so we send it to the install policy
+			// This messages are without any response. 
+			// As it is implemented, we delegate the upper layer to retry to send them again.
+
+			session_id = get_id().to_string();
+			
+			std::vector<msg::anslp_mspec_object *> missing_objects;
+			
+			auction_rule * to_post = create_auction_rule(bidding);
+			
+			auction_rule * result = d->auction_interaction(session_id, to_post);
+			
+			saveDelete(to_post);
+			
+			saveDelete(result);
+			
+			
+		} else { // Not for this node, continue sending the message towards the following node.
+			
+			// Build the bidding message based on those objects not installed.
+			d->send_message( create_msg_for_nr(msg) );
+		
+		}
+
+		LogDebug("Ending state handle_state_auctioning - bidding event ");
+		
+		return STATE_ANSLP_AUCTIONING; // no change
+			
+	}
+
 	
 	/*
 	 * Downstream peer didn't respond.

@@ -156,9 +156,7 @@ void InitiatorTest::process(ni_session_test &s, event *evt) {
 
 void InitiatorTest::setUp() 
 {
-	
-	cout << "Start Setup" << endl;
-	
+		
 	conf = new mock_anslp_config();
 	auction_installer = new nop_auction_rule_installer(conf);
 	d = new mock_dispatcher(NULL, auction_installer, conf);
@@ -174,13 +172,10 @@ void InitiatorTest::setUp()
 	add_fields(mess2);
 	add_fields(mess3);
 
-	cout << "Ending Setup" << endl;
-
 }
 
 void InitiatorTest::tearDown() 
 {
-	cout << "Start Initiator tearDown" << endl;
 	
 	if (d != NULL){
 		delete d;
@@ -201,7 +196,6 @@ void InitiatorTest::tearDown()
 	delete mess2;
 	delete mess3;
 	
-	cout << "Ending Initiator tearDown" << endl;
 }
 
 
@@ -280,6 +274,24 @@ void InitiatorTest::testClose()
 	ASSERT_STATE(s2, ni_session::STATE_ANSLP_PENDING);
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s2.get_response_timer());
+
+
+	ni_session_test s3(ni_session::STATE_ANSLP_CLOSE);
+
+	vector<msg::anslp_mspec_object *> mspec_objects2;
+	mspec_objects2.push_back(mess1->copy());
+	mspec_objects2.push_back(mess2->copy());
+	mspec_objects2.push_back(mess3->copy());
+		
+	event *e3 = new api_bidding_event(s3.get_id(), source,destination,(protlib::uint16) 0, 
+									 (protlib::uint16) 0, (protlib::uint8) 0,
+									  mspec_objects2, NULL);
+	
+	process(s3, e3);
+	ASSERT_STATE(s3, ni_session::STATE_ANSLP_CLOSE);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+
 	
 }
 
@@ -379,7 +391,30 @@ void InitiatorTest::testPending()
 	ASSERT_STATE(s6, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
-	
+
+
+	/*
+	 * STATE_ANSLP_PENDING ---[tg_BIDDING]---> STATE_ANSLP_PENDING
+	 */
+	ni_session_test s7(ni_session::STATE_ANSLP_PENDING);
+	s7.set_last_create_message(create_anslp_create());
+
+	vector<msg::anslp_mspec_object *> mspec_objects2;
+	mspec_objects2.push_back(mess1->copy());
+	mspec_objects2.push_back(mess2->copy());
+	mspec_objects2.push_back(mess3->copy());
+		
+	event *e7 = new api_bidding_event(s7.get_id(), source,destination,(protlib::uint16) 0, 
+									 (protlib::uint16) 0, (protlib::uint8) 0,
+									  mspec_objects2, NULL);
+
+
+	process(s7, e7);
+		
+	ASSERT_STATE(s7, ni_session::STATE_ANSLP_PENDING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+
 }
 
 void InitiatorTest::testAuctioning() 
@@ -475,7 +510,28 @@ void InitiatorTest::testAuctioning()
 	ASSERT_STATE(s6, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s6.get_response_timer());
-	
+
+
+	/*
+	 * STATE_ANSLP_AUCTIONING ---[tg_BIDDING]---> STATE_ANSLP_AUCTIONING
+	 */
+	ni_session_test s7(ni_session::STATE_ANSLP_AUCTIONING);
+	s7.set_last_refresh_message(create_anslp_refresh());
+
+	vector<msg::anslp_mspec_object *> mspec_objects2;
+	mspec_objects2.push_back(mess1->copy());
+	mspec_objects2.push_back(mess2->copy());
+	mspec_objects2.push_back(mess3->copy());
+		
+	event *e7 = new api_bidding_event(s7.get_id(), source,destination,(protlib::uint16) 0, 
+									 (protlib::uint16) 0, (protlib::uint8) 0,
+									  mspec_objects2, NULL);
+
+
+	process(s7, e7);
+	ASSERT_STATE(s7, ni_session::STATE_ANSLP_CLOSE);
+	ASSERT_BIDDING_MESSAGE_SENT(d);
+	ASSERT_NO_TIMER(d);	
 }
 
 void InitiatorTest::testIntegratedStateMachine()

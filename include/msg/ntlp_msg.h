@@ -75,6 +75,7 @@ class ntlp_msg {
 	ntlp_msg *create_success_response(uint32 session_lifetime) const;
 
 	inline anslp_create *get_anslp_create() const;
+	inline anslp_bidding *get_anslp_bidding() const;
 	inline anslp_refresh *get_anslp_refresh() const;
 	inline anslp_notify *get_anslp_notify() const;
 	inline anslp_response *get_anslp_response() const;
@@ -99,6 +100,11 @@ bool is_greater_than(uint32 s1, uint32 s2);
 inline anslp_create *ntlp_msg::get_anslp_create() const {
 	return dynamic_cast<anslp_create *>(get_anslp_msg());
 }
+
+inline anslp_bidding *ntlp_msg::get_anslp_bidding() const {
+	return dynamic_cast<anslp_bidding *>(get_anslp_msg());
+}
+
 
 inline anslp_notify *ntlp_msg::get_anslp_notify() const {
 	return dynamic_cast<anslp_notify *>(get_anslp_msg());

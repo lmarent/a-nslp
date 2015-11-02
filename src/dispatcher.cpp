@@ -122,7 +122,7 @@ void dispatcher::process(event *evt) throw () {
 	}
 	
 	/*
-	 * We received a MNSLP message that we couldn't parse. In this
+	 * We received a A-NSLP message that we couldn't parse. In this
 	 * case, we don't hand it down to the session state machines.
 	 * Instead, an error response message is sent back immediately.
 	 */
@@ -327,6 +327,25 @@ dispatcher::install_auction_rules(const string session_id, const auction_rule *a
 	return result;
 }
 
+
+/**
+ * Putting auction messages
+ */
+auction_rule * 
+dispatcher::auction_interaction(const string session_id, const auction_rule *act_rule)
+		throw (auction_rule_installer_error) {
+
+	assert( rule_installer != NULL );
+
+	if ( act_rule != NULL ){
+		LogDebug("auction interaction ANSLP policy rule " 
+					<< act_rule->get_number_mspec_request_objects());
+	}
+	
+	auction_rule * result = rule_installer->auction_interaction(session_id, act_rule);
+	
+	return result;
+}
 
 /**
  * Install the given policy rules.

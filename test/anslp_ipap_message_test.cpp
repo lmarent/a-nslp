@@ -219,8 +219,9 @@ void Anslp_IpAp_Message_Test::testExceptionAddTemplate()
 	
 	int nfields = 0;
 	CPPUNIT_ASSERT_THROW( (mes->ip_message).new_data_template( nfields, IPAP_SETID_AUCTION_TEMPLATE ),ipap_bad_argument);
-	CPPUNIT_ASSERT_THROW( (mes->ip_message).new_data_template( nfields, IPAP_SETID_BID_TEMPLATE ),ipap_bad_argument);
-	CPPUNIT_ASSERT_THROW( (mes->ip_message).new_data_template( nfields, IPAP_SETID_ALLOCATION_TEMPLATE ),ipap_bad_argument);
+	CPPUNIT_ASSERT_THROW( (mes->ip_message).new_data_template( nfields, IPAP_SETID_BID_OBJECT_TEMPLATE ),ipap_bad_argument);
+	CPPUNIT_ASSERT_THROW( (mes->ip_message).new_data_template( nfields, IPAP_SETID_ALLOC_OBJECT_TEMPLATE ),ipap_bad_argument);
+	CPPUNIT_ASSERT_THROW( (mes->ip_message).new_data_template( nfields, IPAP_SETID_ASK_OBJECT_TEMPLATE ),ipap_bad_argument);
 
 	uint16_t templateAuctionid = 0;
 	uint16_t templateBidid = 0;
@@ -267,7 +268,7 @@ void Anslp_IpAp_Message_Test::testExceptionAddTemplate()
 	a[2].length = 8;
 
 	uint16_t templid = 256;
-	CPPUNIT_ASSERT_THROW( (mes->ip_message).make_template(a, 4, IPAP_SETID_ALLOCATION_TEMPLATE, templid), 
+	CPPUNIT_ASSERT_THROW( (mes->ip_message).make_template(a, 4, IPAP_SETID_ALLOC_OBJECT_TEMPLATE, templid), 
 							ipap_bad_argument);
 
 #ifdef DEBUG

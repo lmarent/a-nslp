@@ -178,10 +178,11 @@ class ni_session : public session {
 												
 	msg::ntlp_msg *build_create_message(api_create_event *evt, 
 								  	    std::vector<msg::anslp_mspec_object *> & missing_objects);
+
+	msg::ntlp_msg *build_bidding_message(api_bidding_event *evt);
 										   
 	msg::ntlp_msg *build_refresh_message(); 
 	
-
 	uint32 create_random_number() const;
 	void inc_create_counter();
 	void inc_refresh_counter();

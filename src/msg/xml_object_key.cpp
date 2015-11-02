@@ -42,27 +42,11 @@ xml_object_key::xml_object_key():
 
 	
 /// Constructor of the field key
-xml_object_key::xml_object_key(ipap_xml_object_type_t _object_type, 
+xml_object_key::xml_object_key(ipap_object_type_t _object_type, 
 									string _id_object): 
 	object_type(_object_type), id_object(_id_object)
 {
-	switch (_object_type)
-	{
-		case IPAP_AUCTION:
-			relatedTemplateTypeList.push_back(IPAP_SETID_AUCTION_TEMPLATE);
-			relatedTemplateTypeList.push_back(IPAP_OPTNS_AUCTION_TEMPLATE);
-			break;
-		case IPAP_BID:
-			relatedTemplateTypeList.push_back(IPAP_SETID_BID_TEMPLATE);
-			relatedTemplateTypeList.push_back(IPAP_OPTNS_BID_TEMPLATE);
-			break;
-		case IPAP_ALLOCATION:
-			relatedTemplateTypeList.push_back(IPAP_SETID_ALLOCATION_TEMPLATE);
-			relatedTemplateTypeList.push_back(IPAP_OPTNS_ALLOCATION_TEMPLATE);
-			break;
-		default:
-			break;
-	}
+
 }
 
 xml_object_key& 
@@ -70,7 +54,6 @@ xml_object_key::operator= (const xml_object_key& param)
 {
 	object_type = param.object_type;
 	id_object = param.id_object;
-	relatedTemplateTypeList = param.relatedTemplateTypeList;
 	return *this;
 }
 

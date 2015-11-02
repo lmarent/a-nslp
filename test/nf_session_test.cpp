@@ -65,6 +65,8 @@ class ForwarderTest : public CppUnit::TestCase {
 	msg::ntlp_msg *create_anslp_create(uint32 msn=START_MSN,
 				uint32 session_lifetime=SESSION_LIFETIME) const;
 
+	msg::ntlp_msg *create_anslp_bidding(uint32 msn=START_MSN) const;
+
 	msg::ntlp_msg *create_anslp_response(
 		uint8 severity, uint8 response_code, uint16 msg_type,
 		uint32 msn=START_MSN) const;
@@ -196,6 +198,24 @@ ForwarderTest::create_anslp_create(uint32 msn, uint32 lt) const
 	return new msg::ntlp_msg(session_id(), create, ntlp_mri, 0);
 }
 
+msg::ntlp_msg *
+ForwarderTest::create_anslp_bidding(uint32 msn) const 
+{
+
+	msg::anslp_bidding *bidding = new anslp_bidding();
+	bidding->set_msg_sequence_number(msn);
+	bidding->set_mspec_object(mess1->copy());
+	bidding->set_mspec_object(mess2->copy());
+	bidding->set_mspec_object(mess3->copy());
+	
+	ntlp::mri *ntlp_mri = new ntlp::mri_pathcoupled(
+		hostaddress("192.168.0.4"), 32, 0,
+		hostaddress("192.168.0.5"), 32, 0,
+		"tcp", 0, 0, 0, true
+	);
+
+	return new msg::ntlp_msg(session_id(), bidding, ntlp_mri, 0);
+}
 
 msg::ntlp_msg *
 ForwarderTest::create_anslp_response(uint8 severity,
@@ -257,6 +277,20 @@ void ForwarderTest::testClose() {
 	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING);
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
+
+
+	/*
+	 * STATE_ANSLP_CLOSE ---[rx_BIDDING ]---> STATE_ANSLP_CLOSE
+	 */
+	nf_session_test s3(nf_session::STATE_ANSLP_CLOSE, conf);
+	event *e3 = new msg_event(new session_id(s3.get_id()),
+		create_anslp_bidding(START_MSN)); // more than allowed
+	
+	process(s3, e3);
+	ASSERT_STATE(s3, nf_session::STATE_ANSLP_CLOSE);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+
 	
 }
 
@@ -366,7 +400,36 @@ void ForwarderTest::testPending() {
 	ASSERT_STATE(s6, nf_session::STATE_ANSLP_CLOSE);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_permanent_failure);
 	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_PENDING ---[STATE_TIMEOUT]---> STATE_ANSLP_PENDING
+	 */
+	nf_session_test s7(nf_session::STATE_ANSLP_PENDING, conf);
+	s7.set_last_create_message(create_anslp_create());
+
+	event *e7 = new msg_event(new session_id(s7.get_id()),
+			create_anslp_bidding(START_MSN+1));
+
+	// We must to wait for a response successful response message. 
+	process(s7, e7);
+	ASSERT_STATE(s7, nf_session::STATE_ANSLP_PENDING);
+	ASSERT_NO_TIMER(d);
+
+	/*
+	 * STATE_ANSLP_PENDING ---[rx_BIDDING ]---> STATE_ANSLP_PENDING
+	 */
+	nf_session_test s8(nf_session::STATE_ANSLP_PENDING, conf);
+	s8.set_last_create_message(create_anslp_create());
+
+	event *e8 = new msg_event(new session_id(s8.get_id()),
+		create_anslp_bidding(START_MSN)); // more than allowed
 	
+	process(s8, e8);
+	ASSERT_STATE(s8, nf_session::STATE_ANSLP_PENDING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+
 }
 
 void ForwarderTest::testAuctioning() {
@@ -483,6 +546,21 @@ void ForwarderTest::testAuctioning() {
 	ASSERT_STATE(s8, nf_session::STATE_ANSLP_CLOSE);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s8.get_state_timer());
+
+	/*
+	 * STATE_ANSLP_AUCTIONING ---[BIDDING]---> STATE_ANSLP_AUCTIONING
+	 */
+	nf_session_test s9(nf_session::STATE_ANSLP_AUCTIONING, conf);
+
+	s9.set_last_refresh_message(create_anslp_refresh(START_MSN+1, 10));
+
+	event *e9 = new msg_event(new session_id(s9.get_id()),
+		create_anslp_bidding(START_MSN+2));
+
+	process(s9, e9);
+	ASSERT_STATE(s9, nf_session::STATE_ANSLP_AUCTIONING);
+	ASSERT_BIDDING_MESSAGE_SENT(d);
+	ASSERT_NO_TIMER(d);
 	
 }
 

@@ -507,8 +507,9 @@ anslp_ipap_xml_message::printTemplateDataRecords(xml_object_key key,
 				ipap_data_record g_data = *iter_data;
 				ipap_template * templ = getTemplate(key, g_data.get_template_id());
 				if ((templ->get_type() == IPAP_SETID_AUCTION_TEMPLATE)
-				  || (templ->get_type() == IPAP_SETID_BID_TEMPLATE)
-				  || (templ->get_type() == IPAP_SETID_ALLOCATION_TEMPLATE)){
+				  || (templ->get_type() == IPAP_SETID_BID_OBJECT_TEMPLATE)
+				  || (templ->get_type() == IPAP_SETID_ASK_OBJECT_TEMPLATE)				  
+				  || (templ->get_type() == IPAP_SETID_ALLOC_OBJECT_TEMPLATE)){
 					string elementName = IPAP_XML_RECORD;
 
 					createElement(writer, elementName);
@@ -546,8 +547,9 @@ anslp_ipap_xml_message::printOptionDataRecords(xml_object_key key,
 				ipap_data_record g_data = *iter_data;
 				ipap_template * templ = getTemplate(key, g_data.get_template_id());
 				if ((templ->get_type() == IPAP_OPTNS_AUCTION_TEMPLATE)
-				  || (templ->get_type() == IPAP_OPTNS_BID_TEMPLATE)
-				  || (templ->get_type() == IPAP_OPTNS_ALLOCATION_TEMPLATE)){
+				  || (templ->get_type() == IPAP_OPTNS_BID_OBJECT_TEMPLATE)
+				  || (templ->get_type() == IPAP_OPTNS_ASK_OBJECT_TEMPLATE)				  
+				  || (templ->get_type() == IPAP_OPTNS_ALLOC_OBJECT_TEMPLATE)){
 					
 					string elementName = IPAP_XML_RECORD;
 					createElement(writer, elementName);
@@ -634,7 +636,7 @@ anslp_ipap_xml_message::writeTemplate(xmlTextWriterPtr &writer,
 
 void 
 anslp_ipap_xml_message::writeTemplates(xmlTextWriterPtr &writer, 
-					ipap_xml_object_type_t object_type,
+					ipap_object_type_t object_type,
 					map<xml_object_key, xml_object_key> &keys)
 {
 
@@ -669,7 +671,7 @@ anslp_ipap_xml_message::writeTemplates(xmlTextWriterPtr &writer,
 
 void
 anslp_ipap_xml_message::writeRecords(xmlTextWriterPtr &writer, 
-					ipap_xml_object_type_t object_type,
+					ipap_object_type_t object_type,
 					map<xml_object_key, xml_object_key> &keys)
 {
 
@@ -700,7 +702,7 @@ anslp_ipap_xml_message::writeRecords(xmlTextWriterPtr &writer,
 
 void 
 anslp_ipap_xml_message::writeObjectTypeData(xmlTextWriterPtr &writer, 
-										ipap_xml_object_type_t object_type)
+										ipap_object_type_t object_type)
 {
 
 #ifdef DEBUG
@@ -813,8 +815,8 @@ anslp_ipap_xml_message::get_message(const anslp_ipap_message &mes)
 		writeNotRelatedTemplates(writer);
 
 		// Copy data related with different object types
-		for (int i=0; i < IPAP_MAX_XML_OBJECT_TYPE; i++) {
-			writeObjectTypeData(writer, (ipap_xml_object_type_t) i);
+		for (int i=0; i < IPAP_MAX_OBJECT_TYPE; i++) {
+			writeObjectTypeData(writer, (ipap_object_type_t) i);
 		}
 				
 		// Close the header.
@@ -1033,7 +1035,6 @@ anslp_ipap_xml_message::from_message(const string str)
 					cur2 = cur->xmlChildrenNode;
 					ReadTemplateFields(cur2, uid, fields);
 					
-					cout << "We are going to read template:" << uid << " with type:" << itype << endl;
 					(message->ip_message).make_template(fields, inumFields, (ipap_templ_type_t) itype , uid);
 					
 					

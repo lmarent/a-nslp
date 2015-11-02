@@ -85,9 +85,9 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		(message->ip_message).set_ackseqno(ackseqNo);
 
 		nfields = 8;
-		templatedataid = (message->ip_message).new_data_template( nfields, IPAP_SETID_BID_TEMPLATE );
+		templatedataid = (message->ip_message).new_data_template( nfields, IPAP_SETID_BID_OBJECT_TEMPLATE );
 		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDAUCTION);
-		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDBID);
+		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDBIDDINGOBJECT);
 		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_IDRECORD);
 		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_QUANTITY);
 		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_UNITBUDGET);	
@@ -96,7 +96,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		(message->ip_message).add_field(templatedataid, 0, IPAP_FT_ENDSECONDS); 
 		
 		/// insert Values for data record 1.
-		ipap_field field1 = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBID );
+		ipap_field field1 = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
 		ipap_value_field fvalue1 = field1.get_ipap_value_field( buf1, 4);
 		
 		ipap_field field2 = (message->ip_message).get_field_definition( 0, IPAP_FT_IDRECORD );
@@ -122,7 +122,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 
 	
 		ipap_data_record data(templatedataid);
-		data.insert_field(0, IPAP_FT_IDBID, fvalue1);
+		data.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1);
 		data.insert_field(0, IPAP_FT_IDRECORD, fvalue2);
 		data.insert_field(0, IPAP_FT_IDAUCTION, fvalue3);
 		data.insert_field(0, IPAP_FT_UNITBUDGET, fvalue4);
@@ -139,7 +139,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 
 
 		/// insert Values for data record 2.
-		ipap_field field1a = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBID );
+		ipap_field field1a = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
 		ipap_value_field fvalue1a = field1a.get_ipap_value_field( buf1, 4);
 
 		ipap_field field2a = (message->ip_message).get_field_definition( 0, IPAP_FT_IDRECORD );
@@ -158,7 +158,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		ipap_value_field fvalue6a = field6a.get_ipap_value_field( buf2a, 4 );
 		
 		ipap_data_record data2(templatedataid);
-		data2.insert_field(0, IPAP_FT_IDBID, fvalue1a);
+		data2.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1a);
 		data2.insert_field(0, IPAP_FT_IDRECORD, fvalue2a);
 		data2.insert_field(0, IPAP_FT_UNITBUDGET, fvalue3a);
 		data2.insert_field(0, IPAP_FT_UNITVALUE, fvalue4a);
@@ -173,7 +173,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		log->dlog(ch, "BuildBidMessage - Finish data record 2" );
 #endif
 		/// insert Values for data record 3.
-		ipap_field field1b = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBID );
+		ipap_field field1b = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
 		ipap_value_field fvalue1b = field1b.get_ipap_value_field( buf1, 4);
 
 		ipap_field field2b = (message->ip_message).get_field_definition( 0, IPAP_FT_IDRECORD );
@@ -192,7 +192,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		ipap_value_field fvalue6b = field6b.get_ipap_value_field( buf2b, 4 );
 		
 		ipap_data_record data3(templatedataid);
-		data3.insert_field(0, IPAP_FT_IDBID, fvalue1b);
+		data3.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1b);
 		data3.insert_field(0, IPAP_FT_IDRECORD, fvalue2b);
 		data3.insert_field(0, IPAP_FT_UNITBUDGET, fvalue3b);
 		data3.insert_field(0, IPAP_FT_UNITVALUE, fvalue4b);
@@ -209,14 +209,14 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 #endif
 
 		nfields = 3;
-		templateoptiondataid = (message->ip_message).new_data_template( nfields, IPAP_OPTNS_BID_TEMPLATE );
-		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDBID);
+		templateoptiondataid = (message->ip_message).new_data_template( nfields, IPAP_OPTNS_BID_OBJECT_TEMPLATE );
+		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDBIDDINGOBJECT);
 		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDAUCTION);
 		(message->ip_message).add_field(templateoptiondataid, 0, IPAP_FT_IDRECORD); 
 
 
 		/// insert Values for option data record 4.
-		ipap_field field1c = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBID );
+		ipap_field field1c = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
 		ipap_value_field fvalue1c = field1c.get_ipap_value_field( buf1, 4);
 
 		ipap_field field3c = (message->ip_message).get_field_definition( 0, IPAP_FT_IDAUCTION );
@@ -226,7 +226,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		ipap_value_field fvalue2c = field2c.get_ipap_value_field( buf2, 4 );
 		
 		ipap_data_record data4(templateoptiondataid);
-		data4.insert_field(0, IPAP_FT_IDBID, fvalue1c);
+		data4.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1c);
 		data4.insert_field(0, IPAP_FT_IDRECORD, fvalue2c);
 		data4.insert_field(0, IPAP_FT_IDAUCTION, fvalue3c);
 
@@ -236,7 +236,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		log->dlog(ch, "BuildBidMessage - Finish data record 4" );
 #endif
 		/// insert Values for option data record 2.
-		ipap_field field1d = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBID );
+		ipap_field field1d = (message->ip_message).get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
 		ipap_value_field fvalue1d = field1d.get_ipap_value_field( buf1, 4);
 
 		ipap_field field3d = (message->ip_message).get_field_definition( 0, IPAP_FT_IDAUCTION );
@@ -246,7 +246,7 @@ anslp_ipap_xml_message_Test::buildBidMessage(anslp_ipap_message *message)
 		ipap_value_field fvalue2d = field2d.get_ipap_value_field( buf2b, 4 );
 		
 		ipap_data_record data5(templateoptiondataid);
-		data5.insert_field(0, IPAP_FT_IDBID, fvalue1d);
+		data5.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1d);
 		data5.insert_field(0, IPAP_FT_IDRECORD, fvalue2d);
 		data5.insert_field(0, IPAP_FT_IDAUCTION, fvalue3d);
 		(message->ip_message).include_data(templateoptiondataid, data5);

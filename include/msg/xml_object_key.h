@@ -39,15 +39,6 @@ namespace anslp
   namespace msg {
 
 
-typedef enum 
-{
-    IPAP_INVALID = -1,
-    IPAP_AUCTION = 0, 
-    IPAP_BID,
-    IPAP_ALLOCATION,
-    IPAP_MAX_XML_OBJECT_TYPE
-} ipap_xml_object_type_t;
-
 typedef vector<ipap_templ_type_t> 			relatedTemplateList_t;
 typedef vector<ipap_templ_type_t>::iterator relatedTemplateIterList_t;
 
@@ -76,14 +67,11 @@ class xml_object_key
 private:
 
 	//! Object type assigned
-	ipap_xml_object_type_t object_type;  		
+	ipap_object_type_t object_type;  		
 	
 	//! Object id within the object type.
 	string id_object;           
 	
-	//! List of templated associated with the object id.
-	relatedTemplateList_t relatedTemplateTypeList;
-
 public:
 
 	/// Constructor of the field key
@@ -91,7 +79,7 @@ public:
 			
 	
 	/// Constructor of the field key
-	xml_object_key(ipap_xml_object_type_t _object_type, string _id_object); 
+	xml_object_key(ipap_object_type_t _object_type, string _id_object); 
 			
 	/// Destructor of the field key
 	inline ~xml_object_key(){}
@@ -114,7 +102,7 @@ public:
 	*/ 
 	xml_object_key& operator= (const xml_object_key& param);
 	
-	inline ipap_xml_object_type_t get_object_type() const
+	inline ipap_object_type_t get_object_type() const
 	{
 		return object_type;
 	}
@@ -131,12 +119,6 @@ public:
 	{
 		return !(operator ==(rhs)); 
 	}
-
-	/// Returns an iterator to the start of the related template types
-	inline relatedTemplateIterList_t begin(){ return relatedTemplateTypeList.begin(); }
-
-	/// Returns an iterator to the end of the related template types
-	inline relatedTemplateIterList_t end(){ return relatedTemplateTypeList.end(); }
 	
 	/** Convert the key field in a string.
 	*/ 

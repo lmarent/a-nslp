@@ -49,7 +49,7 @@ void anslp_ipap_message_splitter::split( const anslp_ipap_message &message )
 
 	uint16_t templid;
 
-	ipap_xml_object_type_t obj_type = IPAP_INVALID;
+	ipap_object_type_t obj_type = IPAP_INVALID;
 
 	// Templates that are included because they have datarecords associated in the message.
 	map<uint16_t, uint16_t> templatesIncluded;
@@ -107,23 +107,8 @@ void anslp_ipap_message_splitter::split( const anslp_ipap_message &message )
 #ifdef DEBUG
 				log->dlog(ch, " template sucesfully read 1b");
 #endif											
-				switch (templ_type)
-				{
-					case IPAP_SETID_AUCTION_TEMPLATE:
-					case IPAP_OPTNS_AUCTION_TEMPLATE:
-						obj_type = IPAP_AUCTION;
-						break;
-
-					case IPAP_SETID_BID_TEMPLATE:
-					case IPAP_OPTNS_BID_TEMPLATE:
-						obj_type = IPAP_BID;
-						break;
-					
-					case IPAP_SETID_ALLOCATION_TEMPLATE:
-					case IPAP_OPTNS_ALLOCATION_TEMPLATE:
-						obj_type = IPAP_ALLOCATION;
-						break;
-				}
+				
+				obj_type = ipap_template::getObjectType(templ_type);
 
 #ifdef DEBUG
 				log->dlog(ch, " read key :%s ", dataKey.c_str());
@@ -144,8 +129,8 @@ void anslp_ipap_message_splitter::split( const anslp_ipap_message &message )
 					objectDataRecords[xml_key] = dataRecordList_t();
 					(objectDataRecords[xml_key]).push_back(g_data);	
 				}			
-			} catch (ipap_bad_argument &){
-				throw Error("anslp_ipap_xml_message: error while reading data record");
+			} catch (ipap_bad_argument &e){
+				throw Error("anslp_ipap_xml_message: error while reading data record %s", e.what());
 			}	
 		}
 	}

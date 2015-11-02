@@ -52,3 +52,16 @@
 *.exe
 *.out
 *.app
+
+# Generated MakeFiles #
+######################
+Makefile.in
+Makefile
+config.h
+config.status
+configure
+
+# Other Executables #
+###################
+test_runner
+test_runner.*

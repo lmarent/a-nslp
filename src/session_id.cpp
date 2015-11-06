@@ -28,7 +28,7 @@
 // ===========================================================
 #include <assert.h>
 #include <openssl/rand.h>
-
+#include <iostream>
 #include "logfile.h"
 
 #include "session.h"
@@ -51,6 +51,56 @@ session_id::session_id()
 	int ret = RAND_bytes((unsigned char *) &id, sizeof(id));
 
 	assert( ret == 1 );
+}
+
+session_id::session_id(string sessionId)
+{
+	unsigned long parts[5];
+	char *errp = NULL;
+	unsigned long n;
+	int i = 0;
+
+	std::size_t found = sessionId.find_first_of('.');
+	std::size_t init = 0;
+	
+	do 	{
+		string part = sessionId.substr(init, found-init);
+		n = strtoul(part.c_str(), &errp, 0);
+		parts[i] = n;
+		if (part.empty() || (*errp != '\0')) {
+			throw request_error("Invalid session Id:" + sessionId);
+		}
+
+		init = found+1;
+		found = sessionId.find_first_of('.',init);
+		i++;
+	} while ((found != std::string::npos));
+
+	//takes the last part.
+	string part = sessionId.substr(init, found-init);
+	n = strtoul(part.c_str(), &errp, 0);
+	parts[i] = n;
+	if (part.empty() || (*errp != '\0')) {
+		throw request_error("Invalid session Id:" + sessionId);
+	}
+	
+	
+	// Everything went well.
+	if (i == 3 ){
+		id.w1 = parts[0];
+		id.w2 = parts[1];
+		id.w3 = parts[2];
+		id.w4 = parts[3];
+	} else {
+		ostringstream o;
+		o << "Invalid session Id:" + sessionId + " number of parts";
+		o << i << endl; 
+		
+		throw request_error(o.str());
+	}
+	
+
+  
 }
 
 

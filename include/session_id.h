@@ -41,6 +41,7 @@ namespace anslp
     using protlib::uint128;
 
 class dispatcher;
+class request_error;
 
 /**
  * A 128 Bit Session ID.
@@ -52,6 +53,8 @@ class session_id {
 	explicit session_id();
 
 	explicit session_id(uint128 value) : id(value) { }
+
+    explicit session_id(string session_id);
 
 	inline ~session_id() { }
 

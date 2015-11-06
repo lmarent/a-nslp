@@ -282,8 +282,10 @@ void InitiatorTest::testClose()
 	mspec_objects2.push_back(mess1->copy());
 	mspec_objects2.push_back(mess2->copy());
 	mspec_objects2.push_back(mess3->copy());
+	
+	anslp::session_id *sessionId = new anslp::session_id(s3.get_id());
 		
-	event *e3 = new api_bidding_event(s3.get_id(), source,destination,(protlib::uint16) 0, 
+	event *e3 = new api_bidding_event(sessionId, source,destination,(protlib::uint16) 0, 
 									 (protlib::uint16) 0, (protlib::uint8) 0,
 									  mspec_objects2, NULL);
 	
@@ -404,7 +406,8 @@ void InitiatorTest::testPending()
 	mspec_objects2.push_back(mess2->copy());
 	mspec_objects2.push_back(mess3->copy());
 		
-	event *e7 = new api_bidding_event(s7.get_id(), source,destination,(protlib::uint16) 0, 
+	anslp::session_id *sessionId2 = new anslp::session_id(s7.get_id());
+	event *e7 = new api_bidding_event(sessionId2, source,destination,(protlib::uint16) 0, 
 									 (protlib::uint16) 0, (protlib::uint8) 0,
 									  mspec_objects2, NULL);
 
@@ -522,8 +525,9 @@ void InitiatorTest::testAuctioning()
 	mspec_objects2.push_back(mess1->copy());
 	mspec_objects2.push_back(mess2->copy());
 	mspec_objects2.push_back(mess3->copy());
-		
-	event *e7 = new api_bidding_event(s7.get_id(), source,destination,(protlib::uint16) 0, 
+
+	anslp::session_id *sessionId3 = new anslp::session_id(s7.get_id());
+	event *e7 = new api_bidding_event(sessionId3, source,destination,(protlib::uint16) 0, 
 									 (protlib::uint16) 0, (protlib::uint8) 0,
 									  mspec_objects2, NULL);
 

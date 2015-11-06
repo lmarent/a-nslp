@@ -22,21 +22,26 @@ ANSLPMSG_LLIB = anslp_msg
 
 lib_LTLIBRARIES = libanslp.la
 
-pkginclude_HEADERS = $(INC_DIR)/events.h \
+pkginclude_HEADERS = $(INC_DIR)/anslp_config.h \
 					 $(INC_DIR)/mspec_rule_key.h \
-					 $(INC_DIR)/auction_rule.h \
-					 $(INC_DIR)/anslp_config.h \
 					 $(INC_DIR)/anslp_daemon.h \
+					 $(INC_DIR)/netauct_rule_installer.h \
 					 $(INC_DIR)/anslp_timers.h \
-					 $(INC_DIR)/ni_session.h \
 					 $(INC_DIR)/nf_session.h \
-					 $(INC_DIR)/nr_session.h \
-					 $(INC_DIR)/session.h \
-					 $(INC_DIR)/session_id.h \
-					 $(INC_DIR)/session_manager.h \
+					 $(INC_DIR)/auction_rule.h \
+					 $(INC_DIR)/ni_session.h \
 					 $(INC_DIR)/auction_rule_installer.h \
 					 $(INC_DIR)/nop_auction_rule_installer.h \
-					 $(INC_DIR)/netauct_rule_installer.h
+					 $(INC_DIR)/benchmark_journal.h \
+					 $(INC_DIR)/nr_session.h \
+					 $(INC_DIR)/dispatcher.h \
+					 $(INC_DIR)/session.h \
+					 $(INC_DIR)/events.h \
+					 $(INC_DIR)/session_id.h \
+					 $(INC_DIR)/gistka_mapper.h \
+					 $(INC_DIR)/session_manager.h
+
+
 
 if ENABLE_DEBUG
 AM_CXXFLAGS = -I$(top_srcdir)/include \
@@ -99,22 +104,6 @@ anslpd_LDADD = -L$(ANSLPMSG_LIBDIR) -l$(ANSLPMSG_LLIB) $(LIBGIST_LIBS)
 anslpd_LDADD += $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBIPAP_LIBS)
 anslpd_LDADD += -lnetfilter_queue -lssl -lcrypto -lrt $(LD_SCTP_LIB) -lpthread -lxml2
 anslpd_LDADD += @LIBXML_LIBS@ @CURL_LIBS@ @LIBXSLT_LIBS@ @LIBUUID_LIBS@
-
-include_HEADERS = $(INC_DIR)/session_id.h \
-			      $(INC_DIR)/anslp_config.h \
-				  $(ANSLPMSG_INCDIR)/msg_sequence_number.h \
-				  $(ANSLPMSG_INCDIR)/anslp_ie.h \
-				  $(ANSLPMSG_INCDIR)/anslp_object.h \
-	        	  $(ANSLPMSG_INCDIR)/ntlp_msg.h \
-	        	  $(ANSLPMSG_INCDIR)/ie_store.h	\
-	        	  $(ANSLPMSG_INCDIR)/message_hop_count.h \
-	       	 	  $(ANSLPMSG_INCDIR)/anslp_msg.h \
-	       	 	  $(ANSLPMSG_INCDIR)/anslp_create.h \
-	       	 	  $(ANSLPMSG_INCDIR)/anslp_response.h	\
-	        	  $(ANSLPMSG_INCDIR)/session_lifetime.h \
-	        	  $(ANSLPMSG_INCDIR)/information_code.h \
-	        	  $(ANSLPMSG_INCDIR)/anslp_refresh.h \
-	        	  $(ANSLPMSG_INCDIR)/anslp_notify.h 
 
 
 if NSIS_NO_WARN_HASHMAP

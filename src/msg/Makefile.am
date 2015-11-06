@@ -49,10 +49,10 @@ libanslp_msg_la_SOURCES = ie_object_key.cpp \
 					      anslp_mspec_object.cpp 
 
 
-pkginclude_HEADERS   = 	$(INC_DIR)/anslp_create.h \
+pkginclude_HEADERS   = 	$(INC_DIR)/anslp_bidding.h \
 						$(INC_DIR)/anslp_constants.h \
+						$(INC_DIR)/anslp_create.h \
 						$(INC_DIR)/anslp_ie.h \
-						$(INC_DIR)/xml_object_key.h \
 						$(INC_DIR)/anslp_ipap_exception.h \
 						$(INC_DIR)/anslp_ipap_message.h \
 						$(INC_DIR)/anslp_ipap_message_splitter.h \
@@ -63,7 +63,6 @@ pkginclude_HEADERS   = 	$(INC_DIR)/anslp_create.h \
 						$(INC_DIR)/anslp_object.h \
 						$(INC_DIR)/anslp_refresh.h \
 						$(INC_DIR)/anslp_response.h \
-						$(INC_DIR)/anslp_bidding.h \
 						$(INC_DIR)/ie_object_key.h \
 						$(INC_DIR)/ie_store.h \
 						$(INC_DIR)/information_code.h \
@@ -71,7 +70,8 @@ pkginclude_HEADERS   = 	$(INC_DIR)/anslp_create.h \
 						$(INC_DIR)/msg_sequence_number.h \
 						$(INC_DIR)/ntlp_msg.h \
 						$(INC_DIR)/selection_auctioning_entities.h \
-						$(INC_DIR)/session_lifetime.h
+						$(INC_DIR)/session_lifetime.h \
+						$(INC_DIR)/xml_object_key.h
 
 
 if ENABLE_DEBUG

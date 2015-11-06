@@ -7,6 +7,7 @@
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "session.h"
 #include "session_id.h"
 
 using namespace anslp;
@@ -47,13 +48,21 @@ void Session_Id_Test::testAssign()
 {
 	anslp::session_id *session1 = new anslp::session_id();
 	anslp::session_id *session2 = new anslp::session_id();
-	
 	anslp::session_id *session3 = new anslp::session_id(); 
 	
-	*session3 = *session1;
-	
-	CPPUNIT_ASSERT( *session3 == *session1 );
-	cout << "session Id:" <<  session1->to_string() << endl;
-	
+	try{
+		*session3 = *session1;
+		CPPUNIT_ASSERT( *session3 == *session1 );
+		
+		string sessionId = session2->to_string();
+		
+		anslp::session_id session4(sessionId);
+		
+		CPPUNIT_ASSERT( *session2 == session4 );
+		
+	} catch (request_error &e){
+		cout << e.get_msg() << endl;
+		throw e;
+	}
 }
 // EOF

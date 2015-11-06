@@ -456,16 +456,15 @@ class api_bidding_event : public api_event {
 	
   public:
   
-	api_bidding_event(session_id sid, const hostaddress &source, const hostaddress &dest,
+	//! The sid must has to have his own memory, because the event class deletes the memory.
+	api_bidding_event(session_id *sid, const hostaddress &source, const hostaddress &dest,
 					  uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0, 
 					  std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(),
 					  FastQueue *rq=NULL) : 
-		  api_event(), sid(sid), source_addr(source), dest_addr(dest),source_port(source_port), 
+		  api_event(), source_addr(source), dest_addr(dest),source_port(source_port), 
 		  dest_port(dest_port), protocol(protocol), mspec_objects(mspec_objects), return_queue(rq) { }
 
-	virtual ~api_bidding_event() { }
-
-	inline session_id get_session_id() const { return sid; }
+	virtual ~api_bidding_event();
 
 	inline hostaddress get_source_address() const { return source_addr; }
 	inline uint16 get_source_port() const { return source_port; }
@@ -485,7 +484,6 @@ class api_bidding_event : public api_event {
 
   private:
   
-	session_id sid;
 	hostaddress source_addr;
 	hostaddress dest_addr;
 	uint16 source_port;
@@ -495,6 +493,17 @@ class api_bidding_event : public api_event {
 	
 	FastQueue *return_queue;
 };
+
+inline api_bidding_event::~api_bidding_event()
+{
+	std::vector<msg::anslp_mspec_object *>::iterator it;
+	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++)
+	{
+		delete(*it);
+	}
+	mspec_objects.clear();
+	
+}
 
 
 /**

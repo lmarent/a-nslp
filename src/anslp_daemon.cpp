@@ -32,7 +32,6 @@
 #include "queuemanager.h"
 
 #include "apimessage.h" // from NTLP
-
 #include "anslp_config.h"
 #include "msg/anslp_ie.h"
 #include "msg/anslp_msg.h"
@@ -40,6 +39,7 @@
 #include "anslp_daemon.h"
 #include "benchmark_journal.h"
 #include <openssl/ssl.h>
+#include "gist_conf.h"
 
 using namespace protlib;
 using namespace protlib::log;
@@ -108,17 +108,9 @@ void anslp_daemon::startup() {
     AddressList *addresses = new AddressList();
 	
 	hostaddresslist_t& ntlpv4addr= ntlp::gconf.getparref< protlib::hostaddresslist_t >(ntlp::gistconf_localaddrv4);
-
-#ifdef DEBUG
-	LogInfo("EStoy aqui 1 " << ntlpv4addr.size());
-#endif
 	
     hostaddresslist_t& ntlpv6addr= ntlp::gconf.getparref< protlib::hostaddresslist_t >(ntlp::gistconf_localaddrv6);
 
-#ifdef DEBUG
-	LogInfo("EStoy aqui 2 " << ntlpv6addr.size());
-#endif
-	cout << "LLgue hasta qui" << endl;
 
     if (ntlpv4addr.size() == 0 && ntlpv6addr.size() == 0) {
          addresses->add_host_prop(NULL, AddressList::ConfiguredAddr_P);
@@ -192,8 +184,6 @@ void anslp_daemon::startup() {
         addresses->add_property(na, AddressList::ConfiguredAddr_P);
     }
 	
-	LogInfo("starting it is going to read parameters 4");
-
 	/*
 	 * Start the GIST thread.
 	 */

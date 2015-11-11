@@ -34,7 +34,7 @@ using namespace anslp;
 void
 anslp_config::repository_init() 
 {
-  DLog("anslp_config", "start - creating configuration parameter singleton");
+  DLog("anslp_config", "start - creating configuration parameter singleton" << anslp::anslp_realm+1 );
   configpar_repository::create_instance(anslp::anslp_realm+1);
 } // end namespace
 

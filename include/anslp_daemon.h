@@ -40,6 +40,8 @@
 
 namespace anslp 
 {
+   extern ntlp::gistconf gconf	
+	
   using protlib::uint32;
   using ntlp::NTLPStarterParam;
   using ntlp::NTLPStarter;

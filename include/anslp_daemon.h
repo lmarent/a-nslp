@@ -32,7 +32,7 @@
 #include "protlib_types.h"
 
 #include "ntlp_starter.h" // from NTLP
-
+#include "gist_conf.h"
 #include "anslp_config.h"
 #include "session_manager.h"
 #include "auction_rule_installer.h"
@@ -40,7 +40,6 @@
 
 namespace anslp 
 {
-   extern ntlp::gistconf gconf	
 	
   using protlib::uint32;
   using ntlp::NTLPStarterParam;

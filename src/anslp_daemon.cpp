@@ -157,6 +157,7 @@ void anslp_daemon::startup() {
 	LogInfo("starting it is going to read parameters 3");
     // MOBILITY: care-of interfaces
     const string& coa_iface= ntlp::gconf.getparref< string >(ntlp::gistconf_coa_interfaces);
+    cout << "coa_iface" << coa_iface << endl;
     if (!coa_iface.empty()){
        std::stringstream in(coa_iface);
        while (in) {
@@ -316,10 +317,10 @@ void anslp::init_framework() {
 	 * Initialize libraries.
 	 */
 	tsdb::init();
+	SSL_load_error_strings();
 	SSL_library_init();		// TODO: seed random generator
 	OpenSSL_add_ssl_algorithms();
 	OpenSSL_add_all_digests();
-	SSL_load_error_strings();
 	ANSLP_IEManager::register_known_ies();
 }
 

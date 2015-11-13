@@ -2,11 +2,21 @@
 
 echo "Executing iptables rules for tracking NSIS packets"
 
-sudo iptables -N FORWARD_UDP
-sudo iptables -A FORWARD -p udp -s 0/0 -j FORWARD_UDP
-sudo iptables -N natfwd_filter
-sudo iptables -A FORWARD ! -p udp -s 0/0 -j natfwd_filter
-sudo iptables -A FORWARD_UDP -p udp --sport 270 -j NFQUEUE --queue-num 0
-sudo iptables -A FORWARD_UDP -p udp ! --sport 270 -j natfwd_filter
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+
+iptables -N FORWARD_UDP
+iptables -A FORWARD -p udp -s 0/0 -j FORWARD_UDP
+iptables -N natfwd_filter
+iptables -A FORWARD ! -p udp -s 0/0 -j natfwd_filter
+iptables -A FORWARD_UDP -p udp --sport 270 -j NFQUEUE --queue-num 0
+iptables -A FORWARD_UDP -p udp ! --sport 270 -j natfwd_filter
 
 

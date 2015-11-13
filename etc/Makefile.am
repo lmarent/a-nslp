@@ -3,6 +3,8 @@
 dist_sysconf_DATA = intercept ipap_xml_message.dtd reply2.xsl
 
 nodist_sysconf_DATA = nsis.ka.conf
-		    
+
+install-exec-hook:
+	chmod +x @DEF_SYSCONFDIR@/intercept
 
 

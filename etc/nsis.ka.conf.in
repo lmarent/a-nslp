@@ -29,7 +29,7 @@ sctp-port = 30000
 # i.e. the address where replies are sent to.
 # =======================================================================================
 #localaddr-v4 = "10.0.2.5 10.1.2.2"
-localaddr-v4 = 10.0.2.15
+localaddr-v4 = "192.168.2.12 192.168.3.4"
 localaddr-v6 = ""
 
 # Mobility Support/MobileIP related stuff (all optional)
@@ -206,8 +206,11 @@ nr-max-session-lifetime 	= 60
 [anslp-nslp]
 dispatcher-threads = 1
 
+# true for user agents.
 as-is-auctioneer 			= false
-as-install-auction-rules	= false
+
+# true for auctions servers.
+as-install-auction-rules	= true
 
 #---------------------------------------------------
 # Connection settings for the metering application
@@ -239,4 +242,4 @@ nf-response-timeout 		= 5
 #
 nr-max-session-lifetime		= 70
 
-# end of nsis.ka_agent.conf
+# end of nsis.ka.conf

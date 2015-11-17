@@ -97,7 +97,7 @@ void dispatcher::process(event *evt) throw () {
 
 	LogDebug("processing received event " << *evt);
 
-	// log all incoming MNSLP messages for debugging
+	// log all incoming A-NSLP messages for debugging
 	const msg_event *e = dynamic_cast<const msg_event *>(evt);
 	if ( e != NULL && e->get_ntlp_msg() != NULL ) {
 		assert( e->get_session_id() != NULL );
@@ -149,6 +149,8 @@ void dispatcher::process(event *evt) throw () {
 
 	session *s = NULL;
 	session_id *id = evt->get_session_id();
+
+	LogDebug("session given " << id->to_string());
 
 	// If the event has a session ID, try to lookup the session.
 	if ( id != NULL )

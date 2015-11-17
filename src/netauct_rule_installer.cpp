@@ -116,10 +116,11 @@ int netauct_rule_installer::getNumberAuctions(string response)
 	
 	std::size_t found = response.find(tofind);
 	if (found!=std::string::npos){
-		int pos = found + tofind.length() + 1;
-		int pos2 = response.find(tofind2);
+		LogDebug("found:" << found);
+		std::size_t pos = found + tofind.length();
+		std::size_t pos2 = response.find(tofind2);
 		if (pos2!=std::string::npos){
-			LogDebug("pos:" << pos << " pos2:" << pos2);
+			LogDebug("data:" << response.substr(0,pos) << "pos:" << pos << " pos2:" << pos2);
 			string snbr = response.substr(pos, pos2-pos);
 			val_return = atoi(snbr.c_str());
 		}
@@ -498,6 +499,8 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
           break;
 	}
 
+	LogDebug("Server " << server << "Port:" << port << "userpswd:" << userpwd );
+
 
     
 	// initialize libcurl
@@ -560,8 +563,12 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
     curl_easy_setopt(curl, CURLOPT_URL, _url);
     post_body =  curl_escape(post_fields.c_str(), post_fields.length());	
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_body);
-
+		
     res = curl_easy_perform(curl);
+    
+   	LogDebug("Here # response " << res);	
+
+    
     if (res != CURLE_OK) {
        response = "";
        free(_url);
@@ -579,7 +586,9 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
 			msg::information_code::sc_signaling_session_failures,
 			msg::information_code::sigfail_auction_connection_broken);       
     }
-
+	
+	LogDebug("Here 0 ");	
+	
     res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ctype);
     if (res != CURLE_OK) {
        response = "";
@@ -598,7 +607,9 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
 			msg::information_code::sc_signaling_session_failures,
 			msg::information_code::sigfail_auction_connection_broken);
     }
-
+	
+	LogDebug("Here 1 ");	
+	
     res = curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &rcode);
     if (res != CURLE_OK) {
 
@@ -619,11 +630,14 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
 			msg::information_code::sigfail_auction_connection_broken);
     }
 
+	LogDebug("Here 2 ");	
+    
     if (!strcmp(ctype, "text/xml")) {
        // translate
       
 	   xmlChar *output = 0; 
 	   int len = 0; 
+      
       
        doc = xmlParseMemory(response.c_str(), response.length());
        out = xsltApplyStylesheet(cur, doc, NULL);
@@ -640,7 +654,9 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
        xmlFreeDoc(out);
        xmlFreeDoc(doc);
     } 
-
+	
+	LogDebug("Here 3 ");	
+	
     free(_url);
 #ifdef HAVE_CURL_FREE
     curl_free(post_body);
@@ -652,7 +668,9 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
 	xsltFreeStylesheet(cur);
 	xsltCleanupGlobals();
 	xmlCleanupParser();
-
+	
+	LogDebug("Response: " << response.c_str() );
+	
 	return response;
 }
 

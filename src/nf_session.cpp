@@ -862,6 +862,12 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		return STATE_ANSLP_CLOSE;
 	}	
 	/*
+	 * Outdated timer event, discard and don't log.
+	 */
+	else if ( is_timer(evt) ) {
+		return STATE_ANSLP_AUCTIONING; // no change
+	}
+	/*
 	 * A RESPONSE to a REFRESH arrived.
 	 */
 	else if ( is_anslp_response(evt, get_last_refresh_message()) ) 
@@ -913,12 +919,6 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 			return STATE_ANSLP_CLOSE;
 		}
-	}
-	/*
-	 * Outdated timer event, discard and don't log.
-	 */
-	else if ( is_timer(evt) ) {
-		return STATE_ANSLP_AUCTIONING; // no change
 	}
 	/*
 	 * Received unexpected event.

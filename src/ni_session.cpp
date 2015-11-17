@@ -497,6 +497,7 @@ ni_session::state_t ni_session::handle_state_pending(
 				cal_refresh_interval();
 			}
 			
+			LogDebug("Refresh interval " << get_refresh_interval());
 			refresh_timer.start(d, get_refresh_interval());
 				
 			set_create_counter(0);

@@ -769,7 +769,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 						
 		if (e->is_for_this_node()) {
 			// The message is for us, so we send it to the install policy
-			// This messages are without any response. 
+			// These messages are without any response. 
 			// As it is implemented, we delegate the upper layer to retry to send them again.
 
 			session_id = get_id().to_string();

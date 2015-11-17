@@ -150,12 +150,13 @@ void dispatcher::process(event *evt) throw () {
 	session *s = NULL;
 	session_id *id = evt->get_session_id();
 
-	LogDebug("session given " << id->to_string());
 
 	// If the event has a session ID, try to lookup the session.
-	if ( id != NULL )
+	if ( id != NULL ){
+		LogDebug("session given " << id->to_string());
 		s = session_mgr->get_session(*id);
-
+	}
+	
 	/*
 	 * There can be several reasons if we don't find the session.
 	 * In some cases (tg_CREATE, rx_CREATE, etc.), we create a new

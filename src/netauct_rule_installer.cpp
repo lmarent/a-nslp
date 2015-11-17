@@ -144,7 +144,11 @@ netauct_rule_installer::getMessage(string response)
 		if (pos2!=std::string::npos){
 			LogDebug("pos:" << pos << " pos2:" << pos2);
 			val_return = response.substr(pos, pos2 + tofind2.length());
-		}
+		} else{
+			// the message only contains the header.
+			std::size_t pos2 = response.size();
+			val_return = response.substr(pos, pos2);
+		}	
 	}
 	
 	LogDebug("ending getMessage" << val_return);
@@ -394,6 +398,7 @@ netauct_rule_installer::auction_interaction(const string sessionId, const auctio
 
 			} else {
 				string responseMsg = getMessage(response);
+				
 				msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
 				(ipap_response->ip_message).output();
 				auc_return->set_response_object(ipap_response);

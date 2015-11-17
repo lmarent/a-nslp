@@ -134,17 +134,23 @@ event *gistka_mapper::map_to_event(const protlib::message *msg) const
 
 	MP(benchmark_journal::PRE_MAPPING);
 
-	if ( dynamic_cast<const APIMsg *>(msg) != NULL )
+	if ( dynamic_cast<const APIMsg *>(msg) != NULL ){
 		ret = map_api_message(dynamic_cast<const APIMsg *>(msg));
 		
-	else if ( dynamic_cast<const anslp_timer_msg *>(msg) != NULL )
+		LogDebug("Mapped to APIMsg");
+	}	
+	else if ( dynamic_cast<const anslp_timer_msg *>(msg) != NULL ){
 		ret = map_timer_message(
 			dynamic_cast<const anslp_timer_msg *>(msg));
-			
+		
+		LogDebug("Mapped to anslp_timer_msg");
+	}		
 	else if ( dynamic_cast<const anslp_event_msg *>(msg) != NULL ) 
 	{
 		const anslp_event_msg *em
 			= dynamic_cast<const anslp_event_msg *>(msg);
+		
+		LogDebug("Mapped to anslp_event_msg");
 		ret = em->get_event();
 	}
 	else

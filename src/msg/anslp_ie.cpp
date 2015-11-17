@@ -126,6 +126,7 @@ void ANSLP_IEManager::register_known_ies()
 	inst->register_ie(new anslp_refresh());
 	inst->register_ie(new anslp_response());
 	inst->register_ie(new anslp_notify());
+	inst->register_ie(new anslp_bidding());	
 		
 	inst->register_ie(new session_lifetime());
 	inst->register_ie(new information_code());

@@ -191,7 +191,7 @@ void dispatcher::process(event *evt) throw () {
 	else {
 		// Don't log obsolete timers, there are lots of them.
 		if ( ! is_timer(evt) )
-			LogWarn("discarding event " << *evt);
+			LogWarn("discarding event " << *evt << " session:" << evt->get_session_id());
 	}
 }
 

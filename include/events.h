@@ -461,7 +461,7 @@ class api_bidding_event : public api_event {
 					  uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0, 
 					  std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(),
 					  FastQueue *rq=NULL) : 
-		  api_event(), source_addr(source), dest_addr(dest),source_port(source_port), 
+		  api_event(sid), source_addr(source), dest_addr(dest),source_port(source_port), 
 		  dest_port(dest_port), protocol(protocol), mspec_objects(mspec_objects), return_queue(rq) { }
 
 	virtual ~api_bidding_event();

@@ -301,7 +301,7 @@ netauct_rule_installer::put_response(const string sessionId, const auction_rule 
 
 			} else {
 				// Copy the object as the response.
-				auc_return->set_response_object(i->second);
+				auc_return->set_response_object((i->second)->copy());
 			}
 		}	
 		

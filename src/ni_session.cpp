@@ -206,14 +206,7 @@ msg::ntlp_msg *ni_session::build_bidding_message(api_bidding_event *e )
 	uint32 ipsec_spi = 0;			// IPsec SPI
 	bool downstream = true;
 
-	ntlp::mri *nslp_mri = new ntlp::mri_pathcoupled(
-		e->get_source_address(), src_prefix,
-		e->get_source_port(),
-		e->get_destination_address(), dest_prefix,
-		e->get_destination_port(),
-		e->get_protocol(), flow_label, traffic_class, ipsec_spi,
-		downstream
-	);
+	ntlp::mri *nslp_mri = get_mri()->copy();
 
 
 	/*

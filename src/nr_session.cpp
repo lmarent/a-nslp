@@ -470,7 +470,7 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	 * API bidding event received. The user wants to send an object to the auction server.
 	 */
 	else if ( is_anslp_bidding(evt) ) {
-		LogDebug("received API bidding event");
+		LogDebug("received anslp bidding event");
 
 		msg_event *e = dynamic_cast<msg_event *>(evt);
 		ntlp_msg *msg = e->get_ntlp_msg();

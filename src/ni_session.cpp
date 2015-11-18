@@ -704,17 +704,17 @@ ni_session::state_t ni_session::handle_state_auctioning(
 			e->get_return_queue()->enqueue(m);
 		}
 		
-		LogDebug("Ending state handle_state_auctioning - bidding event ");
+		LogDebug("Ending state handle_state_auctioning - api bidding event ");
 		
 		return STATE_ANSLP_AUCTIONING; // no change
 		
 	}
 
 	/*
-	 * API bidding event received. The user wants to send an object to the auction server.
+	 * API bidding event received. The user wants to receive an object from the auction server.
 	 */
 	else if ( is_anslp_bidding(evt) ) {
-		LogDebug("received API bidding event");
+		LogDebug("received anslp bidding event");
 
 		msg_event *e = dynamic_cast<msg_event *>(evt);
 		ntlp_msg *msg = e->get_ntlp_msg();

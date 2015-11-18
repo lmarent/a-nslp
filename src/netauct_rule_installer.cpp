@@ -369,65 +369,46 @@ netauct_rule_installer::auction_interaction(const bool server, const string sess
 {
 
 	LogDebug("Creating auction interaction " << *rule);
-	
-	if (get_install_auction_rules()){
-	
-		string response;
-		string action = "/auct_interact";
 		
-		auction_rule *auc_return = new auction_rule(*rule);
-		objectListConstIter_t i;
-		objectList_t * requestObjectList = auc_return->get_request_objects();
+	string response;
+	string action = "/auct_interact";
 		
-		LogDebug("Nbr objects to post: " << requestObjectList->size());
+	auction_rule *auc_return = new auction_rule(*rule);
+	objectListConstIter_t i;
+	objectList_t * requestObjectList = auc_return->get_request_objects();
 		
-		// Loop through the objects and install them.
-		for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+	LogDebug("Nbr objects to post: " << requestObjectList->size());
+		
+	// Loop through the objects and install them.
+	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
 			
-			LogDebug("Posting object");
+		LogDebug("Posting object");
 			
-			msg::anslp_ipap_xml_message mess;
-			string postfield = mess.get_message( *(get_ipap_message(i->second)) );
-			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-			if (server == true){
-				response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
-			} else {
-				response = execute_command(RULE_INSTALLER_CLIENT, action, postfield);
-			}
-					
-			if (!responseOk(response)){
-				throw auction_rule_installer_error(response,
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);
-
-			} else {
-				string responseMsg = getMessage(response);
-				
-				msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
-				(ipap_response->ip_message).output();
-				auc_return->set_response_object(ipap_response);
-			}
-		}	
-		
-		LogDebug("Finishing, nbr objects posted:" << auc_return->get_response_objects());
-	
-		return auc_return;
-	} else {
-
-		LogDebug("Generates errors as objects should be posted" << *rule);
-		auction_rule *rule_return;
-		
-		if ( rule != NULL ){
-			rule_return = rule->copy(); 
-			
+		msg::anslp_ipap_xml_message mess;
+		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
+		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
+		if (server == true){
+			response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
+		} else {
+			response = execute_command(RULE_INSTALLER_CLIENT, action, postfield);
 		}
-		else{
-			rule_return = NULL;
-		}	
+					
+		if (!responseOk(response)){
+			throw auction_rule_installer_error(response,
+				msg::information_code::sc_signaling_session_failures,
+				msg::information_code::sigfail_wrong_conf_message);
+		} else {
+			string responseMsg = getMessage(response);
+				
+			msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
+			(ipap_response->ip_message).output();
+			auc_return->set_response_object(ipap_response);
+		}
+	}	
 		
-		return rule_return;
+	LogDebug("Finishing, nbr objects posted:" << auc_return->get_response_objects());
 	
-	}
+	return auc_return;
 
 }
 

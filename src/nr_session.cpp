@@ -57,12 +57,13 @@ using protlib::uint32;
  */
 nr_session::nr_session(const session_id &id, anslp_config *conf)
 		: session(id), state(STATE_ANSLP_CLOSE),routing_info(NULL), config(conf),
-		  lifetime(0), max_lifetime(0), state_timer(this) 
+		  msn_bidding(0), lifetime(0), max_lifetime(0), state_timer(this) 
 {
 
 	set_session_type(st_receiver);
 	assert( conf != NULL );
 
+	set_msg_bidding_sequence_number(create_random_number());
 	set_max_lifetime(conf->get_nr_max_session_lifetime());
 }
 
@@ -75,10 +76,10 @@ nr_session::nr_session(const session_id &id, anslp_config *conf)
  */
 nr_session::nr_session(nr_session::state_t s, uint32 msn)
 		: session(), state(s), routing_info(NULL), config(NULL),
-		  lifetime(0), max_lifetime(60), state_timer(this) 
+		  msn_bidding(0), lifetime(0), max_lifetime(60), state_timer(this) 
 {
 	set_session_type(st_receiver);
-	set_msg_sequence_number(msn);
+	set_msg_bidding_sequence_number(msn);
 }
 
 
@@ -94,6 +95,17 @@ nr_session::~nr_session()
 	}	
 }
 
+/**
+ * Generate a 32 Bit random number.
+ */
+uint32 nr_session::create_random_number() const 
+{
+	unsigned value;
+	int ret = RAND_bytes((unsigned char *) &value, sizeof(value));
+	assert( ret == 1 );
+
+	return value;
+}
 
 std::ostream &anslp::operator<<(std::ostream &out, const nr_session &s) 
 {
@@ -103,6 +115,16 @@ std::ostream &anslp::operator<<(std::ostream &out, const nr_session &s)
 
 	return out << "[nr_session: id=" << s.get_id()
 		<< ", state=" << names[s.get_state()] << "]";
+}
+
+/**
+ * Increment the Message Sequence Number.
+ *
+ * @return the new (incremented) MSN_BIDDING
+ */
+uint32 nr_session::next_msg_bidding_sequence_number() 
+{
+	return ++msn_bidding;	// UINT_MAX+1 = 0, so wrap arounds as per RFC-1982 work
 }
 
 /****************************************************************************
@@ -250,7 +272,7 @@ msg::ntlp_msg *nr_session::build_bidding_message(api_bidding_event *e )
 	 */
 	anslp_bidding *bidding = new anslp_bidding();
 		
-	bidding->set_msg_sequence_number(next_msg_sequence_number());
+	bidding->set_msg_sequence_number(next_msg_bidding_sequence_number());
 
 	// Set the objects to install.
 	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;

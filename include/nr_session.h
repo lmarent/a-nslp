@@ -58,6 +58,12 @@ class nr_session : public session {
 	~nr_session();
 
 	bool is_final() const; // inherited from session
+	
+	uint32 get_msg_bidding_sequence_number() const { return msn_bidding; }		
+	
+	void set_msg_bidding_sequence_number(uint32 value) { msn_bidding = value; }
+	
+	uint32 next_msg_bidding_sequence_number();
 
   protected:
 	/**
@@ -93,6 +99,7 @@ class nr_session : public session {
 
 	anslp_config *config;		// shared among instances, don't delete!
 
+	uint32 msn_bidding;
 	uint32 lifetime;
 	uint32 max_lifetime;
 	timer state_timer;
@@ -121,6 +128,8 @@ class nr_session : public session {
 	friend std::ostream &operator<<(std::ostream &out, const nr_session &s);
 
 	msg::ntlp_msg *build_bidding_message(api_bidding_event *evt);
+	
+	uint32 create_random_number() const;
 	
 	/*
 	 * Auctioning methods:

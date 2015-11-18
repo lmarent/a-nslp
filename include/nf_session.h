@@ -109,7 +109,11 @@ class nf_session : public session {
 	ntlp::mri_pathcoupled *get_nr_mri() const;
 	void set_nr_mri(ntlp::mri_pathcoupled *m);
 
-
+	uint32 get_msg_bidding_sequence_number() const { return msn_bidding; }		
+	void set_msg_bidding_sequence_number(uint32 value) { msn_bidding = value; }
+	
+	uint32 next_msg_bidding_sequence_number();
+	
   private:
   
 	state_t state;
@@ -117,6 +121,8 @@ class nf_session : public session {
 	const anslp_config *config;	// shared among sessions, don't delete!
 
 	bool proxy_mode;
+	
+	uint32 msn_bidding;
 	
 	uint32 lifetime;
 	
@@ -164,6 +170,10 @@ class nf_session : public session {
 
 	auction_rule * create_auction_rule(anslp_bidding *bidding);
 
+	uint32 create_random_number() const;
+	
+	msg::ntlp_msg *build_bidding_message(api_bidding_event *e );
+	
 	friend std::ostream &operator<<(std::ostream &out, const nf_session &s);
 };
 

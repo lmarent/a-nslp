@@ -36,6 +36,7 @@
 #include "session.h"
 #include "msg/information_code.h"
 #include <iostream>
+#include <openssl/rand.h>
 
 
 using namespace anslp;
@@ -59,12 +60,13 @@ using protlib::uint32;
  */
 nf_session::nf_session(const session_id &id, const anslp_config *conf)
 		: session(id), state(nf_session::STATE_ANSLP_CLOSE), config(conf),
-		  proxy_mode(false), lifetime(0), max_lifetime(0),
+		  proxy_mode(false), msn_bidding(0), lifetime(0), max_lifetime(0),
 		  response_timeout(0), state_timer(this), response_timer(this),
 		  ni_mri(NULL), nr_mri(NULL), create_message(NULL), 
 		  refresh_message(NULL)
 {
 	set_session_type(st_forwarder);
+	set_msg_bidding_sequence_number(create_random_number());
 	assert( config != NULL );
 }
 
@@ -76,12 +78,13 @@ nf_session::nf_session(const session_id &id, const anslp_config *conf)
  */
 nf_session::nf_session(nf_session::state_t s, const anslp_config *conf)
 		: session(), state(s), config(conf),
-		  proxy_mode(false), lifetime(0), max_lifetime(60),
+		  proxy_mode(false), msn_bidding(0), lifetime(0), max_lifetime(60),
 		  response_timeout(0), state_timer(this), response_timer(this),
 		  ni_mri(NULL), nr_mri(NULL), create_message(NULL),
 		  refresh_message(NULL)
 {
 	set_session_type(st_forwarder);
+	set_msg_bidding_sequence_number(create_random_number());
 }
 
 
@@ -105,6 +108,18 @@ nf_session::~nf_session()
 		
 }
 
+/**
+ * Generate a 32 Bit random number.
+ */
+uint32 nf_session::create_random_number() const 
+{
+	unsigned value;
+	int ret = RAND_bytes((unsigned char *) &value, sizeof(value));
+	assert( ret == 1 );
+
+	return value;
+}
+
 
 std::ostream &anslp::operator<<(std::ostream &out, const nf_session &s) {
 	static const char *const names[] = { "CLOSE", 
@@ -115,6 +130,16 @@ std::ostream &anslp::operator<<(std::ostream &out, const nf_session &s) {
 		<< ", state=" << names[s.get_state()] << "]";
 }
 
+
+/**
+ * Increment the Message Sequence Number.
+ *
+ * @return the new (incremented) MSN_BIDDING
+ */
+uint32 nf_session::next_msg_bidding_sequence_number() 
+{
+	return ++msn_bidding;	// UINT_MAX+1 = 0, so wrap arounds as per RFC-1982 work
+}
 
 /****************************************************************************
  *
@@ -261,6 +286,60 @@ nf_session::create_auction_rule(anslp_bidding *bidding)
 	
 	return to_post;
 }
+
+/**
+ * Build a A-NSLP bidding message based the api bidding event.
+ *  This function makes a deep copy of the mspec_objects. So the session
+ *  object can destroy them.
+ *
+ */
+msg::ntlp_msg *nf_session::build_bidding_message(api_bidding_event *e ) 
+{
+	using namespace anslp::msg;
+
+	assert( get_ni_mri() != NULL );
+	
+	/*
+	 * Create the message routing information (MRI) which we're going to
+	 * use for all messages.
+	 */
+	uint8 src_prefix = 32;
+	uint8 dest_prefix = 32;
+	uint16 flow_label = 0;
+	uint16 traffic_class = 0;		// DiffServ CodePoint
+	uint32 ipsec_spi = 0;			// IPsec SPI
+	bool downstream = false;
+
+	ntlp::mri *nslp_mri = get_ni_mri()->copy();
+	nslp_mri->invertDirection();
+
+	/*
+	 * Build a A-NSLP bidding message.
+	 */
+	anslp_bidding *bidding = new anslp_bidding();
+		
+	bidding->set_msg_sequence_number(next_msg_bidding_sequence_number());
+
+	// Set the objects to install.
+	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
+	for ( it_objects = e->get_auctioning_objects().begin(); 
+			it_objects != e->get_auctioning_objects().end(); it_objects++)
+	{
+		anslp_mspec_object *object = *it_objects;
+		bidding->set_mspec_object(object->copy());
+	}
+	
+
+	/*
+	 * Wrap the bidding inside an ntlp_msg and add session ID and MRI.
+	 */
+	ntlp_msg *msg = new ntlp_msg(get_id(), bidding, nslp_mri->copy(), 0);
+	
+	saveDelete(nslp_mri);
+	
+	return msg;
+}
+
 
 
 // For implementation of auctioning interface.

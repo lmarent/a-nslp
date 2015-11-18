@@ -289,9 +289,10 @@ void anslp_daemon::main_loop(uint32 thread_id) {
 		if ( msg == NULL )
 			continue;	// no message in the queue
 
+
 		LogDebug("dispatcher thread #" << thread_id
 			<< " processing received message #" << msg->get_id());
-
+			
 		MP(benchmark_journal::PRE_PROCESSING);
 
 		// Analyze message and create an event from it.

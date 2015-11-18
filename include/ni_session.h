@@ -187,6 +187,9 @@ class ni_session : public session {
 	void inc_create_counter();
 	void inc_refresh_counter();
 
+	auction_rule * create_auction_rule(anslp_bidding *bidding);
+
+
 	friend std::ostream &operator<<(std::ostream &out, const ni_session &s);
 	friend class session_manager;
 };

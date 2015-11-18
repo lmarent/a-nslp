@@ -335,7 +335,7 @@ dispatcher::install_auction_rules(const string session_id, const auction_rule *a
  * Putting auction messages
  */
 auction_rule * 
-dispatcher::auction_interaction(const string session_id, const auction_rule *act_rule)
+dispatcher::auction_interaction(const bool server, const string session_id, const auction_rule *act_rule)
 		throw (auction_rule_installer_error) {
 
 	assert( rule_installer != NULL );
@@ -345,7 +345,7 @@ dispatcher::auction_interaction(const string session_id, const auction_rule *act
 					<< act_rule->get_number_mspec_request_objects());
 	}
 	
-	auction_rule * result = rule_installer->auction_interaction(session_id, act_rule);
+	auction_rule * result = rule_installer->auction_interaction(server, session_id, act_rule);
 	
 	return result;
 }

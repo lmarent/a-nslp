@@ -81,9 +81,15 @@ class nr_session : public session {
 
 	void set_auction_rule(auction_rule *r);	
 
+	inline ntlp::mri *get_mri() const { return routing_info; }
+	void set_mri(ntlp::mri *m);
+
+
   private:
   
 	state_t state;
+
+	ntlp::mri *routing_info;
 
 	anslp_config *config;		// shared among instances, don't delete!
 
@@ -114,6 +120,7 @@ class nr_session : public session {
 
 	friend std::ostream &operator<<(std::ostream &out, const nr_session &s);
 
+	msg::ntlp_msg *build_bidding_message(api_bidding_event *evt);
 	
 	/*
 	 * Auctioning methods:
@@ -151,6 +158,12 @@ inline void nr_session::set_auction_rule(auction_rule *r)
 inline auction_rule *nr_session::get_auction_rule() const 
 {
 	return act_rule; // may return NULL!
+}
+
+inline void nr_session::set_mri(ntlp::mri *m) 
+{
+	delete routing_info;
+	routing_info = m;
 }
 
 

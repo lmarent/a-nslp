@@ -85,7 +85,7 @@ class dispatcher {
 	virtual auction_rule * install_auction_rules(const string session_id, const auction_rule *act_rule) 
 		throw (auction_rule_installer_error);
 	
-	virtual auction_rule * auction_interaction(const string session_id, const auction_rule *act_rule)
+	virtual auction_rule * auction_interaction(const bool server, const string session_id, const auction_rule *act_rule)
 		throw (auction_rule_installer_error);
 		
 	virtual auction_rule * send_response(const string session_id, const auction_rule *act_rule) 

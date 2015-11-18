@@ -365,7 +365,7 @@ bool netauct_rule_installer::remove_all()
 
 
 auction_rule * 
-netauct_rule_installer::auction_interaction(const string sessionId, const auction_rule *rule)
+netauct_rule_installer::auction_interaction(const bool server, const string sessionId, const auction_rule *rule)
 {
 
 	LogDebug("Creating auction interaction " << *rule);
@@ -389,7 +389,11 @@ netauct_rule_installer::auction_interaction(const string sessionId, const auctio
 			msg::anslp_ipap_xml_message mess;
 			string postfield = mess.get_message( *(get_ipap_message(i->second)) );
 			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-			response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
+			if (server == true){
+				response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
+			} else {
+				response = execute_command(RULE_INSTALLER_CLIENT, action, postfield);
+			}
 					
 			if (!responseOk(response)){
 				throw auction_rule_installer_error(response,
@@ -426,6 +430,7 @@ netauct_rule_installer::auction_interaction(const string sessionId, const auctio
 	}
 
 }
+
 
 const msg::anslp_ipap_message *
 netauct_rule_installer::get_ipap_message(const msg::anslp_mspec_object *object)

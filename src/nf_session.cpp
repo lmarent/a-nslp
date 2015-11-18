@@ -778,7 +778,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 			
 			auction_rule * to_post = create_auction_rule(bidding);
 			
-			auction_rule * result = d->auction_interaction(session_id, to_post);
+			auction_rule * result = d->auction_interaction(true, session_id, to_post);
 			
 			saveDelete(to_post);
 			

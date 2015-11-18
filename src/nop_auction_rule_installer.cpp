@@ -161,7 +161,7 @@ bool nop_auction_rule_installer::remove_all()
 }
 
 auction_rule * 
-nop_auction_rule_installer::auction_interaction(const string sessionId, const auction_rule *rule)
+nop_auction_rule_installer::auction_interaction(const bool server, const string sessionId, const auction_rule *rule)
 {
 
 	LogDebug("NOP: auction interaction " << *rule);

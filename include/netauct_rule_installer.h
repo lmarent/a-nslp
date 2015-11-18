@@ -70,7 +70,7 @@ class netauct_rule_installer : public auction_rule_installer
 
 	//! This method is used every time that any actor wants to post or push
 	//! Information for an auction.
-	virtual auction_rule * auction_interaction(const string sessionId, const auction_rule *mt_object);
+	virtual auction_rule * auction_interaction(const bool server, const string sessionId, const auction_rule *mt_object);
 
 	//! Remove an auction session in an auction server.
 	virtual auction_rule * remove(const string sessionId, const auction_rule *mt_object);

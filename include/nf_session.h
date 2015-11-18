@@ -99,7 +99,6 @@ class nf_session : public session {
 	
 	void set_last_refresh_message(msg::ntlp_msg *msg);
 
-
 	inline bool is_proxy_mode() const { return proxy_mode; }
 	
 	inline void set_proxy_mode(bool value) { proxy_mode = value; }

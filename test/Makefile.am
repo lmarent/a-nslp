@@ -61,7 +61,7 @@ TESTS = $(check_PROGRAMS)
 
 if ENABLE_DEBUG
   AM_CXXFLAGS = -I$(top_srcdir)/include \
-				-g  -fno-inline -DDEBUG -D_GLIBCXX_DEBUG
+				-g  -fno-inline -DDEBUG 
 else
   AM_CXXFLAGS = -I$(top_srcdir)/include \
 				-O2 

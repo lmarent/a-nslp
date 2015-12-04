@@ -45,7 +45,7 @@ pkginclude_HEADERS = $(INC_DIR)/anslp_config.h \
 
 if ENABLE_DEBUG
 AM_CXXFLAGS = -I$(top_srcdir)/include \
-   			  -g  -fno-inline -DDEBUG -D_GLIBCXX_DEBUG -ggdb
+   			  -g  -fno-inline -DDEBUG -ggdb
 else
 AM_CXXFLAGS = -I$(top_srcdir)/include \
 			  -O2
@@ -73,7 +73,7 @@ libanslp_la_SOURCES = anslp_timers.cpp \
 					  anslp_config.cpp \
 					  anslp_daemon.cpp
 
-libanslp_la_LIBADD = -L$(ANSLPMSG_LIBDIR) -l$(ANSLPMSG_LLIB) $(LIBGIST_LIBS) 
+libanslp_la_LIBADD = $(top_builddir)/src/msg/libanslp_msg.la $(LIBGIST_LIBS) 
 libanslp_la_LIBADD += $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) $(LIBIPAP_LIBS)
 libanslp_la_LIBADD += -lnetfilter_queue -lssl -lcrypto -lrt $(LD_SCTP_LIB) -lpthread -lxml2
 libanslp_la_LIBADD += @LIBXML_LIBS@ @CURL_LIBS@ @LIBXSLT_LIBS@ @LIBUUID_LIBS@
@@ -100,7 +100,7 @@ if USE_WITH_SCTP
 LD_SCTP_LIB= -lsctp
 endif
 
-anslpd_LDADD = -L$(ANSLPMSG_LIBDIR) -l$(ANSLPMSG_LLIB) $(LIBGIST_LIBS) 
+anslpd_LDADD = $(top_builddir)/src/msg/libanslp_msg.la  $(LIBGIST_LIBS) 
 anslpd_LDADD += $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBIPAP_LIBS)
 anslpd_LDADD += -lnetfilter_queue -lssl -lcrypto -lrt $(LD_SCTP_LIB) -lpthread -lxml2
 anslpd_LDADD += @LIBXML_LIBS@ @CURL_LIBS@ @LIBXSLT_LIBS@ @LIBUUID_LIBS@
@@ -111,6 +111,9 @@ AM_CXXFLAGS += -Wno-deprecated
 else !NSIS_NO_WARN_HASHMAP
 AM_CXXFLAGS += 
 endif
+
+$(top_builddir)/src/msg/libanslp_msg.la:
+	cd $(top_builddir)/src/msg ; $(MAKE)
 
 
 # end of Makefile.am

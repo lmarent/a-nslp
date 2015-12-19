@@ -50,7 +50,6 @@ using protlib::uint32;
 #define LogDebug(msg) Log(DEBUG_LOG, LOG_NORMAL, "ni_session", msg)
 
 
-
 /**
  * Constructor.
  *
@@ -651,7 +650,9 @@ ni_session::state_t ni_session::handle_state_auctioning(
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0){
 				session_id = get_id().to_string();
+				pthread_mutex_lock(&execute_rules_lock);
 				d->remove_auction_rules(session_id, rule);
+				pthread_mutex_unlock(&execute_rules_lock);
 			}
 			
 			LogDebug("no response to our REFRESH message");
@@ -672,7 +673,9 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){ 
 			session_id = get_id().to_string();
+			pthread_mutex_lock(&execute_rules_lock);
 			d->remove_auction_rules(session_id, rule);
+			pthread_mutex_unlock(&execute_rules_lock);
 		}
 
 		d->send_message( build_refresh_message() );
@@ -723,8 +726,10 @@ ni_session::state_t ni_session::handle_state_auctioning(
 			
 		auction_rule * to_post = create_auction_rule(bidding);
 		
+		pthread_mutex_lock(&execute_rules_lock);
 		auction_rule * result = d->auction_interaction(false, session_id, to_post);
-			
+		pthread_mutex_unlock(&execute_rules_lock);	
+		
 		saveDelete(to_post);
 			
 		saveDelete(result);
@@ -775,7 +780,9 @@ ni_session::state_t ni_session::handle_state_auctioning(
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0){
 				session_id = get_id().to_string();
+				pthread_mutex_lock(&execute_rules_lock);
 				d->remove_auction_rules(session_id, rule);
+				pthread_mutex_unlock(&execute_rules_lock);
 			}
 
 			d->report_async_event("REFRESH session died");

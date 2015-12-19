@@ -12,6 +12,7 @@ iptables -P INPUT ACCEPT
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 
+
 iptables -N FORWARD_UDP
 iptables -A FORWARD -p udp -s 0/0 -j FORWARD_UDP
 iptables -N natfwd_filter

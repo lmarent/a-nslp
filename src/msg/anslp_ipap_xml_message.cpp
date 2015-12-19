@@ -24,6 +24,7 @@
     $Id: anslp_ipap_xml_message.cpp 748 2015-09-07 18:20:00Z amarentes $
 */
 
+#include "stdincpp.h"
 #include <inttypes.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
@@ -782,6 +783,7 @@ anslp_ipap_xml_message::get_message(const anslp_ipap_message &mes)
 	split(mes);
 
 	try{
+		
 		xmlTextWriterPtr writer;
 		xmlBufferPtr buf;
 		createXmlMessage(writer, buf);

@@ -39,10 +39,13 @@
 #include <stdexcept>
 
 
+
 namespace anslp 
 {
     using protlib::uint32;
     using protlib::hostaddress;
+
+extern pthread_mutex_t execute_rules_lock;
 
 class event;
 class api_configure_event;

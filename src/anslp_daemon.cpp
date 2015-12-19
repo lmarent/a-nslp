@@ -290,8 +290,12 @@ void anslp_daemon::main_loop(uint32 thread_id) {
 		
 		
 		
-		if ( msg == NULL )
+		if ( msg == NULL ){
 			continue;	// no message in the queue
+			LogDebug("dispatcher thread #" << thread_id
+					<< " no message in queue" );
+			
+		}
 
 
 		LogDebug("dispatcher thread #" << thread_id

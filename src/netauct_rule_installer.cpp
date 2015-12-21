@@ -501,7 +501,9 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
 			msg::information_code::sc_signaling_session_failures,
 			msg::information_code::sigfail_auction_connection_broken);
 	}
-
+	
+	LogDebug("after easily init" );
+	
 	memset(cebuf, 0, sizeof(cebuf));
     xmlSubstituteEntitiesDefault(1);
     xmlLoadExtDtdDefaultValue = 1;
@@ -513,6 +515,8 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
 			msg::information_code::sigfail_auction_connection_broken);
 	}
 
+	LogDebug("Here -1 " << res);	
+	
 #ifdef USE_SSL
     use_ssl = 1;
     curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
@@ -526,13 +530,17 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
 #endif
 
+	LogDebug("Here -2 " << res);	
+
     // debug
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, cebuf);
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &response);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writedata);
-   
+	
+	LogDebug("Here -3 " << res);	
+	
     curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd.c_str());
   
     ostringstream url;
@@ -553,8 +561,9 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
     char *_url = strdup(url.str().c_str());
     curl_easy_setopt(curl, CURLOPT_URL, _url);
     post_body =  curl_escape(post_fields.c_str(), post_fields.length());	
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_body);
-		
+    
+    
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_body);		
     res = curl_easy_perform(curl);
     
    	LogDebug("Here # response " << res);	

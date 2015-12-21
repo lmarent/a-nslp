@@ -564,8 +564,9 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
     
     
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_body);		
-    res = curl_easy_perform(curl);
     
+    LogDebug("Here before doing perform " << res);	    	
+    res = curl_easy_perform(curl);
    	LogDebug("Here # response " << res);	
 
     

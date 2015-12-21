@@ -44,7 +44,7 @@ using namespace anslp;
 using namespace protlib::log;
 using protlib::uint32;
 
-
+#define LogError(msg) ERRLog("ni_session", msg)
 #define LogWarn(msg) Log(WARNING_LOG, LOG_NORMAL, "ni_session", msg)
 #define LogInfo(msg) Log(INFO_LOG, LOG_NORMAL, "ni_session", msg)
 #define LogDebug(msg) Log(DEBUG_LOG, LOG_NORMAL, "ni_session", msg)
@@ -707,27 +707,31 @@ ni_session::state_t ni_session::handle_state_auctioning(
 	 */
 	else if ( is_anslp_bidding(evt) ) {
 		LogDebug("received anslp bidding event");
-
-		msg_event *e = dynamic_cast<msg_event *>(evt);
-		ntlp_msg *msg = e->get_ntlp_msg();
-		anslp_bidding *bidding = e->get_bidding();
-						
-		// The message is for us, so we send it to the install policy
-		// These messages are without any response. 
-		// As it is implemented, we delegate the upper layer to retry to send them again.
-
-		session_id = get_id().to_string();
-			
-		std::vector<msg::anslp_mspec_object *> missing_objects;
-			
-		auction_rule * to_post = create_auction_rule(bidding);
 		
-		auction_rule * result = d->auction_interaction(false, session_id, to_post);
+		try{
+			msg_event *e = dynamic_cast<msg_event *>(evt);
+			ntlp_msg *msg = e->get_ntlp_msg();
+			anslp_bidding *bidding = e->get_bidding();
+							
+			// The message is for us, so we send it to the install policy
+			// These messages are without any response. 
+			// As it is implemented, we delegate the upper layer to retry to send them again.
+
+			session_id = get_id().to_string();
+				
+			std::vector<msg::anslp_mspec_object *> missing_objects;
+				
+			auction_rule * to_post = create_auction_rule(bidding);
+			
+			auction_rule * result = d->auction_interaction(false, session_id, to_post);
+			
+			saveDelete(to_post);
+				
+			saveDelete(result);
 		
-		saveDelete(to_post);
-			
-		saveDelete(result);
-			
+		} catch (auction_rule_installer_error &e){
+			LogError(e.get_msg());
+		}
 		LogDebug("Ending state handle_state_auctioning - bidding event ");
 		
 		return STATE_ANSLP_AUCTIONING; // no change

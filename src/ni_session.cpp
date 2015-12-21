@@ -546,13 +546,15 @@ ni_session::state_t ni_session::handle_state_pending(
 				rule->set_request_object(*iter);
 			}
 			session_id = get_id().to_string();
+			auction_rule * result = NULL;
 
 			try{
 
-				auction_rule * result = d->send_response(session_id, rule);
+				result = d->send_response(session_id, rule);
 			
 			} catch (auction_rule_installer_error &e){
 				LogError(e.get_msg());
+				return STATE_ANSLP_CLOSE;
 			}
 			
 			if (rule->get_number_mspec_request_objects() 

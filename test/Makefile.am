@@ -9,6 +9,7 @@ ANSLPMSG_LLIB 	= anslp_msg
 
 test_runner_SOURCES =  @top_srcdir@/src/benchmark_journal.cpp \
 					   @top_srcdir@/src/gistka_mapper.cpp \
+					   @top_srcdir@/src/aqueue.cpp \
 					   @top_srcdir@/src/session_id.cpp \
 					   @top_srcdir@/src/dispatcher.cpp \
 					   @top_srcdir@/src/nf_session.cpp \
@@ -41,6 +42,7 @@ test_runner_SOURCES =  @top_srcdir@/src/benchmark_journal.cpp \
 					   @top_srcdir@/test/ni_session_test.cpp \
 					   @top_srcdir@/test/nf_session_test.cpp \
 					   @top_srcdir@/test/nr_session_test.cpp \
+					   @top_srcdir@/test/netauct_rule_installer_test.cpp \
 					   @top_srcdir@/test/test_runner.cpp
 
 if USE_WITH_SCTP

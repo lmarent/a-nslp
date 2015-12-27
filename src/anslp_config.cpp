@@ -69,7 +69,7 @@ anslp_config::registerAllPars()
   registerPar( new configpar<string>(anslp_realm, anslpconf_conffilename, "config", "configuration file name", true, "nsis-ka.conf") );
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_dispatcher_threads, "dispatcher-threads", "number of dispatcher threads", true, 1) );
   registerPar( new configpar<bool>(anslp_realm, anslpconf_is_auctioneer, "as-is-auctioneer", "NE is auctioneer", false, false) );
-  registerPar( new configpar<bool>(anslp_realm, anslpconf_install_auction_rules, "as-install-auction-rules", "ME install auction rules", false, false) );
+  registerPar( new configpar<bool>(anslp_realm, anslpconf_install_auction_rules, "as-install-auction-rules", "ME install auction rules", true, true) );
 
   registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_application, "as-auctioneer-application", "auctioneer application name", true, "auctionManager") );
   registerPar( new configpar<string>(anslp_realm, anslpconf_auctioneer_user, "as-auctioneer-user", "auctioneer application user", true, "admin") );

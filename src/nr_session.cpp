@@ -79,7 +79,7 @@ nr_session::nr_session(nr_session::state_t s, uint32 msn)
 		  msn_bidding(0), lifetime(0), max_lifetime(60), state_timer(this) 
 {
 	set_session_type(st_receiver);
-	set_msg_bidding_sequence_number(msn);
+	set_msg_sequence_number(msn);
 }
 
 
@@ -343,7 +343,9 @@ nr_session::handle_state_close(dispatcher *d, event *evt)
 		catch ( override_lifetime &exp) {
 			lifetime = get_max_lifetime();
 		}
+		
 		if ( lifetime > 0 ) {
+			
 			LogDebug("responder session initiated.");
 			set_lifetime(lifetime);
 			set_msg_sequence_number(msn);
@@ -393,6 +395,7 @@ nr_session::handle_state_close(dispatcher *d, event *evt)
 				return STATE_ANSLP_CLOSE;
 			}				
 		}
+		
 		else {
 			LogWarn("invalid lifetime.");
 			d->send_message( msg->create_response(
@@ -423,6 +426,8 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	 */
 	if ( is_anslp_refresh(evt) ) 
 	{
+		LogDebug(" is_anslp_refresh " );
+		
 		msg_event *e = dynamic_cast<msg_event *>(evt);
 		ntlp_msg *msg = e->get_ntlp_msg();
 		anslp_refresh *c = e->get_refresh();
@@ -443,13 +448,17 @@ nr_session::state_t nr_session::handle_state_auctioning(
 			d->send_message( msg->create_error_response(exp) );
 			return STATE_ANSLP_AUCTIONING;
 		}
-
+		
+		LogDebug(" duplicate response received. " << "msn:" << msn << "messaSN:" << get_msg_sequence_number());
+		
 		if ( ! is_greater_than(msn, get_msg_sequence_number()) ) {
+		
 			LogWarn("duplicate response received.");
 			return STATE_ANSLP_AUCTIONING; // no change
-		}
-		else if ( lifetime > 0 ) {
-			LogDebug("authentication succesful.");
+		
+		} else if ( lifetime > 0 ) {
+			
+			LogInfo("authentication succesful.");
 
 			set_lifetime(lifetime); // could be a new lifetime!
 			set_msg_sequence_number(msn);
@@ -461,9 +470,8 @@ nr_session::state_t nr_session::handle_state_auctioning(
 			state_timer.restart(d, lifetime);
 
 			return STATE_ANSLP_AUCTIONING; // no change
-		}
-		else if ( lifetime == 0 ) 
-		{
+		} else if ( lifetime == 0 ) {
+
 			LogInfo("terminating session on NI request.");
 		
 			session_id = get_id().to_string();
@@ -479,9 +487,7 @@ nr_session::state_t nr_session::handle_state_auctioning(
 			state_timer.stop();
 
 			return STATE_ANSLP_CLOSE;
-		}
-		else 
-		{
+		} else {
 			LogWarn("invalid lifetime.");
 
 			return STATE_ANSLP_AUCTIONING; // no change
@@ -492,6 +498,7 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	 * API bidding event received. The user wants to send an object to the auction server.
 	 */
 	else if ( is_anslp_bidding(evt) ) {
+		
 		LogDebug("received anslp bidding event");
 
 		msg_event *e = dynamic_cast<msg_event *>(evt);
@@ -525,6 +532,7 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	 * API bidding event received. The user wants to send an object to the auction server.
 	 */
 	else if ( is_api_bidding(evt) ) {
+		
 		LogDebug("received API bidding event");
 				
 		api_bidding_event *e = dynamic_cast<api_bidding_event *>(evt);
@@ -549,6 +557,7 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	 * The session timeout was triggered.
 	 */
 	else if ( is_timer(evt, state_timer) ) {
+		
 		LogWarn("session timed out.");
 		
 		session_id = get_id().to_string();
@@ -566,6 +575,8 @@ nr_session::state_t nr_session::handle_state_auctioning(
 	 */
 	else if ( is_timer(evt) ) 
 	{
+		LogDebug(" is_timer ");
+		
 		return STATE_ANSLP_AUCTIONING;// no change
 	}
 	else 

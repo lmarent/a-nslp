@@ -52,10 +52,12 @@ namespace anslp
 class anslp_daemon_param : public ThreadParam 
 {
   public:
-	anslp_daemon_param(const char *name, const anslp_config &conf)
-		: ThreadParam((uint32)-1, name), config(conf) { }
+	anslp_daemon_param(const char *name, const anslp_config &conf, FastQueue *installQueue=NULL)
+		: ThreadParam((uint32)-1, name), config(conf), installQueue(installQueue) { }
 
 	anslp_config config;
+	
+	FastQueue *installQueue;
 };
 
 
@@ -85,8 +87,11 @@ class anslp_daemon : public Thread {
 	session_manager session_mgr;
 		
 	auction_rule_installer *rule_installer;
+	
+	FastQueue *installQueue;
 
 	ThreadStarter<NTLPStarter, NTLPStarterParam> *ntlp_starter;
+	
 };
 
 

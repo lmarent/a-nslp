@@ -829,7 +829,10 @@ anslp_ipap_xml_message::get_message(const anslp_ipap_message &mes)
 		string content((const char *) buf->content);
 				
 		xmlBufferFree(buf);
-				
+
+#ifdef DEBUG
+	log->dlog(ch, "Ending get_message");
+#endif		
 		return content;
 	}
 	catch (anslp_ipap_bad_argument &e){

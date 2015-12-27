@@ -63,8 +63,7 @@ using namespace anslp::msg;
  */
 anslp_daemon::anslp_daemon(const anslp_daemon_param &param)
 		: Thread(param), config(param.config),
-		  session_mgr(&config), rule_installer(NULL), 
-		  ntlp_starter(NULL) {
+		  session_mgr(&config), rule_installer(NULL), installQueue(param.installQueue), ntlp_starter(NULL) {
 
 	startup();
 }
@@ -91,9 +90,13 @@ void anslp_daemon::startup() {
 	/*
 	 * Instantiate a operating system dependent auction rule installer.
 	 */
-	if ( (config.is_auctioneer() == true) || 
-		   (config.get_install_auction_rules() == true) ){
-		rule_installer = new netauct_rule_installer(&config);
+	
+	if (installQueue != NULL){
+		if ((config.is_auctioneer() == true) || (config.get_install_auction_rules() == true)){
+			rule_installer = new netauct_rule_installer(&config, installQueue);
+		} else {
+			rule_installer = new nop_auction_rule_installer(&config);
+		}	
 	} else {
 		rule_installer = new nop_auction_rule_installer(&config);
 	}
@@ -280,7 +283,7 @@ void anslp_daemon::main_loop(uint32 thread_id) {
 	LogInfo("dispatcher thread #"
 			<< thread_id << " waiting for incoming messages ...");
 
-	FastQueue *mnslp_input = get_fqueue();
+	protlib::FastQueue *mnslp_input = get_fqueue();
 
 	while ( get_state() == Thread::STATE_RUN ) {
 

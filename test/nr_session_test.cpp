@@ -319,8 +319,8 @@ ResponderTest::testAuctioning() {
 	 * STATE_AUCTIONING_PART ---[rx_REFRESH && MSN too low ]---> STATE_AUCTIONING_PART
 	 */
 	nr_session_test s4(nr_session::STATE_ANSLP_AUCTIONING, START_MSN);
-	event *e4 = new msg_event(NULL, create_anslp_refresh(START_MSN, 10), true);
-
+	event *e4 = new msg_event(NULL, create_anslp_refresh(10, 20), true);
+	
 	process(s4, e4);
 	ASSERT_STATE(s4, nr_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);

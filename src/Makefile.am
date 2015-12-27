@@ -26,6 +26,7 @@ pkginclude_HEADERS = $(INC_DIR)/anslp_config.h \
 					 $(INC_DIR)/mspec_rule_key.h \
 					 $(INC_DIR)/anslp_daemon.h \
 					 $(INC_DIR)/netauct_rule_installer.h \
+					 $(INC_DIR)/aqueue.h \
 					 $(INC_DIR)/anslp_timers.h \
 					 $(INC_DIR)/nf_session.h \
 					 $(INC_DIR)/auction_rule.h \
@@ -57,6 +58,7 @@ libanslp_la_CPPFLAGS += @LIBXML_CFLAGS@ @CURL_CFLAGS@ @LIBXSLT_CFLAGS@ @LIBUUID_
 
 libanslp_la_SOURCES = anslp_timers.cpp \
 					  auction_rule.cpp \
+					  aqueue.cpp \
 					  auction_rule_installer.cpp \
 					  benchmark_journal.cpp \
 					  dispatcher.cpp \

@@ -31,9 +31,12 @@
 
 
 #include "auction_rule_installer.h"
+#include "aqueue.h"
 
 namespace anslp 
 {
+
+extern pthread_mutex_t execute_rules_lock;
 
 typedef enum 
 {
@@ -52,7 +55,7 @@ class netauct_rule_installer : public auction_rule_installer
 	
   public:
 
-	netauct_rule_installer(anslp_config *conf) throw ();
+	netauct_rule_installer(anslp_config *conf, FastQueue *installQueue, bool test=false) throw ();
 
 	virtual ~netauct_rule_installer() throw ();
 
@@ -78,6 +81,23 @@ class netauct_rule_installer : public auction_rule_installer
 	//! Remove all auction sessions in an auction server.
 	virtual bool remove_all();
 
+  protected:
+
+	//! This function puts the objects in rule for processing in an auctioning server or 
+	//! auctioner user agent.
+	auction_rule * handle_create_session(const string sessionId, const auction_rule *rule);
+
+	//! This function throws an exception when there are not returning objects 
+	//! (there is not any auction satisfaying given criteria).
+	void handle_response_check(anslp::FastQueue *waitqueue) 
+			throw (auction_rule_installer_error);
+  
+	//! This function throws an exception when there is not an event in queue 
+	//! (update auc_return with the number of objects installed).
+    void handle_response_create(anslp::FastQueue *queue, auction_rule *auc_return);
+
+
+
   private:
 	
 	//! Cast the object to the ipap_message.
@@ -88,12 +108,17 @@ class netauct_rule_installer : public auction_rule_installer
 	string execute_command(rule_installer_destination_type_t destination, 
 								string action, string post_fields);
 
+	anslp::FastQueue * getQueue(){ return installQueue; }
+		
 	bool responseOk(string response);
 	
 	int getNumberAuctions(string response);
 	
 	string getMessage(string response);
-
+	
+	FastQueue *installQueue;
+	
+	bool test;
 };
 
 } // namespace anslp

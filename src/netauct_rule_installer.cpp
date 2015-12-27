@@ -45,7 +45,7 @@
 #include "anslp_ipap_message.h"
 #include "anslp_ipap_xml_message.h"
 #include "netauct_rule_installer.h"
-
+#include "aqueue.h"
 
 using namespace anslp;
 using namespace protlib::log;
@@ -65,9 +65,8 @@ using namespace protlib::log;
 
 
 
-netauct_rule_installer::netauct_rule_installer(
-		anslp_config *conf) throw () 
-		: auction_rule_installer(conf) 
+netauct_rule_installer::netauct_rule_installer(anslp_config *conf, FastQueue *installQueue, bool test) throw () 
+		: auction_rule_installer(conf), installQueue(installQueue) , test(test)
 {
 
 	// nothing to do
@@ -156,6 +155,34 @@ netauct_rule_installer::getMessage(string response)
 			
 }		
 
+void netauct_rule_installer::handle_response_check(anslp::FastQueue *waitqueue) 
+								throw (auction_rule_installer_error) 
+{
+	LogDebug("start handle_response_check()");
+	
+	AnslpEvent *ret_evt = waitqueue->dequeue_timedwait(10000);
+
+	if (!is_response_checksession_event(ret_evt)){
+		throw auction_rule_installer_error("Unexpected anslp event returned, expecting response_checksession",
+			msg::information_code::sc_signaling_session_failures,
+			msg::information_code::sigfail_wrong_conf_message);			
+	}
+
+	ResponseCheckSessionEvent *resAdd = 
+		dynamic_cast< ResponseCheckSessionEvent *>(ret_evt);
+						
+	// Loop through responses to see which of the them work. 			
+	if ( resAdd->getObjects()->size() == 0 ){
+		throw auction_rule_installer_error("No auction satisfying filter criteria",
+			msg::information_code::sc_signaling_session_failures,
+			msg::information_code::sigfail_auction_not_applicable);
+	}
+	
+	delete resAdd;
+	
+	LogDebug("ending handle_response_check()");
+}
+
 void 
 netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_object *object)
 		throw (auction_rule_installer_error) 
@@ -163,151 +190,142 @@ netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_obj
 	LogDebug("start check()");
 	
 	if (get_install_auction_rules()){
-	
-		string response;
-		string action = "/check_session";
 		
-		msg::anslp_ipap_xml_message mess;
-		string postfield = mess.get_message( *(get_ipap_message(object)) );
+		LogDebug("Installing check rule");
 		
-		LogDebug("check - message:" << postfield);
-		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-		response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
-		LogDebug("Reponse" + response);
+		anslp::FastQueue retQueue;
+		mspec_rule_key key;
+		
+		CheckEvent *evt = new CheckEvent(&retQueue);
+		evt->setSession(sessionId);
+		evt->setObject(key, object->copy());
+		
+		LogDebug("Installing check rule 1");
+		
+		bool queued = getQueue()->enqueue(evt);
+
+		if ( queued ){
 			
-		
-		if (!responseOk(response)){
-			throw auction_rule_installer_error(response,
-				msg::information_code::sc_signaling_session_failures,
-				msg::information_code::sigfail_wrong_conf_message);
-		} else  {
+			LogDebug("Installing check rule 2");
 			
-			if (getNumberAuctions(response) <= 0){
-				throw auction_rule_installer_error("No auction satisfying filter criteria",
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_auction_not_applicable);
+			if (!test){ // When testing mode, it does not wait.
+				handle_response_check(&retQueue);
 			}
+		} else { // Error Queuing the event.
+			
+			throw auction_rule_installer_error("Process could not enqueue the anslp event",
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);
 		}
-	
+
 		LogDebug("end check()");		
 	
 	} else {
 		LogDebug("NOP: check()");
-	}
-	
+	}	
 }
 
+void
+netauct_rule_installer::handle_response_create(anslp::FastQueue *waitqueue, auction_rule *auc_return)
+{
+
+	AnslpEvent *ret_evt = waitqueue->dequeue_timedwait(10000);
+	if (!is_response_addsession_event(ret_evt)){
+		throw auction_rule_installer_error("Unexpected anslp event returned, expecting response_addsession",
+			msg::information_code::sc_signaling_session_failures,
+			msg::information_code::sigfail_wrong_conf_message);			
+	}
+
+	ResponseAddSessionEvent *resAdd = 
+		dynamic_cast<ResponseAddSessionEvent *>(ret_evt);
+					
+	// Loop though the responses to see which of the them work. 
+	objectListIter_t j;
+			
+	for ( j = resAdd->getObjects()->begin(); j != resAdd->getObjects()->end(); j++){
+		auc_return->set_response_object(j->second->copy());
+	}
+
+	delete resAdd;
+}
+
+auction_rule * 
+netauct_rule_installer::handle_create_session(const string sessionId, const auction_rule *rule)
+{
+
+	int nbrObjects = 0;
+	anslp::FastQueue retQueue; 
+				
+	auction_rule *auc_return = new auction_rule(*rule);
+	objectListConstIter_t i;
+	objectList_t * requestObjectList = auc_return->get_request_objects();
+		
+	LogDebug("Nbr objects to install: " << requestObjectList->size());
+
+	AddSessionEvent *evt = new AddSessionEvent( &retQueue);
+	evt->setSession(sessionId);
+	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+		nbrObjects++;
+		evt->setObject(i->first, i->second->copy());
+	}
+		
+	bool queued = getQueue()->enqueue(evt);
+	if ( queued ){
+			
+		if (!test){ // When testing mode, it does not wait.
+			handle_response_create(&retQueue, auc_return);
+		}
+					
+	} else { // Error Queuing the event.
+			
+		throw auction_rule_installer_error("Process could not enqueue the anslp event",
+			msg::information_code::sc_signaling_session_failures,
+			msg::information_code::sigfail_wrong_conf_message);
+	}
+	
+	LogDebug("Finishing, put nbr objects:" << nbrObjects);
+	
+	return auc_return;
+
+}
 
 auction_rule * 
 netauct_rule_installer::create(const string sessionId, const auction_rule *rule) 
 {
 
+	assert(rule != NULL);
+	
 	LogDebug("Creating auction session " << *rule);
 	
-	if (get_install_auction_rules()){
+	auction_rule *rule_return;
 	
-		string response;
-		string action = "/add_session";
-		
-		auction_rule *auc_return = new auction_rule(*rule);
-		objectListConstIter_t i;
-		objectList_t * requestObjectList = auc_return->get_request_objects();
-		
-		LogDebug("Nbr objects to install: " << requestObjectList->size());
-		
-		// Loop through the objects and install them.
-		for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
-			
-			LogDebug("Installing object");
-			
-			msg::anslp_ipap_xml_message mess;
-			string postfield = mess.get_message( *(get_ipap_message(i->second)) );
-			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-			response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
-					
-			if (!responseOk(response)){
-				throw auction_rule_installer_error(response,
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);
-
-			} else {
-				string responseMsg = getMessage(response);
-				msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
-				(ipap_response->ip_message).output();
-				auc_return->set_response_object(ipap_response);
-			}
-		}	
-		
-		LogDebug("Finishing, put nbr objects:" << auc_return->get_response_objects());
+	if (get_install_auction_rules())
+	{
 	
-		return auc_return;
+		rule_return = handle_create_session(sessionId, rule);
+	
 	} else {
 
 		LogDebug("NOP: installing policy rule " << *rule);
-		auction_rule *rule_return;
+		rule_return = rule->copy(); 		
 		
-		if ( rule != NULL ){
-			rule_return = rule->copy(); 
-			
-			objectListConstIter_t i;
-			for ( i = rule_return->get_request_objects()->begin(); 
-						i != rule_return->get_request_objects()->end(); i++)
-			{
-				rule_return->set_response_object((i->second)->copy());
-			}
-		}
-		else{
-			rule_return = NULL;
-		}	
-		
-		return rule_return;
-	
 	}
 	
+	return rule_return;		
 }
 
 
 auction_rule * 
 netauct_rule_installer::put_response(const string sessionId, const auction_rule *rule) 
 {
+
+	LogDebug("start put response ");
+
 	if ( is_auctioneer() )
 	{
-	
-		LogDebug("Putting response " << *rule);
 		
-		string response;
-		string action = "/res_add_session";
-		
-		auction_rule *auc_return = new auction_rule(*rule);
-		objectListConstIter_t i;
-		objectList_t * requestObjectList = auc_return->get_request_objects();
-		
-		LogDebug("Nbr objects to install: " << requestObjectList->size());
-		
-		// Loop through the objects and install them.
-		for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+		return handle_create_session(sessionId, rule);
 			
-			LogDebug("Installing object");
-			
-			msg::anslp_ipap_xml_message mess;
-			string postfield = mess.get_message( *(get_ipap_message(i->second)) );
-			postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-			response = execute_command(RULE_INSTALLER_CLIENT, action, postfield);
-					
-			if (!responseOk(response)){
-				throw auction_rule_installer_error(response,
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);
-
-			} else {
-				// Copy the object as the response.
-				auc_return->set_response_object((i->second)->copy());
-			}
-		}	
-		
-		LogDebug("Finishing, put nbr objects:" << auc_return->get_response_objects());
-		
-		return auc_return;
 	} else {
 		throw auction_rule_installer_error("The Ni-Session agent is not configured as auctioneer",
 				msg::information_code::sc_signaling_session_failures,
@@ -327,6 +345,7 @@ netauct_rule_installer::remove(const string sessionId, const auction_rule *rule)
 
 		auction_rule *rule_return = new auction_rule(*rule);
 		
+		// TODO AM: finish this code.
 		// Iterate over the set of sessions associated with the auction
 		
 			//create the command with the session 
@@ -369,43 +388,37 @@ netauct_rule_installer::auction_interaction(const bool server, const string sess
 {
 
 	LogDebug("Creating auction interaction " << *rule);
-		
-	string response;
-	string action = "/auct_interact";
-		
+				
 	auction_rule *auc_return = new auction_rule(*rule);
 	objectListConstIter_t i;
 	objectList_t * requestObjectList = auc_return->get_request_objects();
-		
+
 	LogDebug("Nbr objects to post: " << requestObjectList->size());
-		
-	// Loop through the objects and install them.
+
+	AuctionInteractionEvent *evt = new AuctionInteractionEvent( );
+	evt->setSession(sessionId);
+	
 	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
-			
-		LogDebug("Posting object");
-			
-		msg::anslp_ipap_xml_message mess;
-		string postfield = mess.get_message( *(get_ipap_message(i->second)) );
-		postfield = "SessionID=" +  sessionId + "&Message=" + postfield;
-		if (server == true){
-			response = execute_command(RULE_INSTALLER_SERVER, action, postfield);
-		} else {
-			response = execute_command(RULE_INSTALLER_CLIENT, action, postfield);
+		evt->setObject(i->first, i->second->copy());
+	}
+		
+	bool queued = getQueue()->enqueue(evt);
+
+	if ( queued ){
+						
+		// it just believe that auction interactions were posted. 
+		
+		for ( i = evt->getObjects()->begin(); i != evt->getObjects()->end(); i++){
+			auc_return->set_response_object(i->second);
 		}
-					
-		if (!responseOk(response)){
-			throw auction_rule_installer_error(response,
+						
+	} else { // Error Queuing the event.
+			
+		throw auction_rule_installer_error("Process could not enqueue the anslp event",
 				msg::information_code::sc_signaling_session_failures,
 				msg::information_code::sigfail_wrong_conf_message);
-		} else {
-			string responseMsg = getMessage(response);
+	}
 				
-			msg::anslp_ipap_message *ipap_response = mess.from_message(responseMsg);
-			(ipap_response->ip_message).output();
-			auc_return->set_response_object(ipap_response);
-		}
-	}	
-		
 	LogDebug("Finishing, nbr objects posted:" << auc_return->get_response_objects());
 	
 	return auc_return;
@@ -561,7 +574,6 @@ netauct_rule_installer::execute_command(rule_installer_destination_type_t destin
     char *_url = strdup(url.str().c_str());
     curl_easy_setopt(curl, CURLOPT_URL, _url);
     post_body =  curl_escape(post_fields.c_str(), post_fields.length());	
-    
     
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_body);		
     

@@ -420,8 +420,8 @@ netauct_rule_installer::auction_interaction(const bool server, const string sess
 						
 		// it just believe that auction interactions were posted. 
 		
-		for ( i = evt->getObjects()->begin(); i != evt->getObjects()->end(); i++){
-			auc_return->set_response_object(i->second);
+		for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
+			auc_return->set_response_object(i->second->copy());
 		}
 						
 	} else { // Error Queuing the event.

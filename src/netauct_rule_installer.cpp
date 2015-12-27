@@ -229,6 +229,8 @@ void
 netauct_rule_installer::handle_response_create(anslp::FastQueue *waitqueue, auction_rule *auc_return)
 {
 
+	LogDebug("starting handle_response_create" );
+
 	AnslpEvent *ret_evt = waitqueue->dequeue_timedwait(10000);
 	if (!is_response_addsession_event(ret_evt)){
 		throw auction_rule_installer_error("Unexpected anslp event returned, expecting response_addsession",
@@ -247,11 +249,15 @@ netauct_rule_installer::handle_response_create(anslp::FastQueue *waitqueue, auct
 	}
 
 	delete resAdd;
+	
+	LogDebug("ending handle_response_create" );
 }
 
 auction_rule * 
 netauct_rule_installer::handle_create_session(const string sessionId, const auction_rule *rule)
 {
+
+	LogDebug("starting handle_create_session" );
 
 	int nbrObjects = 0;
 	anslp::FastQueue retQueue; 
@@ -260,7 +266,15 @@ netauct_rule_installer::handle_create_session(const string sessionId, const auct
 	objectListConstIter_t i;
 	objectList_t * requestObjectList = auc_return->get_request_objects();
 		
-	LogDebug("Nbr objects to install: " << requestObjectList->size());
+	LogDebug("Nbr objects to install: " << requestObjectList->size() << "in queue:" << getQueue()->get_name());
+
+	pthread_id_np_t   tid;
+	pthread_t         self;
+	self = pthread_self();
+	pthread_getunique_np(&self, &tid);
+
+    LogDebug("it is going to create the session - threadid:" << tid);
+
 
 	AddSessionEvent *evt = new AddSessionEvent( &retQueue);
 	evt->setSession(sessionId);

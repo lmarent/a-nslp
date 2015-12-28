@@ -33,7 +33,6 @@
 #include "address.h"
 #include "logfile.h"
 #include <pthread.h>
-#include <sys/syscall.h>
 
 // curl includes
 #include <curl/curl.h>
@@ -269,9 +268,6 @@ netauct_rule_installer::handle_create_session(const string sessionId, const auct
 	objectList_t * requestObjectList = auc_return->get_request_objects();
 		
 	LogDebug("Nbr objects to install: " << requestObjectList->size() << "in queue:" << getQueue()->get_name());
-
-
-    LogDebug("it is going to create the session - pid:" << getpid() << "getthread_self:" << pthread_self() << "tid:" << syscall(SYS_gettid));
 
 
 	AddSessionEvent *evt = new AddSessionEvent( &retQueue);

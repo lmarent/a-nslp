@@ -188,9 +188,7 @@ void NetAuctRuleInstallerTest::testCheck()
 		reponse.enqueue(resCheck);
 		
 		installer->handle_response_check(&reponse);
-		
-		cout << "I am fine 2" << endl;
-		
+				
 	} catch (auction_rule_installer_error &e){
 		throw e;
 	}
@@ -345,20 +343,49 @@ void NetAuctRuleInstallerTest::testPutResponse()
 void NetAuctRuleInstallerTest::testRemove()
 {
 	string sessionId = "123456";
-	/*
+	
+	auction_rule *rule = NULL;	
+	
 	try{
-	
-		installer->put_response( sessionId, mess1 );
-	
-		AnslpEvent *ret_evt = queueRet->dequeue_timedwait(10000);
-	
-	} catch (auction_rule_installer_error &e){
 		
+		rule = new auction_rule();
+		
+		mspec_rule_key key1;
+		rule->set_request_object(key1, mess1->copy());
+		
+		mspec_rule_key key2;
+		rule->set_request_object(key2, mess2->copy());
+
+		AnslpEvent *ret_evt = NULL;
+		
+		installer->handle_remove_session( sessionId, rule );
+
+		ret_evt = queueRet->dequeue_timedwait(100);
+		
+		// Verify that it creates a new remove session event, 
+		// which will be given to the auction server or auction client.
+		CPPUNIT_ASSERT( ret_evt != NULL);
+		CPPUNIT_ASSERT( is_removesession_event(ret_evt) == true);
+		
+		anslp::FastQueue reponse;
+		
+		mspec_rule_key key;
+	
+		// test an exception when it is given a not waited message
+		ResponseCheckSessionEvent *resCreate = new ResponseCheckSessionEvent();
+		
+		reponse.enqueue(resCreate);
+		
+		CPPUNIT_ASSERT_THROW( installer->handle_response_remove(&reponse, rule), auction_rule_installer_error);
+
+
+	} catch (auction_rule_installer_error &e){
+		if (rule != NULL)
+			saveDelete(rule);
+		
+		throw e;
 	}
 	
-	CPPUNIT_ASSERT( ret_evt != NULL);
-	CPPUNIT_ASSERT( is_addsession_event(ret_evt) == true);
-	*/ 
 }
 
 void NetAuctRuleInstallerTest::testAuctionInteraction()

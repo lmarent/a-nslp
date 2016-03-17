@@ -51,7 +51,9 @@ typedef enum
    ANLSP_CREATE_CHECK_SESSION,
    ANLSP_RESPONSE_CREATE_SESSION,
    ANLSP_RESPONSE_CREATE_CHECK_SESSION,
-   ANSLP_AUCTION_INTERACTION
+   ANSLP_AUCTION_INTERACTION,
+   ANSLP_REMOVE_SESSION,
+   ANSLP_RESPONSE_REMOVE_SESSION
 } anslp_event_t;
 
 
@@ -210,6 +212,40 @@ class AuctionInteractionEvent: public AnslpEvent
 		
 };
 
+class RemoveSessionEvent: public AnslpEvent
+{
+	private:
+				
+		///! Fast queue where we have to put the return. 
+		///! It can be NULL, in which case this event is processed without response
+		anslp::FastQueue *ret; 
+	
+	public:
+		//! ctrlcomm events always expire now
+		RemoveSessionEvent( anslp::FastQueue * _ret): 
+			AnslpEvent(ANSLP_REMOVE_SESSION), ret(_ret){}
+		
+		virtual ~RemoveSessionEvent() {}
+				
+		anslp::FastQueue * getQueue()
+		{
+			return ret;
+		}
+};
+
+
+class ResponseRemoveSessionEvent: public AnslpEvent
+{
+					
+	public:
+		//! ctrlcomm events always expire now
+		ResponseRemoveSessionEvent( ): 
+			AnslpEvent(ANSLP_RESPONSE_REMOVE_SESSION) {}
+		
+		virtual ~ResponseRemoveSessionEvent() {}
+				
+};
+
 
 inline bool is_check_event(const AnslpEvent *evt) 
 {
@@ -234,6 +270,16 @@ inline bool is_response_checksession_event(const AnslpEvent *evt)
 inline bool is_auction_interaction_event(const AnslpEvent *evt) 
 {
 	return dynamic_cast<const AuctionInteractionEvent *>(evt) != NULL;
+}
+
+inline bool is_removesession_event(const AnslpEvent *evt)
+{
+	return dynamic_cast<const RemoveSessionEvent *>(evt) != NULL;
+}
+
+inline bool is_response_removesession_event(const AnslpEvent *evt) 
+{
+	return dynamic_cast<const ResponseRemoveSessionEvent *>(evt) != NULL;
 }
 
 /** @addtogroup fastqueue Fast Queue

@@ -110,7 +110,12 @@ AnslpEvent *FastQueue::dequeue_timedwait(const long int msec)
   struct timespec tspec = {0,0};
   tspec.tv_sec = msec/1000;
   tspec.tv_nsec = (msec%1000)*1000000;
-  return (AnslpEvent*)dequeue_element_timedwait(queue, &tspec);
+  void* message = dequeue_element_timedwait(queue, &tspec);
+  if (message != NULL){
+	return (AnslpEvent*) message;
+  } else {
+	return NULL;
+  }
 }
 
 

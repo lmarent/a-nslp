@@ -33,6 +33,7 @@
 #include "address.h"
 #include "logfile.h"
 #include <pthread.h>
+#include <sys/syscall.h>
 
 // curl includes
 #include <curl/curl.h>
@@ -231,26 +232,66 @@ netauct_rule_installer::handle_response_create(anslp::FastQueue *waitqueue, auct
 {
 
 	LogDebug("starting handle_response_create" );
-
-	AnslpEvent *ret_evt = waitqueue->dequeue_timedwait(10000);
-	if (!is_response_addsession_event(ret_evt)){
-		throw auction_rule_installer_error("Unexpected anslp event returned, expecting response_addsession",
-			msg::information_code::sc_signaling_session_failures,
-			msg::information_code::sigfail_wrong_conf_message);			
-	}
-
-	ResponseAddSessionEvent *resAdd = 
-		dynamic_cast<ResponseAddSessionEvent *>(ret_evt);
-					
-	// Loop though the responses to see which of the them work. 
-	objectListIter_t j;
-			
-	for ( j = resAdd->getObjects()->begin(); j != resAdd->getObjects()->end(); j++){
-		auc_return->set_response_object(j->second->copy());
-	}
-
-	delete resAdd;
 	
+	if (waitqueue != NULL){
+	
+		AnslpEvent *ret_evt = waitqueue->dequeue_timedwait(10000);
+		
+		if (!is_response_addsession_event(ret_evt)){
+			
+			if (is_check_event(ret_evt)){
+				throw auction_rule_installer_error("Unexpected check event returned, expecting response_addsession",
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);
+			}
+
+			if (is_addsession_event(ret_evt)){
+				throw auction_rule_installer_error("Unexpected addSession event returned, expecting response_addsession",
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);			
+			}
+
+			if (is_response_checksession_event(ret_evt)){
+				throw auction_rule_installer_error("Unexpected response_checkevent event returned, expecting response_addsession",
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);			
+			}
+
+			if (is_auction_interaction_event(ret_evt)){
+				throw auction_rule_installer_error("Unexpected auction interaction event returned, expecting response_addsession",
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);			
+			}
+
+			if (is_removesession_event(ret_evt)){
+				throw auction_rule_installer_error("Unexpected remove session event returned, expecting response_addsession",
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);			
+			}
+
+			if (is_response_removesession_event(ret_evt)){
+				throw auction_rule_installer_error("Unexpected response_removesession event returned, expecting response_addsession",
+					msg::information_code::sc_signaling_session_failures,
+					msg::information_code::sigfail_wrong_conf_message);			
+			}
+					
+		}
+
+		ResponseAddSessionEvent *resAdd = 
+			dynamic_cast<ResponseAddSessionEvent *>(ret_evt);
+						
+		// Loop though the responses to see which of the them work. 
+		objectListIter_t j;
+				
+		for ( j = resAdd->getObjects()->begin(); j != resAdd->getObjects()->end(); j++){
+			auc_return->set_response_object(j->second->copy());
+		}
+
+		delete resAdd;
+		
+	} else {
+		LogDebug("error handle_response_create" );
+	}
 	LogDebug("ending handle_response_create" );
 }
 
@@ -300,7 +341,7 @@ netauct_rule_installer::handle_create_session(const string sessionId, const auct
 	LogDebug("Nbr objects to install: " << requestObjectList->size() << "in queue:" << getQueue()->get_name());
 
 
-	AddSessionEvent *evt = new AddSessionEvent( &retQueue);
+	AddSessionEvent *evt = new AddSessionEvent(&retQueue);
 	evt->setSession(sessionId);
 	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
 		nbrObjects++;
@@ -311,6 +352,10 @@ netauct_rule_installer::handle_create_session(const string sessionId, const auct
 	if ( queued ){
 			
 		if (!test){ // When testing mode, it does not wait.
+		LogDebug("it is going to create the session - procid:" << 
+				 getpid() << " - getthread_self:" << pthread_self() 
+				 << " tid:" << syscall(SYS_gettid) );
+
 			handle_response_create(&retQueue, auc_return);
 		}
 					

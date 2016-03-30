@@ -87,6 +87,10 @@ class netauct_rule_installer : public auction_rule_installer
 	//! auctioner user agent.
 	auction_rule * handle_create_session(const string sessionId, const auction_rule *rule);
 
+	//! This function puts the objects in rule for removing in an auctioning server or 
+	//! auctioner user agent.
+	auction_rule * handle_remove_session(const string sessionId, const auction_rule *rule);
+
 	//! This function throws an exception when there are not returning objects 
 	//! (there is not any auction satisfaying given criteria).
 	void handle_response_check(anslp::FastQueue *waitqueue) 
@@ -96,7 +100,10 @@ class netauct_rule_installer : public auction_rule_installer
 	//! (update auc_return with the number of objects installed).
     void handle_response_create(anslp::FastQueue *queue, auction_rule *auc_return);
 
-
+	//! This function throws an exception when there is not an event in queue 
+	//! (update auc_return with the number of objects installed).
+	void
+	handle_response_remove(anslp::FastQueue *waitqueue, auction_rule *auc_return);
 
   private:
 	

@@ -132,6 +132,8 @@ void anslp_ipap_message_splitter::split( const anslp_ipap_message &message )
 			} catch (ipap_bad_argument &e){
 				throw Error("anslp_ipap_xml_message: error while reading data record %s", e.what());
 			}	
+		
+			saveDelete(templ);
 		}
 	}
 

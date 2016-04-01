@@ -346,6 +346,7 @@ ni_session::create_auction_rule(anslp_bidding *bidding)
 	{
 		const anslp_mspec_object *object = *it_objects;
 		to_post->set_request_object(object->copy());
+		saveDelete(object);
 	}
 	
 	LogDebug("End create_auction_rule - objects inserted:" 

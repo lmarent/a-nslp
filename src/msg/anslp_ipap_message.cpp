@@ -308,7 +308,9 @@ anslp_ipap_message::deserialize_body(NetMsg &msg, uint16 body_length,
 		}
 	}	
 	msg.set_pos(start_pos + body_length);
-
+	
+	free(messdef);
+	
 #ifdef DEBUG
     log->dlog(ch, "ending deserialize_body" );
 #endif	

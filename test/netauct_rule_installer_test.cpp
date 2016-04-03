@@ -270,9 +270,9 @@ void NetAuctRuleInstallerTest::testCreate()
 		ResponseAddSessionEvent *resCreate = new ResponseAddSessionEvent();
 		resCreate->setObject(key, mess3->copy());
 		
-		reponse.enqueue(resCreate);
+		// reponse.enqueue(resCreate);
 		
-		installer->handle_response_create(&reponse, rule);
+		installer->handle_response_create(sessionId, &reponse, rule);
 		
 		saveDelete(rule);
 	
@@ -315,7 +315,7 @@ void NetAuctRuleInstallerTest::testCreateException1()
 		
 	reponse.enqueue(resCreate);
 		
-	CPPUNIT_ASSERT_THROW( installer->handle_response_create(&reponse, rule), auction_rule_installer_error);
+	CPPUNIT_ASSERT_THROW( installer->handle_response_create(sessionId, &reponse, rule), auction_rule_installer_error);
 
 }
 

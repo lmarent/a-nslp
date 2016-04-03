@@ -53,7 +53,8 @@ typedef enum
    ANLSP_RESPONSE_CREATE_CHECK_SESSION,
    ANSLP_AUCTION_INTERACTION,
    ANSLP_REMOVE_SESSION,
-   ANSLP_RESPONSE_REMOVE_SESSION
+   ANSLP_RESPONSE_REMOVE_SESSION,
+   ANSLP_CREATE_ANSLP_SESSION
 } anslp_event_t;
 
 
@@ -166,6 +167,32 @@ class ResponseCheckSessionEvent: public AnslpEvent
 		
 };
 
+
+class AddAnslpSessionEvent: public AnslpEvent
+{
+	private:
+		string sessionId;
+		anslp::session_id anslpSession;
+		
+	public:
+	
+		AddAnslpSessionEvent( string _sessionId, anslp::session_id _anslpSession): 
+			AnslpEvent(ANSLP_CREATE_ANSLP_SESSION), sessionId(_sessionId), 
+			anslpSession(_anslpSession){}
+		
+		virtual ~AddAnslpSessionEvent() {}
+				
+		string getSession()
+		{
+			return sessionId;
+		}
+		
+		anslp::session_id getAnslpSession()
+		{
+			return anslpSession;
+		}
+}
+
 class AddSessionEvent: public AnslpEvent
 {
 	private:
@@ -255,6 +282,11 @@ inline bool is_check_event(const AnslpEvent *evt)
 inline bool is_addsession_event(const AnslpEvent *evt) 
 {
 	return dynamic_cast<const AddSessionEvent *>(evt) != NULL;
+}
+
+inline bool is_add_anslp_session_event(const AnslpEvent *evt)
+{
+	return dynamic_cast<const AddAnslpSessionEvent *>(evt) != NULL;
 }
 
 inline bool is_response_addsession_event(const AnslpEvent *evt) 

@@ -38,6 +38,8 @@
 #include "dispatcher.h"
 #include "ni_session.h"
 #include <iostream>
+#include <pthread.h>
+#include <sys/syscall.h>
 
 
 using namespace anslp;
@@ -180,7 +182,9 @@ msg::ntlp_msg *ni_session::build_create_message(api_create_event *e,
 	 * Wrap the Configure inside an ntlp_msg and add session ID and MRI.
 	 */
 	ntlp_msg *msg = new ntlp_msg(get_id(), create, get_mri()->copy(), 0);
-
+	
+	
+	
 	return msg;
 }
 
@@ -370,13 +374,17 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 	using msg::anslp_create;
 	std::vector<msg::anslp_mspec_object *> missing_objects;
 
-	LogDebug("Initiating state handle_state_close ");
+	LogInfo("Initiating state handle_state_close ");
 
 	/*
 	 * API Create event received.
 	 */	
 	if ( is_api_create(evt) ) {
 		api_create_event *e = dynamic_cast<api_create_event *>(evt);
+		
+		LogInfo("after enqueueing the response to tg_create - procid:" << 
+				 getpid() << " - getthread_self:" << pthread_self() 
+				 << " tid:" << syscall(SYS_gettid));
 		
 		// Initialize the session based on user-provided parameters
 		setup_session(d, e, missing_objects);
@@ -387,14 +395,7 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 		d->send_message( get_last_create_message()->copy() );
 		
 		response_timer.start(d, get_response_timeout());
-
-		// Send the response saying that an event was processed for the
-		// new session id.
-		if ( e->get_return_queue() != NULL ) {
-			message *m = new anslp_event_msg(get_id(), NULL);
-			e->get_return_queue()->enqueue(m);
-		}
-
+						
 		// Release the memory allocated to the missing objects vector
 		std::vector<msg::anslp_mspec_object *>::iterator it_objects;
 		for ( it_objects = missing_objects.begin(); 
@@ -403,9 +404,25 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 			delete(*it_objects);
 		}
 		missing_objects.clear();
+
+		// Send the response saying that an event was processed for the
+		// new session id.
+		if ( e->get_return_queue() != NULL ) {
+			
+			AddAnslpSessionEvent *evtRet = new AddAnslpSessionEvent( e->get_session_id(), get_id() );
+			e->get_return_queue()->enqueue(evtRet);
+			
+			LogDebug("Ending state handle_state_close - New State PENDING ");
+			return STATE_ANSLP_PENDING;
+			
+		} else { 
 		
-		LogDebug("Ending state handle_state_close - New State PENDING ");
-		return STATE_ANSLP_PENDING;
+			LogError("Error: the queue to return is null - procid:" << 
+				 getpid() << " - getthread_self:" << pthread_self() 
+				 << " tid:" << syscall(SYS_gettid));
+				 
+			return STATE_ANSLP_CLOSE;
+		}
 		
 	}
 	/*

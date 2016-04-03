@@ -36,7 +36,6 @@
 namespace anslp 
 {
 
-extern pthread_mutex_t execute_rules_lock;
 
 typedef enum 
 {
@@ -98,7 +97,7 @@ class netauct_rule_installer : public auction_rule_installer
   
 	//! This function throws an exception when there is not an event in queue 
 	//! (update auc_return with the number of objects installed).
-    void handle_response_create(anslp::FastQueue *queue, auction_rule *auc_return);
+    void handle_response_create(const string sessiondId, anslp::FastQueue *queue, auction_rule *auc_return);
 
 	//! This function throws an exception when there is not an event in queue 
 	//! (update auc_return with the number of objects installed).

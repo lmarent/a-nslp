@@ -35,6 +35,10 @@
 #include "session_manager.h"
 
 
+#include <pthread.h>
+#include <sys/syscall.h>
+
+
 using namespace anslp;
 using namespace protlib::log;
 using protlib::uint32;
@@ -120,6 +124,11 @@ ni_session *session_manager::create_ni_session()
 	session_table[s->get_id()] = s;
 
 	LogInfo("created new NI session " << s->get_id());
+
+    LogInfo("it is going to create the session - procid" << getpid() <<
+            " - getthread_self:" << pthread_self() <<
+            " tid:" <<  syscall(SYS_gettid) );
+
 
 	pthread_mutex_unlock(&mutex);
 	uninstall_cleanup_handler();

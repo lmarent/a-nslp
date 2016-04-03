@@ -76,7 +76,7 @@ pkginclude_HEADERS   = 	$(INC_DIR)/anslp_bidding.h \
 
 if ENABLE_DEBUG
   AM_CXXFLAGS = -I$(top_srcdir)/include \
-				-g  -fno-inline -DDEBUG @LIBXML2_CFLAGS@ -ggdb
+				-g  -fno-inline -DDEBUG @LIBXML2_CFLAGS@
 else
   AM_CXXFLAGS = -I$(top_srcdir)/include \
 				-O2 @LIBXML2_CFLAGS@ 

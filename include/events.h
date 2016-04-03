@@ -287,19 +287,19 @@ class api_create_event : public api_event {
 	
   public:
   
-	api_create_event(const hostaddress &source, const hostaddress &dest,
+	api_create_event(const string _session_id, const hostaddress &source, const hostaddress &dest,
 		uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0,
 		std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(), 
 		uint32 lifetime=0, 
 		selection_auctioning_entities::selection_auctioning_entities_t sel_auct_entities = selection_auctioning_entities::sme_any,
-		FastQueue *rq=NULL)
-		: api_event(), source_addr(source), dest_addr(dest),
+		FastQueue *rq = NULL)
+		: api_event(), session_id(_session_id) source_addr(source), dest_addr(dest),
 		  source_port(source_port), dest_port(dest_port), protocol(protocol), 
 		  mspec_objects(mspec_objects), session_lifetime(lifetime),  sel_auct_entities(sel_auct_entities),
 		  return_queue(rq) { }
 
 	virtual ~api_create_event();
-
+	inline string get_session_id() const { return session_id; }
 	inline hostaddress get_source_address() const { return source_addr; }
 	inline uint16 get_source_port() const { return source_port; }
 
@@ -322,6 +322,7 @@ class api_create_event : public api_event {
 
   private:
   
+	string session_id;
 	hostaddress source_addr;
 	hostaddress dest_addr;
 	uint16 source_port;

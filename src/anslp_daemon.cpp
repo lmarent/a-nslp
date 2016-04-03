@@ -283,27 +283,26 @@ void anslp_daemon::main_loop(uint32 thread_id) {
 	LogInfo("dispatcher thread #"
 			<< thread_id << " waiting for incoming messages ...");
 
-	protlib::FastQueue *mnslp_input = get_fqueue();
-
 	while ( get_state() == Thread::STATE_RUN ) {
 
 
 		// A timeout makes sure the loop condition is checked regularly.
-		message *msg = mnslp_input->dequeue_timedwait(1000);
-		
-		
+		message *msg = get_fqueue()->dequeue_timedwait(100);
 		
 		if ( msg == NULL ){
 			continue;	// no message in the queue
-			LogDebug("dispatcher thread #" << thread_id
+			LogInfo("dispatcher thread #" << thread_id
 					<< " no message in queue" );
 			
 		}
+		
+		LogInfo("dispatcher thread #" << thread_id
+					<< " no message in queue" );
 
 
-		LogDebug("dispatcher thread #" << thread_id
+		LogInfo("dispatcher thread #" << thread_id
 			<< " processing received message #" << msg->get_id()
-			<< " number of messages #"<< mnslp_input->size() );
+			<< " number of messages #"<< get_fqueue()->size() );
 			
 		MP(benchmark_journal::PRE_PROCESSING);
 

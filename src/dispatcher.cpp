@@ -37,6 +37,8 @@
 #include "events.h"
 #include "benchmark_journal.h"
 #include <iostream>
+#include <pthread.h>
+#include <sys/syscall.h>
 
 
 using namespace anslp;
@@ -95,15 +97,20 @@ dispatcher::~dispatcher() {
 void dispatcher::process(event *evt) throw () {
 	assert( evt != NULL );
 
-	LogDebug("processing received event " << *evt);
+	LogInfo( "processing received event " << *evt  << "- procid:" <<  getpid() 
+				 << " - getthread_self:" << pthread_self() 
+				 << " tid:" << syscall(SYS_gettid));
 
 	// log all incoming A-NSLP messages for debugging
 	const msg_event *e = dynamic_cast<const msg_event *>(evt);
 	if ( e != NULL && e->get_ntlp_msg() != NULL ) {
 		assert( e->get_session_id() != NULL );
-		LogDebug("received message for session "
-				<< *(e->get_session_id()) << " "
-				<< *(e->get_ntlp_msg()));
+
+		LogInfo("SessionId:" << e->get_session_id() << "processing received event " 
+				 << *evt  << "- procid:" <<  getpid() 
+				 << " - getthread_self:" << pthread_self() 
+				 << " tid:" << syscall(SYS_gettid));
+
 	}
 
 	/*

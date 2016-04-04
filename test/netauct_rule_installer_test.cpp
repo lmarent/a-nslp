@@ -270,7 +270,7 @@ void NetAuctRuleInstallerTest::testCreate()
 		ResponseAddSessionEvent *resCreate = new ResponseAddSessionEvent();
 		resCreate->setObject(key, mess3->copy());
 		
-		// reponse.enqueue(resCreate);
+		reponse.enqueue(resCreate);
 		
 		installer->handle_response_create(sessionId, &reponse, rule);
 		

@@ -44,8 +44,9 @@ class InitiatorTest : public CppUnit::TestCase {
 
 	CPPUNIT_TEST( testClose );
 	CPPUNIT_TEST( testPending );
-	//CPPUNIT_TEST( testAuctioning );
-	//CPPUNIT_TEST( testIntegratedStateMachine );
+	CPPUNIT_TEST( testPendingInstalling );
+	CPPUNIT_TEST( testAuctioning );
+	CPPUNIT_TEST( testIntegratedStateMachine );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -57,6 +58,7 @@ class InitiatorTest : public CppUnit::TestCase {
 
 	void testClose();
 	void testPending();
+	void testPendingInstalling();
 	void testAuctioning();
 	void testIntegratedStateMachine();
 
@@ -68,6 +70,10 @@ class InitiatorTest : public CppUnit::TestCase {
 	msg::ntlp_msg *create_anslp_create() const;
 
 	msg::ntlp_msg *create_anslp_response(
+		uint8 severity, uint8 response_code, uint16 msg_type,
+		uint32 msn=START_MSN) const;
+
+	anslp_response *create_anslp_response_with_objects(
 		uint8 severity, uint8 response_code, uint16 msg_type,
 		uint32 msn=START_MSN) const;
 
@@ -230,6 +236,22 @@ msg::ntlp_msg *InitiatorTest::create_anslp_response(uint8 severity,
 	return new msg::ntlp_msg(session_id(), resp, ntlp_mri, 0);
 }
 
+anslp_response *InitiatorTest::create_anslp_response_with_objects(uint8 severity,
+		uint8 response_code, uint16 msg_type, uint32 msn) const {
+
+	anslp_response *resp = new anslp_response();
+	resp->set_information_code(severity, response_code, 
+							   information_code::obj_none);
+	resp->set_msg_sequence_number(msn);
+
+	resp->set_mspec_object(mess1->copy());
+	resp->set_mspec_object(mess2->copy());
+	resp->set_mspec_object(mess3->copy());
+
+	return resp;
+}
+
+
 msg::ntlp_msg *InitiatorTest::create_anslp_refresh() const {
 
 	msg::anslp_refresh *refresh = new anslp_refresh();
@@ -247,8 +269,13 @@ msg::ntlp_msg *InitiatorTest::create_anslp_refresh() const {
 
 void InitiatorTest::testClose() 
 {
+	anslp::FastQueue *output=new anslp::FastQueue();
+	string sessionIdIn = "12345678901223";
+	AnslpEvent * anslpEvt = NULL;
+	
 	/*
-	 * STATE_ANSLP_CLOSE ---[tg_CONF]---> PENDING
+	 * STATE_ANSLP_CLOSE ---[tg_CONF]---> STATE_ANSLP_CLOSE
+	 * This part tests when no queue was given, so response could not be delivered.
 	 */
 	ni_session_test s1(ni_session::STATE_ANSLP_CLOSE);
 	vector<msg::anslp_mspec_object *> mspec_objects;
@@ -256,25 +283,30 @@ void InitiatorTest::testClose()
 	mspec_objects.push_back(mess2->copy());
 	mspec_objects.push_back(mess3->copy());
 		
-	event *e1 = new api_create_event(source, destination);
+	event *e1 = new api_create_event(sessionIdIn, source, destination);
 
 	process(s1, e1);
-	ASSERT_STATE(s1, ni_session::STATE_ANSLP_PENDING);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s1.get_response_timer());
-	
-	
-	event *e2 = new api_create_event(source,destination,(protlib::uint16) 0, 
+		
+	event *e2 = new api_create_event(sessionIdIn, source,destination,(protlib::uint16) 0, 
 									 (protlib::uint16) 0, (protlib::uint8) 0,
 									  mspec_objects, conf->get_ni_session_lifetime(),
-									  selection_auctioning_entities::sme_any, NULL);
+									  selection_auctioning_entities::sme_any, output);
 	
 	ni_session_test s2(ni_session::STATE_ANSLP_CLOSE);
 	process(s2, e2);
 	ASSERT_STATE(s2, ni_session::STATE_ANSLP_PENDING);
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s2.get_response_timer());
-
+	
+	CPPUNIT_ASSERT( output->size() == 1 );
+	anslpEvt = output->dequeue();
+	CPPUNIT_ASSERT(anslpEvt != NULL && \
+					dynamic_cast<anslp::AddAnslpSessionEvent *>(anslpEvt) != NULL );
+	saveDelete(anslpEvt);
+	
 
 	ni_session_test s3(ni_session::STATE_ANSLP_CLOSE);
 
@@ -302,7 +334,7 @@ void InitiatorTest::testPending()
 {
 		
 	/*
-	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_AUCTIONING
+	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_PENDING_INSTALLING
 	 */
 	ni_session_test s1(ni_session::STATE_ANSLP_PENDING);
 	s1.set_last_create_message(create_anslp_create());
@@ -314,9 +346,9 @@ void InitiatorTest::testPending()
 	event *e1 = new msg_event(NULL, resp1);
 
 	process(s1, e1);
-	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_PENDING_INSTALLING);
 	ASSERT_NO_MESSAGE(d);
-	ASSERT_TIMER_STARTED(d, s1.get_refresh_timer());
+	ASSERT_TIMER_STARTED(d, s1.get_response_timer());
 
 
 	/*
@@ -419,6 +451,166 @@ void InitiatorTest::testPending()
 	ASSERT_NO_TIMER(d);
 
 }
+
+
+void InitiatorTest::testPendingInstalling() 
+{
+	
+	string sessionIdIn = "12345678901223";
+		
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[tg_install(NBR_OBJECTS = NBR_OBJECTS)]---> STATE_ANSLP_AUCTIONING
+	 */
+	anslp_response *resp1 = create_anslp_response_with_objects(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none);
+			
+	ni_session_test s1(ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	s1.set_last_create_message(create_anslp_create());
+	s1.set_last_auction_install_rule(s1.build_auction_install_rule(resp1));
+
+	vector<msg::anslp_mspec_object *> mspec_objects;
+	mspec_objects.push_back(mess1->copy());
+	mspec_objects.push_back(mess2->copy());
+	mspec_objects.push_back(mess3->copy());
+		
+	event *e1 = new api_install_event(sessionIdIn, mspec_objects, NULL);
+
+	process(s1, e1);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_TIMER_STARTED(d, s1.get_refresh_timer());
+
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[tg_install(NBR_OBJECTS != NBR_OBJECTS)]---> CLOSE
+	 */
+	anslp_response *resp2 = create_anslp_response_with_objects(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none);
+    
+	ni_session_test s2(ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	s2.set_last_create_message(create_anslp_create());
+	s2.set_last_auction_install_rule(s2.build_auction_install_rule(resp2));
+	
+	vector<msg::anslp_mspec_object *> mspec_objects2;
+	mspec_objects2.push_back(mess1->copy());
+	mspec_objects2.push_back(mess2->copy());
+
+	event *e2 = new api_install_event(sessionIdIn, mspec_objects2, NULL);
+    
+	process(s2, e2);
+	ASSERT_STATE(s2, ni_session::STATE_ANSLP_CLOSE);
+	ASSERT_REFRESH_MESSAGE_SENT(d);
+	ASSERT_NO_TIMER(d);
+
+	
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[RESPONSE_TIMEOUT, retry]---> STATE_ANSLP_PENDING_INSTALLING
+	 */
+	anslp_response *resp3 = create_anslp_response_with_objects(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none);
+
+	ni_session_test s3(ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	// fake a previously sent Create message
+	s3.set_last_create_message(create_anslp_create());
+	s3.set_last_auction_install_rule(s3.build_auction_install_rule(resp3));
+	s3.get_response_timer().set_id(47);
+
+	timer_event *e3 = new timer_event(NULL, 47);
+
+	process(s3, e3);
+	ASSERT_STATE(s3, ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_TIMER_STARTED(d, s3.get_response_timer());
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[RESPONSE_TIMEOUT, no retry]---> CLOSE
+	 */
+	anslp_response *resp4 = create_anslp_response_with_objects(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none);
+
+	ni_session_test s4(ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	// fake a previously sent Configure message
+	s4.set_last_create_message(create_anslp_create());	
+	s4.set_last_auction_install_rule(s4.build_auction_install_rule(resp4));
+	s4.set_create_counter(1000);
+	s4.get_response_timer().set_id(47);
+	timer_event *e4 = new timer_event(NULL, 47);
+
+	process(s4, e4);
+	ASSERT_STATE(s4, ni_session::STATE_ANSLP_CLOSE);
+	ASSERT_REFRESH_MESSAGE_SENT(d);
+	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[tg_TEARDOWN]---> STATE_ANSLP_CLOSE
+	 */
+	anslp_response *resp5 = create_anslp_response_with_objects(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none);
+
+	ni_session_test s5(ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	s5.set_last_create_message(create_anslp_create());
+	s5.set_last_auction_install_rule(s5.build_auction_install_rule(resp5));
+	event *e5 = new api_teardown_event(NULL);
+
+	process(s5, e5);
+	ASSERT_STATE(s5, ni_session::STATE_ANSLP_CLOSE);
+	ASSERT_REFRESH_MESSAGE_SENT(d);
+	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[no next node found]---> STATE_ANSLP_PENDING_INSTALLING
+	 */
+	anslp_response *resp6 = create_anslp_response_with_objects(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none);
+
+	ni_session_test s6(ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	s6.set_last_create_message(create_anslp_create());
+	s6.set_last_auction_install_rule(s6.build_auction_install_rule(resp6));
+	event *e6 = new no_next_node_found_event(NULL);
+
+	process(s6, e6);
+	ASSERT_STATE(s6, ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[tg_BIDDING]---> STATE_ANSLP_PENDING_INSTALLING
+	 */
+	anslp_response *resp7 = create_anslp_response_with_objects(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none);
+
+	ni_session_test s7(ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	s7.set_last_create_message(create_anslp_create());
+	s7.set_last_auction_install_rule(s7.build_auction_install_rule(resp7));
+
+	vector<msg::anslp_mspec_object *> mspec_objects3;
+	mspec_objects3.push_back(mess1->copy());
+	mspec_objects3.push_back(mess2->copy());
+
+	anslp::session_id *sessionId2 = new anslp::session_id(s7.get_id());
+	event *e7 = new api_bidding_event(sessionId2, source,destination,(protlib::uint16) 0, 
+									 (protlib::uint16) 0, (protlib::uint8) 0,
+									  mspec_objects3, NULL);
+
+
+	process(s7, e7);
+		
+	ASSERT_STATE(s7, ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+	
+}
+
 
 void InitiatorTest::testAuctioning() 
 {
@@ -533,27 +725,31 @@ void InitiatorTest::testAuctioning()
 
 
 	process(s7, e7);
-	ASSERT_STATE(s7, ni_session::STATE_ANSLP_CLOSE);
+	ASSERT_STATE(s7, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_BIDDING_MESSAGE_SENT(d);
 	ASSERT_NO_TIMER(d);	
 }
 
 void InitiatorTest::testIntegratedStateMachine()
 {
+	
+	string sessionIdIn = "1232342343";
 		
 	vector<msg::anslp_mspec_object *> mspec_objects;
 	mspec_objects.push_back(mess1->copy());
 	mspec_objects.push_back(mess2->copy());
 	mspec_objects.push_back(mess3->copy());
-
-	event *e1 = new api_create_event(source,destination,
+	
+	anslp::FastQueue *installQueue = new anslp::FastQueue();
+	
+	event *e1 = new api_create_event(sessionIdIn, source,destination,
    					    (protlib::uint16) 0, //Srcport 
 					    (protlib::uint16) 0, //Dstport
 					    (protlib::uint8) 0, // Protocol
 					    mspec_objects, // Mspec Objects
 					    conf->get_ni_session_lifetime(), 
 					    selection_auctioning_entities::sme_any,
-					    NULL);
+					    installQueue);
 
 	ni_session_test s1(ni_session::STATE_ANSLP_CLOSE);
 	process(s1, e1);
@@ -563,7 +759,7 @@ void InitiatorTest::testIntegratedStateMachine()
 
 	
 	/*
-	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_AUCTIONING
+	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_PENDING_INSTALLING
 	 */
 	ntlp_msg *resp1 = create_anslp_response(information_code::sc_success,
 		information_code::suc_successfully_processed,
@@ -572,17 +768,38 @@ void InitiatorTest::testIntegratedStateMachine()
 	event *e2 = new msg_event(NULL, resp1);
 
 	process(s1, e2);
+	ASSERT_STATE(s1, ni_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_TIMER_STARTED(d, s1.get_response_timer());
+
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[tg_install]---> STATE_ANSLP_AUCTIONING
+	 */
+	anslp_response *resp2 = create_anslp_response_with_objects(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none);
+
+	s1.set_last_auction_install_rule(s1.build_auction_install_rule(resp2));
+
+	vector<msg::anslp_mspec_object *> mspec_objects2;
+	mspec_objects2.push_back(mess1->copy());
+	mspec_objects2.push_back(mess2->copy());
+	mspec_objects2.push_back(mess3->copy());
+		
+	event *e3 = new api_install_event(sessionIdIn, mspec_objects2, NULL);
+
+	process(s1, e3);
 	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_TIMER_STARTED(d, s1.get_refresh_timer());
-
 	
 	/*
-	 * STATE_METERING ---[tg_TEARDOWN]---> STATE_ANSLP_CLOSE
+	 * STATE_ANSLP_AUCTIONING ---[tg_TEARDOWN]---> STATE_ANSLP_CLOSE
 	 */
-	event *e3 = new api_teardown_event(NULL);
+	event *e4 = new api_teardown_event(NULL);
 
-	process(s1, e3);
+	process(s1, e4);
 	ASSERT_STATE(s1, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_NO_TIMER(d);

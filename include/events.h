@@ -41,6 +41,7 @@
 #include "session.h"
 #include "auction_rule.h"
 #include "anslp_timers.h"
+#include "aqueue.h"
 #include "msg/selection_auctioning_entities.h"
 #include <vector>
 
@@ -292,8 +293,8 @@ class api_create_event : public api_event {
 		std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(), 
 		uint32 lifetime=0, 
 		selection_auctioning_entities::selection_auctioning_entities_t sel_auct_entities = selection_auctioning_entities::sme_any,
-		FastQueue *rq = NULL)
-		: api_event(), session_id(_session_id) source_addr(source), dest_addr(dest),
+		anslp::FastQueue *rq = NULL)
+		: api_event(), session_id(_session_id), source_addr(source), dest_addr(dest),
 		  source_port(source_port), dest_port(dest_port), protocol(protocol), 
 		  mspec_objects(mspec_objects), session_lifetime(lifetime),  sel_auct_entities(sel_auct_entities),
 		  return_queue(rq) { }
@@ -315,7 +316,7 @@ class api_create_event : public api_event {
 	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
 		return mspec_objects; }
 
-	inline FastQueue *get_return_queue() const { return return_queue; }
+	inline anslp::FastQueue *get_return_queue() const { return return_queue; }
 
 	virtual ostream &print(ostream &out) const {
 		return out << "[api_configure_event]"; }
@@ -333,7 +334,7 @@ class api_create_event : public api_event {
 	uint32 session_lifetime;
 	selection_auctioning_entities::selection_auctioning_entities_t sel_auct_entities;
 
-	FastQueue *return_queue;
+	anslp::FastQueue *return_queue;
 };
 
 inline api_create_event::~api_create_event()
@@ -346,6 +347,54 @@ inline api_create_event::~api_create_event()
 	mspec_objects.clear();
 }
 
+
+/**
+ * An API response for installing objects.
+ *
+ * Conditions: 
+ */
+class api_install_event : public api_event {
+	
+  public:
+  
+	api_install_event(const string _session_id, 
+						std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(), 
+						protlib::FastQueue *rq = NULL)
+		: api_event(), session_id(_session_id), mspec_objects(mspec_objects), 
+		  return_queue(rq) { }
+
+	virtual ~api_install_event();
+	inline string get_session_id() const { return session_id; }
+	
+	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
+		return mspec_objects; }
+
+	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
+
+	virtual ostream &print(ostream &out) const {
+		return out << "[api_install_event]"; }
+
+  private:
+  
+	string session_id;
+
+	std::vector<msg::anslp_mspec_object *> mspec_objects;
+
+	protlib::FastQueue *return_queue;
+};
+
+inline api_install_event::~api_install_event()
+{
+	std::vector<msg::anslp_mspec_object *>::iterator it;
+	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++)
+	{
+		delete(*it);
+	}
+	mspec_objects.clear();
+}
+
+
+
 /**
  * An API request to send a Refresh Message.
  *
@@ -357,7 +406,7 @@ class api_refresh_event : public api_event {
   
 	api_refresh_event(session_id *sid, const hostaddress &source, const hostaddress &dest,
 					  uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0,
-					  uint32 lifetime=0, uint32 msgseqnbr=0, FastQueue *rq=NULL)
+					  uint32 lifetime=0, uint32 msgseqnbr=0, protlib::FastQueue *rq=NULL)
 		: api_event(), source_addr(source), dest_addr(dest),
 		  source_port(source_port), dest_port(dest_port), 
 		  protocol(protocol), session_lifetime(lifetime), 
@@ -377,7 +426,7 @@ class api_refresh_event : public api_event {
 	
 	inline uint32 get_msg_sequence_number() const { return msg_sequence_number; }
 	
-	inline FastQueue *get_return_queue() const { return return_queue; }
+	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
 
 	virtual ostream &print(ostream &out) const {
 		return out << "[api_refresh_event]"; }
@@ -392,7 +441,7 @@ class api_refresh_event : public api_event {
 	uint32 session_lifetime;
 	uint32 msg_sequence_number;
 
-	FastQueue *return_queue;
+	protlib::FastQueue *return_queue;
 };
 
 /**
@@ -407,7 +456,7 @@ class api_notify_event : public api_event {
 	api_notify_event(session_id *sid, const hostaddress &source, const hostaddress &dest,
 		uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0,
 		uint8 severity=2, uint8 response_code=1, uint16 object_type = 0, 
-		FastQueue *rq=NULL) : api_event(), source_addr(source), dest_addr(dest),
+		protlib::FastQueue *rq=NULL) : api_event(), source_addr(source), dest_addr(dest),
 		  source_port(source_port), dest_port(dest_port),
 		  protocol(protocol), 
 		  severity(severity), // success
@@ -429,7 +478,7 @@ class api_notify_event : public api_event {
 	
 	inline uint16 get_response_object_type() const { return object_type; }
 	
-	inline FastQueue *get_return_queue() const { return return_queue; }
+	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
 
 	virtual ostream &print(ostream &out) const {
 		return out << "[api_notify_event]"; }
@@ -445,7 +494,7 @@ class api_notify_event : public api_event {
 	uint8 response_code;
 	uint16 object_type;
 
-	FastQueue *return_queue;
+	protlib::FastQueue *return_queue;
 };
 
 /**
@@ -461,7 +510,7 @@ class api_bidding_event : public api_event {
 	api_bidding_event(session_id *sid, const hostaddress &source, const hostaddress &dest,
 					  uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0, 
 					  std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(),
-					  FastQueue *rq=NULL) : 
+					  protlib::FastQueue *rq=NULL) : 
 		  api_event(sid), source_addr(source), dest_addr(dest),source_port(source_port), 
 		  dest_port(dest_port), protocol(protocol), mspec_objects(mspec_objects), return_queue(rq) { }
 
@@ -478,7 +527,7 @@ class api_bidding_event : public api_event {
 	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
 		return mspec_objects; }
 		
-	inline FastQueue *get_return_queue() const { return return_queue; }
+	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
 
 	virtual ostream &print(ostream &out) const {
 		return out << "[api_bidding_event]"; }
@@ -492,7 +541,7 @@ class api_bidding_event : public api_event {
 	uint8 protocol;
 	std::vector<msg::anslp_mspec_object *> mspec_objects;
 	
-	FastQueue *return_queue;
+	protlib::FastQueue *return_queue;
 };
 
 inline api_bidding_event::~api_bidding_event()
@@ -519,7 +568,7 @@ class api_response_event : public api_event {
 	api_response_event(session_id *sid, const hostaddress &source, const hostaddress &dest,
 		uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0,
 		uint32 lifetime=0, uint32 msgseqnbr=0, uint8 severity=2, 
-		uint8 response_code=1, uint16 object_type = 0, FastQueue *rq=NULL): 
+		uint8 response_code=1, uint16 object_type = 0, protlib::FastQueue *rq=NULL): 
 		api_event(sid), source_addr(source), dest_addr(dest),
 		source_port(source_port), dest_port(dest_port),protocol(protocol), 
 		session_lifetime(lifetime), msg_sequence_number(msgseqnbr),
@@ -546,7 +595,7 @@ class api_response_event : public api_event {
 	
 	inline uint16 get_response_object_type() const { return object_type; }
 	
-	inline FastQueue *get_return_queue() const { return return_queue; }
+	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
 
 	virtual ostream &print(ostream &out) const {
 		return out << "[api_response_event]"; }
@@ -564,7 +613,7 @@ class api_response_event : public api_event {
 	uint8 response_code;
 	uint16 object_type;
 
-	FastQueue *return_queue;
+	protlib::FastQueue *return_queue;
 };
 
 
@@ -608,6 +657,12 @@ inline bool is_api_create(const event *evt)
 {
 	return dynamic_cast<const api_create_event *>(evt) != NULL;
 }
+
+inline bool is_api_install(const event *evt) 
+{
+	return dynamic_cast<const api_install_event *>(evt) != NULL;
+}
+
 
 inline bool is_api_bidding(const event *evt) 
 {

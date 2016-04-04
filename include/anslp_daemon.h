@@ -79,6 +79,8 @@ class anslp_daemon : public Thread {
 	virtual void main_loop(uint32 thread_num);
 
 	virtual void shutdown();
+	
+	FastQueue * getInstallQueue(){ return installQueue; }
 
   private:
   

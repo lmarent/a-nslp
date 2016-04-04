@@ -81,7 +81,8 @@ class ni_session : public session {
 	enum state_t {
 		STATE_ANSLP_CLOSE	= 0,
 		STATE_ANSLP_PENDING	= 1,
-		STATE_ANSLP_AUCTIONING	= 2
+		STATE_ANSLP_PENDING_INSTALLING = 2,
+		STATE_ANSLP_AUCTIONING	= 3
 	};
 
 	ni_session(state_t s=STATE_ANSLP_CLOSE);
@@ -95,7 +96,10 @@ class ni_session : public session {
 	
 	void set_last_refresh_message(msg::ntlp_msg *msg);
 	msg::ntlp_msg *get_last_refresh_message() const;
-
+	
+	void set_last_auction_install_rule(auction_rule *act) { last_auction_install_rule = act; }
+	auction_rule * get_last_auction_install_rule() const { return last_auction_install_rule; } 
+	
 	inline void set_create_counter(uint32 num) { create_counter = num; }
 	inline uint32 get_create_counter() const { return create_counter; }
 
@@ -127,6 +131,8 @@ class ni_session : public session {
 	inline timer &get_response_timer() { return response_timer; }
 	inline timer &get_refresh_timer() { return refresh_timer; }
 
+	auction_rule *build_auction_install_rule(anslp_response *resp);
+
 
   private:
 	state_t state;
@@ -146,6 +152,15 @@ class ni_session : public session {
 	 * REFRESH sent earlier.
 	 */
 	msg::ntlp_msg *last_refresh_msg;
+
+
+	/*
+	 * The AUCTION RULE to install. We keep it because we need it for
+	 * retransmission and to check if a received RESPONSE matches the
+	 * RULE sent earlier.
+	 */
+	auction_rule * last_auction_install_rule;
+	
 	
 	bool proxy_mode;
 	uint32 lifetime;
@@ -169,6 +184,7 @@ class ni_session : public session {
 	 */
 	state_t handle_state_close(dispatcher *d, event *evt);
 	state_t handle_state_pending(dispatcher *d, event *evt);
+	state_t handle_state_pending_installing(dispatcher *d, event *evt);
 	state_t handle_state_auctioning(dispatcher *d, event *evt);
 
 	/*
@@ -184,7 +200,7 @@ class ni_session : public session {
 	msg::ntlp_msg *build_bidding_message(api_bidding_event *evt);
 										   
 	msg::ntlp_msg *build_refresh_message(); 
-	
+		
 	uint32 create_random_number() const;
 	void inc_create_counter();
 	void inc_refresh_counter();

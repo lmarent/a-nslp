@@ -59,8 +59,8 @@ using protlib::uint32;
  */
 ni_session::ni_session(const session_id &id, const anslp_config *conf)
 		: session(id), state(STATE_ANSLP_CLOSE), routing_info(NULL),
-		  last_create_msg(NULL), last_refresh_msg(NULL), lifetime(0),
-		  refresh_interval(20), response_timeout(0), create_counter(0),
+		  last_create_msg(NULL), last_refresh_msg(NULL), last_auction_install_rule(NULL),
+		  lifetime(0),refresh_interval(20), response_timeout(0), create_counter(0),
 		  refresh_counter(0), max_retries(0), proxy_session(false),
 		  response_timer(this), refresh_timer(this) {
 
@@ -82,7 +82,8 @@ ni_session::ni_session(const session_id &id, const anslp_config *conf)
  */
 ni_session::ni_session(state_t s)
 		: session(), state(s), routing_info(NULL),
-		  last_create_msg(NULL), last_refresh_msg(NULL), lifetime(30),
+		  last_create_msg(NULL), last_refresh_msg(NULL), 
+		  last_auction_install_rule(NULL), lifetime(30),
 		  refresh_interval(20), response_timeout(2), create_counter(0),
 		  refresh_counter(0), max_retries(3), proxy_session(false),
 		  response_timer(this), refresh_timer(this) {
@@ -112,6 +113,10 @@ ni_session::~ni_session()
 	
 	if (last_refresh_msg != NULL){
 		delete last_refresh_msg;
+	}
+	
+	if (last_auction_install_rule != NULL){
+		delete last_auction_install_rule;
 	}
 	
 	LogDebug("Ending destroy ni_session");
@@ -267,6 +272,33 @@ msg::ntlp_msg *ni_session::build_refresh_message()
 }
 
 
+/***
+ * Create the auctioning rules (set of objects) to install 
+*
+*/
+auction_rule *
+ni_session::build_auction_install_rule(anslp_response *resp)
+{
+ 
+	auction_rule *act_return = new auction_rule();
+	
+	// Group response messages from respose and 
+	// messages from policies locally installed
+	//ntlp::mri mriData = e->get_mri();
+	vector<anslp_mspec_object *> responseObjects;
+				
+	// Insert objects returned from other routers along the path into the rule.
+	resp->get_mspec_objects(responseObjects);
+
+	vector<anslp_mspec_object *>::iterator iter;
+	for (iter = responseObjects.begin(); iter != responseObjects.end(); ++iter)
+	{
+		act_return->set_request_object(*iter);
+	}
+
+	return act_return;
+}
+
 void 
 ni_session::setup_session(dispatcher *d, api_create_event *e, 
 			  std::vector<msg::anslp_mspec_object *> &missing_objects) 
@@ -321,7 +353,6 @@ ni_session::setup_session(dispatcher *d, api_create_event *e,
 	LogDebug("using response timeout: " << t << " seconds");
 
 }
-
 
 /**
  * Create an auctioning rule from the given event and return it.
@@ -379,7 +410,9 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 	/*
 	 * API Create event received.
 	 */	
-	if ( is_api_create(evt) ) {
+	if ( is_api_create(evt) ) 
+	{
+		
 		api_create_event *e = dynamic_cast<api_create_event *>(evt);
 		
 		LogInfo("after enqueueing the response to tg_create - procid:" << 
@@ -410,7 +443,8 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 		if ( e->get_return_queue() != NULL ) {
 			
 			AddAnslpSessionEvent *evtRet = new AddAnslpSessionEvent( e->get_session_id(), get_id() );
-			e->get_return_queue()->enqueue(evtRet);
+			anslp::FastQueue *queue = e->get_return_queue();
+			queue->enqueue(evtRet);
 			
 			LogDebug("Ending state handle_state_close - New State PENDING ");
 			return STATE_ANSLP_PENDING;
@@ -453,8 +487,11 @@ ni_session::state_t ni_session::handle_state_pending(
 
 		// Retry. Send the Create message again and start a new timer.
 		if ( get_create_counter() < get_max_retries() ) {
+			
 			LogWarn("response timeout, restarting timer.");
+			
 			inc_create_counter();
+			
 			d->send_message( get_last_create_message()->copy() );
 
 			response_timer.start(d, get_response_timeout());
@@ -463,10 +500,7 @@ ni_session::state_t ni_session::handle_state_pending(
 		}
 		// Retry count exceeded, abort.
 		else {
-			if (rule->get_number_mspec_response_objects() > 0){
-				session_id = get_id().to_string();
-				d->remove_auction_rules(session_id, rule);
-			}
+			
 			d->report_async_event("got no response for our Create Message");
 			return STATE_ANSLP_CLOSE;
 		}
@@ -475,10 +509,6 @@ ni_session::state_t ni_session::handle_state_pending(
 	 * The NTLP can't reach the destination.
 	 */
 	else if ( is_no_next_node_found_event(evt) ) {
-		if (rule->get_number_mspec_response_objects() > 0){
-			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule);
-		}
 		
 		LogInfo("cannot reach destination");
 
@@ -494,12 +524,6 @@ ni_session::state_t ni_session::handle_state_pending(
 		// Send a Refresh message with a session lifetime of 0.
 		set_lifetime(0);
 		set_last_create_message(NULL);
-
-		// Uninstall the previous rules.
-		if (rule->get_number_mspec_response_objects() > 0){
-			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule);
-		}
 			
 		d->send_message( build_refresh_message() );
 
@@ -533,7 +557,7 @@ ni_session::state_t ni_session::handle_state_pending(
 			
 			LogDebug("initiated session " << get_id());
 			d->report_async_event("CREATE session initiated");
-			response_timer.stop();
+			response_timer.start(d, get_response_timeout());
 			
 			// Check whether someone in the path change the initial lifetime
 			if (resp->get_session_lifetime() != get_lifetime())
@@ -546,66 +570,17 @@ ni_session::state_t ni_session::handle_state_pending(
 			}
 			
 			LogDebug("Refresh interval " << get_refresh_interval());
-			refresh_timer.start(d, get_refresh_interval());
 				
 			set_create_counter(0);
 				
-			// Group response messages from respose and 
-			// messages from policies locally installed
-			//ntlp::mri mriData = e->get_mri();
-			vector<anslp_mspec_object *> responseObjects;
-				
-			// Insert objects returned from other routers along the path into the rule.
-			resp->get_mspec_objects(responseObjects);
-
-			vector<anslp_mspec_object *>::iterator iter;
-			for (iter = responseObjects.begin(); iter != responseObjects.end(); ++iter)
-			{
-				rule->set_request_object(*iter);
-			}
 			session_id = get_id().to_string();
-			auction_rule * result = NULL;
 
-			try{
+			set_last_auction_install_rule( build_auction_install_rule(resp) );
 
-				result = d->send_response(session_id, rule);
+			d->send_response(session_id, get_last_auction_install_rule()->copy() );
 			
-			} catch (auction_rule_installer_error &e){
-				LogError(e.get_msg());
-				return STATE_ANSLP_CLOSE;
-			}
-			
-			if (rule->get_number_mspec_request_objects() 
-					== result->get_number_mspec_response_objects() )
-			{
-				// Assign the response as the rule installed.
-				delete(rule);
-				rule = result;
-						
-				LogDebug("Ending state handle pending - New State AUCTIONING ");
-				return STATE_ANSLP_AUCTIONING;
-			
-			} else {
-				
-				// Assign the response as the rule installed.
-				delete(rule);
-				rule = result;
-				
-				// Send a Refresh message with a session lifetime of 0.
-				set_lifetime(0);
-				set_last_create_message(NULL);
-
-				// Uninstall the previous rules.
-				if (rule->get_number_mspec_response_objects() > 0) {
-					session_id = get_id().to_string();
-					d->remove_auction_rules(session_id, result);
-				}
-			
-				d->send_message( build_refresh_message() );
-
-				return STATE_ANSLP_CLOSE;
-			}
-				  
+			return STATE_ANSLP_PENDING_INSTALLING;
+										  
 		}
 		else {
 			d->report_async_event("cannot initiate Create session");
@@ -621,6 +596,145 @@ ni_session::state_t ni_session::handle_state_pending(
 		return STATE_ANSLP_PENDING; // no change
 	}
 }
+
+
+/*
+ * state: STATE_ANSLP_PENDING_INSTALLING
+ */
+ni_session::state_t ni_session::handle_state_pending_installing(
+		dispatcher *d, event *evt) {
+
+	
+	LogDebug("Initiating state pending installing");
+	using namespace anslp::msg;
+	string session_id;
+
+
+	/*
+	 * A response timeout was triggered.
+	 */
+	if ( is_timer(evt, response_timer) ) {
+
+		// Retry. Send the Create message again and start a new timer.
+		if ( get_create_counter() < get_max_retries() ) {
+			LogWarn("response timeout, restarting timer.");
+			
+			inc_create_counter();
+			
+			d->send_response(session_id, get_last_auction_install_rule()->copy() );
+
+			response_timer.start(d, get_response_timeout());
+
+			return STATE_ANSLP_PENDING_INSTALLING; // no change
+		}
+		// Retry count exceeded, abort.
+		else {
+			
+			saveDelete(rule);
+
+			set_lifetime(0);
+			set_last_create_message(NULL);
+			
+			// In any case, we call the function to remove the rule.
+			if (get_last_auction_install_rule()->get_number_mspec_response_objects() > 0){
+				session_id = get_id().to_string();
+				d->remove_auction_rules(session_id, get_last_auction_install_rule()->copy());
+			}
+			
+			d->send_message( build_refresh_message() );
+			
+			d->report_async_event("got no response for our Create Message");
+			
+			return STATE_ANSLP_CLOSE;
+		}
+	}
+	/*
+	 * API teardown event received.
+	 */
+	else if ( is_api_teardown(evt) ) {
+		LogDebug("received API teardown event");
+
+		// Send a Refresh message with a session lifetime of 0.
+		set_lifetime(0);
+		set_last_create_message(NULL);
+
+		// Uninstall the previous rules.
+		if (get_last_auction_install_rule()->get_number_mspec_response_objects() > 0){
+			session_id = get_id().to_string();
+			d->remove_auction_rules(session_id, get_last_auction_install_rule()->copy() );
+		}
+			
+		d->send_message( build_refresh_message() );
+
+		return STATE_ANSLP_CLOSE;
+	}
+	
+	/*
+	 * Outdated timer event, discard and don't log.
+	 */
+	else if ( is_timer(evt) ) {
+		return STATE_ANSLP_PENDING_INSTALLING; // no change
+	}
+	
+	/*
+	 * A msg_event arrived which contains an api install message.
+	 */
+	else if ( is_api_install(evt) ) {
+	
+		api_install_event *e = dynamic_cast<api_install_event *>(evt);
+		
+		LogDebug("received install event ");
+						
+			
+		if (get_last_auction_install_rule()->get_number_mspec_request_objects() 
+				== e->get_auctioning_objects().size() )
+		{
+			// Assign the response as the rule installed.
+			saveDelete(rule);
+			rule = get_last_auction_install_rule()->copy();
+			
+			set_create_counter(0);
+			response_timer.stop();
+			refresh_timer.start(d, get_refresh_interval());
+				
+			LogDebug("Ending state handle pending - New State AUCTIONING ");
+			return STATE_ANSLP_AUCTIONING;
+			
+		} else {
+			
+			LogDebug("Error in the number of objects installed ");
+						
+			// Assign the response as the rule installed.
+			saveDelete(rule);
+				
+			// Send a Refresh message with a session lifetime of 0.
+			set_lifetime(0);
+			set_last_create_message(NULL);
+						
+			// Uninstall the previous rules.
+			if (get_last_auction_install_rule()->get_number_mspec_response_objects() > 0) {
+				session_id = get_id().to_string();
+				d->remove_auction_rules(session_id, get_last_auction_install_rule()->copy());
+			}
+			
+			d->send_message( build_refresh_message() );
+						
+			LogDebug("Ending state handle pending installing");
+			
+			return STATE_ANSLP_CLOSE;
+		}
+				  
+	}
+	
+	/*
+	 * Some other, unexpected event arrived.
+	 */
+	else {
+		LogInfo("discarding unexpected event " << *evt);
+		return STATE_ANSLP_PENDING_INSTALLING; // no change
+	}
+}
+
 
 
 /*
@@ -655,6 +769,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		return STATE_ANSLP_AUCTIONING; // no change
 
 	}
+	
 	/*
 	 * A response timout was triggered.
 	 */
@@ -685,6 +800,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 			return STATE_ANSLP_CLOSE;
 		}
 	}
+	
 	/*
 	 * API teardown event received. The user wants to end the session.
 	 */
@@ -705,24 +821,18 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		LogDebug("Ending state metering - api teardown");
 		return STATE_ANSLP_CLOSE;
 	}
+	
 	/*
 	 * API bidding event received. The user wants to send an object to the auction server.
 	 */
 	else if ( is_api_bidding(evt) ) {
-		LogDebug("received API bidding event");
+		LogDebug("received API bidding event, this message does not wait response.");
 				
 		api_bidding_event *e = dynamic_cast<api_bidding_event *>(evt);
 		
-		// Build the bidding message based on those objects not installed.
+		// Build the bidding message.
 		d->send_message( build_bidding_message(e) );
-		
-		// Send the response saying that an event was processed for the
-		// session id.
-		if ( e->get_return_queue() != NULL ) {
-			message *m = new anslp_event_msg(get_id(), NULL);
-			e->get_return_queue()->enqueue(m);
-		}
-		
+				
 		LogDebug("Ending state handle_state_auctioning - api bidding event ");
 		
 		return STATE_ANSLP_AUCTIONING; // no change
@@ -759,6 +869,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		} catch (auction_rule_installer_error &e){
 			LogError(e.get_msg());
 		}
+		
 		LogDebug("Ending state handle_state_auctioning - bidding event ");
 		
 		return STATE_ANSLP_AUCTIONING; // no change
@@ -840,6 +951,10 @@ void ni_session::process_event(dispatcher *d, event *evt) {
 
 		case ni_session::STATE_ANSLP_PENDING:
 			state = handle_state_pending(d, evt);
+			break;
+
+		case ni_session::STATE_ANSLP_PENDING_INSTALLING:
+			state = handle_state_pending_installing(d, evt);
 			break;
 
 		case ni_session::STATE_ANSLP_AUCTIONING:

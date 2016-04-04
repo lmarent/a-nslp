@@ -42,6 +42,7 @@ extern "C" {
 }
 
 #include "auction_rule.h"
+#include "session_id.h"
 
 namespace anslp {
 
@@ -191,7 +192,7 @@ class AddAnslpSessionEvent: public AnslpEvent
 		{
 			return anslpSession;
 		}
-}
+};
 
 class AddSessionEvent: public AnslpEvent
 {

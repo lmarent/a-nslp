@@ -254,3 +254,29 @@ appladdress session::get_nr_address(msg_event *e) const {
 }
 
 
+/**
+ * Set the response objects in the auctioning rule from the api install event.
+ */
+void 
+session::set_reponse_objects(api_install_event *install, auction_rule *act_rule) 
+{
+	
+	LogDebug( "Begin set_reponse_objects from api install()");
+
+	assert( install != NULL );
+		
+	LogDebug( "Nbr objects installed:" << install->get_auctioning_objects().size() );
+	
+	// Check which metering object could be installed in this node.
+	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
+	for ( it_objects = install->get_auctioning_objects().begin(); 
+			it_objects != install->get_auctioning_objects().end(); it_objects++)
+	{
+		const anslp_mspec_object *object = *it_objects;
+		act_rule->set_response_object(object->copy());
+	}
+	
+	LogDebug("End set_reponse_objects - objects inserted:" 
+					<< act_rule->get_number_mspec_response_objects());
+	
+}

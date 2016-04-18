@@ -79,6 +79,8 @@ namespace anslp {
     anslpconf_nf_is_edge,
     /* NR  */
     anslpconf_nr_max_session_lifetime,
+    anslpconf_nr_max_retries,
+    anslpconf_nr_response_timeout,
     anslpconf_maxparno
   };
 
@@ -192,6 +194,13 @@ class anslp_config {
 
 	uint32 get_nr_max_session_lifetime() const {
 		return getpar<uint32>(anslpconf_nr_max_session_lifetime); }
+
+	uint32 get_nr_max_retries() const { 
+		return getpar<uint32>(anslpconf_nr_max_retries); }
+
+	uint32 get_nr_response_timeout() const { 
+	  return getpar<uint32>(anslpconf_nr_response_timeout); }
+
 		
 	/// The ID of the queue that receives messages from the NTLP.
 	static const message::qaddr_t INPUT_QUEUE_ADDRESS

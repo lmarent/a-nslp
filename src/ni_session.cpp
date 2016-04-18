@@ -390,6 +390,7 @@ ni_session::create_auction_rule(anslp_bidding *bidding)
 	return to_post;
 }
 
+
 /****************************************************************************
  *
  * state machine part
@@ -405,7 +406,7 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 	using msg::anslp_create;
 	std::vector<msg::anslp_mspec_object *> missing_objects;
 
-	LogInfo("Initiating state handle_state_close ");
+	LogDebug("Initiating state handle_state_close ");
 
 	/*
 	 * API Create event received.
@@ -415,7 +416,7 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 		
 		api_create_event *e = dynamic_cast<api_create_event *>(evt);
 		
-		LogInfo("after enqueueing the response to tg_create - procid:" << 
+		LogDebug("after enqueueing the response to tg_create - procid:" << 
 				 getpid() << " - getthread_self:" << pthread_self() 
 				 << " tid:" << syscall(SYS_gettid));
 		
@@ -442,7 +443,7 @@ ni_session::state_t ni_session::handle_state_close(dispatcher *d, event *evt)
 		// new session id.
 		if ( e->get_return_queue() != NULL ) {
 			
-			AddAnslpSessionEvent *evtRet = new AddAnslpSessionEvent( e->get_session_id(), get_id() );
+			AddAnslpSessionEvent *evtRet = new AddAnslpSessionEvent( e->get_session_id(), get_id().to_string() );
 			anslp::FastQueue *queue = e->get_return_queue();
 			queue->enqueue(evtRet);
 			
@@ -608,8 +609,8 @@ ni_session::state_t ni_session::handle_state_pending_installing(
 	LogDebug("Initiating state pending installing");
 	using namespace anslp::msg;
 	string session_id;
-
-
+	session_id = get_id().to_string();
+	
 	/*
 	 * A response timeout was triggered.
 	 */
@@ -637,7 +638,6 @@ ni_session::state_t ni_session::handle_state_pending_installing(
 			
 			// In any case, we call the function to remove the rule.
 			if (get_last_auction_install_rule()->get_number_mspec_response_objects() > 0){
-				session_id = get_id().to_string();
 				d->remove_auction_rules(session_id, get_last_auction_install_rule()->copy());
 			}
 			
@@ -660,7 +660,6 @@ ni_session::state_t ni_session::handle_state_pending_installing(
 
 		// Uninstall the previous rules.
 		if (get_last_auction_install_rule()->get_number_mspec_response_objects() > 0){
-			session_id = get_id().to_string();
 			d->remove_auction_rules(session_id, get_last_auction_install_rule()->copy() );
 		}
 			
@@ -692,7 +691,8 @@ ni_session::state_t ni_session::handle_state_pending_installing(
 			// Assign the response as the rule installed.
 			saveDelete(rule);
 			rule = get_last_auction_install_rule()->copy();
-			
+			set_reponse_objects(e, rule);
+						
 			set_create_counter(0);
 			response_timer.stop();
 			refresh_timer.start(d, get_refresh_interval());
@@ -713,7 +713,6 @@ ni_session::state_t ni_session::handle_state_pending_installing(
 						
 			// Uninstall the previous rules.
 			if (get_last_auction_install_rule()->get_number_mspec_response_objects() > 0) {
-				session_id = get_id().to_string();
 				d->remove_auction_rules(session_id, get_last_auction_install_rule()->copy());
 			}
 			
@@ -747,11 +746,22 @@ ni_session::state_t ni_session::handle_state_auctioning(
 	
 	LogDebug("Initiating state auctioning");
 	string session_id;
+
+	/*
+	 * API install event received. The user agent sends a duplicated message.
+	 */
+	if ( is_api_install(evt) ) {
+		LogDebug("received API install event, this message is duplicated.");
+						
+		return STATE_ANSLP_AUCTIONING; // no change
+		
+	}
+
 	
 	/*
 	 * A refresh timer was triggered.
 	 */
-	if ( is_timer(evt, refresh_timer) ) {
+	else if ( is_timer(evt, refresh_timer) ) {
 
 		LogDebug("received refresh timer");
 
@@ -941,7 +951,12 @@ ni_session::state_t ni_session::handle_state_auctioning(
  */
 void ni_session::process_event(dispatcher *d, event *evt) {
 	
-	LogDebug("begin process_event(): " << *this);
+
+	LogInfo("Start process_event SessionId:" << get_id().to_string() << "state: " 
+				 << get_state()  << "- procid:" <<  getpid() 
+				 << " - getthread_self:" << pthread_self() 
+				 << " tid:" << syscall(SYS_gettid));
+
 		
 	switch ( get_state() ) {
 
@@ -965,5 +980,24 @@ void ni_session::process_event(dispatcher *d, event *evt) {
 			assert( false ); // invalid state
 	}
 
-	LogDebug("end process_event(): " << *this);
+	LogInfo("En process event SessionId:" << get_id().to_string() << "state: " 
+				 << get_state()  << "- procid:" <<  getpid() 
+				 << " - getthread_self:" << pthread_self() 
+				 << " tid:" << syscall(SYS_gettid));
+
+
+}
+
+
+inline msg::ntlp_msg *ni_session::get_last_refresh_message() const 
+{
+	if (last_refresh_msg == NULL ){
+		LogInfo("error getting last refresh message event SessionId:" << get_id().to_string() << "state: " 
+				 << get_state()  << "- procid:" <<  getpid() 
+				 << " - getthread_self:" << pthread_self() 
+				 << " tid:" << syscall(SYS_gettid));
+	}
+	
+	assert(last_refresh_msg != NULL );
+	return last_refresh_msg;
 }

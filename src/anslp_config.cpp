@@ -94,6 +94,8 @@ anslp_config::registerAllPars()
   registerPar( new configpar<bool>(anslp_realm, anslpconf_nf_is_edge, "nf-is-edge", "NF is an ege", false, false) );
 
   registerPar( new configpar<uint32>(anslp_realm, anslpconf_nr_max_session_lifetime, "nr-max-session-lifetime", "NR max session lifetime in seconds", true, 60, "s") );
+  registerPar( new configpar<uint32>(anslp_realm, anslpconf_nr_response_timeout, "nr-response-timeout", "NR response timeout", true, 2, "s") );
+  registerPar( new configpar<uint32>(anslp_realm, anslpconf_nr_max_retries, "nr-max-retries", "NR max retries", true, 3) );
   
   DLog("anslp_config::registerAllPars", "finished registering anslp parameters.");
 }

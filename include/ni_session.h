@@ -97,8 +97,8 @@ class ni_session : public session {
 	void set_last_refresh_message(msg::ntlp_msg *msg);
 	msg::ntlp_msg *get_last_refresh_message() const;
 	
-	void set_last_auction_install_rule(auction_rule *act) { last_auction_install_rule = act; }
-	auction_rule * get_last_auction_install_rule() const { return last_auction_install_rule; } 
+	void set_last_auction_install_rule(auction_rule *act); 
+	auction_rule * get_last_auction_install_rule() const;
 	
 	inline void set_create_counter(uint32 num) { create_counter = num; }
 	inline uint32 get_create_counter() const { return create_counter; }
@@ -159,7 +159,7 @@ class ni_session : public session {
 	 * retransmission and to check if a received RESPONSE matches the
 	 * RULE sent earlier.
 	 */
-	auction_rule * last_auction_install_rule;
+	auction_rule *last_auction_install_rule;
 	
 	
 	bool proxy_mode;
@@ -207,7 +207,6 @@ class ni_session : public session {
 
 	auction_rule * create_auction_rule(anslp_bidding *bidding);
 
-
 	friend std::ostream &operator<<(std::ostream &out, const ni_session &s);
 	friend class session_manager;
 };
@@ -241,18 +240,24 @@ inline void ni_session::set_last_create_message(msg::ntlp_msg *msg)
 	last_create_msg = msg;
 }
 
-inline msg::ntlp_msg *ni_session::get_last_refresh_message() const 
-{
-	assert( last_refresh_msg != NULL );
-	return last_refresh_msg;
-}
-
 inline void ni_session::set_last_refresh_message(msg::ntlp_msg *msg) 
 {
 	delete last_refresh_msg;
 	last_refresh_msg = msg;
 }
 
+inline void ni_session::set_last_auction_install_rule(auction_rule *act) 
+{ 
+	last_auction_install_rule = act; 
+}
+
+inline auction_rule * 
+ni_session::get_last_auction_install_rule() const 
+{ 
+
+	return last_auction_install_rule; 
+
+} 
 
 inline void ni_session::set_mri(ntlp::mri *m) 
 {

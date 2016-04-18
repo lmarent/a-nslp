@@ -70,22 +70,33 @@ class nr_session : public session {
 	 * States of a session.
 	 */
 	enum state_t {
-		STATE_ANSLP_CLOSE		= 0,
-		STATE_ANSLP_PENDING	= 1,
-		STATE_ANSLP_AUCTIONING	= 2
+		STATE_ANSLP_CLOSE				= 0,
+		STATE_ANSLP_PENDING				= 1,
+		STATE_ANSLP_PENDING_INSTALLING	= 2,
+		STATE_ANSLP_AUCTIONING			= 3
 	};
 
 	void process_event(dispatcher *d, event *evt);
 	
 	state_t get_state() const;
 
-	nr_session(state_t s=STATE_ANSLP_CLOSE, uint32 msn=0);
+	nr_session(state_t s=STATE_ANSLP_CLOSE, anslp_config *conf=NULL, uint32 msn=0);
 	
 	inline timer &get_state_timer() { return state_timer; }
 	
 	auction_rule *get_auction_rule() const;
 
 	void set_auction_rule(auction_rule *r);	
+
+	void set_last_create_message(msg::ntlp_msg *msg);
+	
+	msg::ntlp_msg * get_last_create_message() const;
+
+	inline void set_create_counter(uint32 num) { create_counter = num; }
+	inline uint32 get_create_counter() const { return create_counter; }
+
+	inline uint32 get_max_retries() const { return max_retries; }
+	inline void set_max_retries(uint32 m) { max_retries = m; }
 
 	inline ntlp::mri *get_mri() const { return routing_info; }
 	void set_mri(ntlp::mri *m);
@@ -102,16 +113,27 @@ class nr_session : public session {
 	uint32 msn_bidding;
 	uint32 lifetime;
 	uint32 max_lifetime;
+	uint32 response_timeout;
+	uint32 create_counter;
+	uint32 max_retries;
+
 	timer state_timer;
+	timer response_timer;  // timer for servers' response.
 	
 	auction_rule *act_rule;
+
+	// Original create event.
+	msg::ntlp_msg *create_message;
 
 
 	/*
 	 * State machine methods:
 	 */
 	state_t handle_state_close(dispatcher *d, event *evt);
+	state_t handle_state_pending(dispatcher *d, event *evt);
+	state_t handle_state_pending_installing(dispatcher *d, event *evt);
 	state_t handle_state_auctioning(dispatcher *d, event *e);	
+	
 
 	msg::ntlp_msg *build_trace_response(ntlp_msg *msg) const;
 
@@ -125,17 +147,24 @@ class nr_session : public session {
 	inline uint32 get_max_lifetime() const { return max_lifetime; }
 	inline void set_max_lifetime(uint32 t) { max_lifetime = t; }
 
+	inline uint32 get_response_timeout() const { return response_timeout; }
+	
+	inline void set_response_timeout(uint32 t) { response_timeout = t; }
+
+
 	friend std::ostream &operator<<(std::ostream &out, const nr_session &s);
 
 	msg::ntlp_msg *build_bidding_message(api_bidding_event *evt);
 	
 	uint32 create_random_number() const;
 	
+	void inc_create_counter();
+	
 	/*
 	 * Auctioning methods:
 	 */
-	void save_auction_rule(dispatcher *d, 
-   							 msg_event *evt,
+	bool save_auction_rule(dispatcher *d, 
+   							anslp_create *create,
 							 std::vector<msg::anslp_mspec_object *> &missing_objects )
 		 throw (request_error);
 	
@@ -169,10 +198,31 @@ inline auction_rule *nr_session::get_auction_rule() const
 	return act_rule; // may return NULL!
 }
 
+inline void nr_session::set_last_create_message(msg::ntlp_msg *msg) {
+	
+	if (create_message != NULL){
+		delete(create_message);
+	}
+	
+	delete(create_message);
+	create_message = msg;
+
+}
+
+inline msg::ntlp_msg *nr_session::get_last_create_message() const {
+	assert( create_message != NULL );
+	return create_message;
+}
+
 inline void nr_session::set_mri(ntlp::mri *m) 
 {
 	delete routing_info;
 	routing_info = m;
+}
+
+inline void nr_session::inc_create_counter() 
+{
+	create_counter++;
 }
 
 

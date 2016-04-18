@@ -106,7 +106,7 @@ void dispatcher::process(event *evt) throw () {
 	if ( e != NULL && e->get_ntlp_msg() != NULL ) {
 		assert( e->get_session_id() != NULL );
 
-		LogInfo("SessionId:" << e->get_session_id() << "processing received event " 
+		LogInfo("SessionId:" << e->get_session_id()->to_string() << "processing received event " 
 				 << *evt  << "- procid:" <<  getpid() 
 				 << " - getthread_self:" << pthread_self() 
 				 << " tid:" << syscall(SYS_gettid));
@@ -160,7 +160,6 @@ void dispatcher::process(event *evt) throw () {
 
 	// If the event has a session ID, try to lookup the session.
 	if ( id != NULL ){
-		LogDebug("session given " << id->to_string());
 		s = session_mgr->get_session(*id);
 	}
 	
@@ -321,7 +320,7 @@ void dispatcher::report_async_event(std::string msg) throw () {
 /**
  * Install the given policy rules.
  */
-auction_rule * 
+void  
 dispatcher::install_auction_rules(const string session_id, const auction_rule *act_rule)
 		throw (auction_rule_installer_error) {
 
@@ -332,9 +331,8 @@ dispatcher::install_auction_rules(const string session_id, const auction_rule *a
 					<< act_rule->get_number_mspec_request_objects());
 	}
 	
-	auction_rule * result = rule_installer->create(session_id, act_rule);
+	rule_installer->create(session_id, act_rule);
 	
-	return result;
 }
 
 
@@ -358,9 +356,9 @@ dispatcher::auction_interaction(const bool server, const string session_id, cons
 }
 
 /**
- * Install the given policy rules.
+ * Install the given policy rules in the agent.
  */
-auction_rule * 
+void
 dispatcher::send_response(const string session_id, const auction_rule *act_rule)
 		throw (auction_rule_installer_error) {
 
@@ -371,9 +369,8 @@ dispatcher::send_response(const string session_id, const auction_rule *act_rule)
 					<< act_rule->get_number_mspec_request_objects());
 	}
 	
-	auction_rule * result = rule_installer->put_response(session_id, act_rule);
+	rule_installer->put_response(session_id, act_rule);
 	
-	return result;
 }
 
 /**
@@ -397,26 +394,20 @@ void dispatcher::remove_auction_rules(const string session_id, const auction_rul
 				
 }
 
-bool dispatcher::check(const string session_id, const msg::anslp_mspec_object *object) {	
+bool dispatcher::check(const string session_id, 
+						std::vector<msg::anslp_mspec_object *> &missing_objects) {	
 		
 	assert( rule_installer != NULL );
 	
 	if (config->get_install_auction_rules())
 	{	
-		if ( object != NULL )
-			LogDebug("Checking mspec object " << *object);
-	
-		try 
-		{
-			rule_installer->check(session_id, object);
-			return true;
-		}
-		catch (auction_rule_installer_error &e){
-			return false;
-		}
+		rule_installer->check(session_id, missing_objects);
+		return true;
 	}
 	else
+	{
 		return false;
+	}
 }
 
 bool dispatcher::is_authorized(const msg_event *evt) const throw () {

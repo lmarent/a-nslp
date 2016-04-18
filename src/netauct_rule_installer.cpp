@@ -186,7 +186,8 @@ void netauct_rule_installer::handle_response_check(anslp::FastQueue *waitqueue)
 }
 
 void 
-netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_object *object)
+netauct_rule_installer::check(const string sessionId, 
+								std::vector<msg::anslp_mspec_object *> &missing_objects)
 		throw (auction_rule_installer_error) 
 {
 	LogDebug("start check()");
@@ -200,21 +201,18 @@ netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_obj
 		
 		CheckEvent *evt = new CheckEvent(&retQueue);
 		evt->setSession(sessionId);
-		evt->setObject(key, object->copy());
 		
-		LogDebug("Installing check rule 1");
-		
+		std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
+		for ( it_objects = missing_objects.begin(); it_objects != missing_objects.end(); it_objects++)
+		{
+			const msg::anslp_mspec_object *object = *it_objects;
+			evt->setObject(key, object->copy());
+		}
+				
 		bool queued = getQueue()->enqueue(evt);
 
-		if ( queued ){
-			
-			LogDebug("Installing check rule 2");
-			
-			if (!test){ // When testing mode, it does not wait.
-				handle_response_check(&retQueue);
-			}
-		} else { // Error Queuing the event.
-			
+		if ( !queued ){
+						
 			throw auction_rule_installer_error("Process could not enqueue the anslp event",
 					msg::information_code::sc_signaling_session_failures,
 					msg::information_code::sigfail_wrong_conf_message);
@@ -223,134 +221,10 @@ netauct_rule_installer::check(const string sessionId, const msg::anslp_mspec_obj
 		LogDebug("end check()");		
 	
 	} else {
-		LogDebug("NOP: check()");
+		LogDebug("NOP: a checker check node");
 	}	
 }
 
-void
-netauct_rule_installer::handle_response_create(const string sessionId, anslp::FastQueue *waitqueue, auction_rule *auc_return)
-{
-
-	LogInfo("starting handle_response_create" );
-	string errorStr;
-	
-	if (waitqueue != NULL){
-	
-		AnslpEvent *ret_evt = waitqueue->dequeue_timedwait(10000);
-		
-		if (!is_response_addsession_event(ret_evt)){
-			
-			if (is_check_event(ret_evt)){
-				errorStr = "Unexpected check event returned, expecting response_addsession" + sessionId;
-
-				LogInfo(errorStr << "- pid: " <<  getpid() 
-						<< " - getthread_self:" << pthread_self() 
-						<< " tid:" << syscall(SYS_gettid) );
-
-				throw auction_rule_installer_error( errorStr.c_str(),
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);
-			}
-
-			if (is_addsession_event(ret_evt)){
-				errorStr = "Unexpected addSession event returned, expecting response_addsession" + sessionId;
-
-				LogInfo(errorStr << "- pid: " <<  getpid() 
-						<< " - getthread_self:" << pthread_self() 
-						<< " tid:" << syscall(SYS_gettid) );
-
-
-				throw auction_rule_installer_error( errorStr.c_str(),
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);			
-			}
-
-			if (is_response_checksession_event(ret_evt)){
-				errorStr = "Unexpected response_checkevent event returned, expecting response_addsession" + sessionId;
-
-				LogInfo(errorStr << "- pid: " <<  getpid() 
-						<< " - getthread_self:" << pthread_self() 
-						<< " tid:" << syscall(SYS_gettid) );
-
-
-				throw auction_rule_installer_error( errorStr.c_str(),
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);			
-			}
-
-			if (is_auction_interaction_event(ret_evt)){
-				errorStr = "Unexpected auction interaction event returned, expecting response_addsession" + sessionId;
-
-				LogInfo(errorStr << "- pid: " <<  getpid() 
-						<< " - getthread_self:" << pthread_self() 
-						<< " tid:" << syscall(SYS_gettid) );
-
-
-				throw auction_rule_installer_error( errorStr.c_str(),
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);			
-			}
-
-			if (is_removesession_event(ret_evt)){
-				errorStr = "Unexpected remove session event returned, expecting response_addsession" + sessionId;
-
-				LogInfo(errorStr << "- pid: " <<  getpid() 
-						<< " - getthread_self:" << pthread_self() 
-						<< " tid:" << syscall(SYS_gettid) );
-
-
-				throw auction_rule_installer_error( errorStr.c_str(),
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);			
-			}
-
-			if (is_response_removesession_event(ret_evt)){
-				errorStr = "Unexpected response_removesession event returned, expecting response_addsession" + sessionId;
-
-				LogInfo(errorStr << "- pid: " <<  getpid() 
-						<< " - getthread_self:" << pthread_self() 
-						<< " tid:" << syscall(SYS_gettid) );
-
-
-				throw auction_rule_installer_error( errorStr.c_str(),
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);			
-			}
-					
-		}
-
-		ResponseAddSessionEvent *resAdd = 
-			dynamic_cast<ResponseAddSessionEvent *>(ret_evt);
-
-		if (resAdd != NULL){
-						
-			// Loop though the responses to see which of the them work. 
-			objectListIter_t j;
-		
-			for ( j = resAdd->getObjects()->begin(); j != resAdd->getObjects()->end(); j++){
-				auc_return->set_response_object(j->second->copy());
-			}
-
-			delete resAdd;
-		
-		} else {
-			errorStr = "Unexpected event which is null - session:" + sessionId;
-
-			LogInfo(errorStr << "- pid: " <<  getpid() 
-				 << " - getthread_self:" << pthread_self() 
-				 << " tid:" << syscall(SYS_gettid) );
-
-
-			throw auction_rule_installer_error(errorStr,
-					msg::information_code::sc_signaling_session_failures,
-					msg::information_code::sigfail_wrong_conf_message);
-		}
-	} else {
-		LogDebug("error handle_response_create" );
-	}
-	
-	LogInfo("ending handle_response_create" );
-}
 
 void
 netauct_rule_installer::handle_response_remove(anslp::FastQueue *waitqueue, auction_rule *auc_return)
@@ -381,15 +255,13 @@ netauct_rule_installer::handle_response_remove(anslp::FastQueue *waitqueue, auct
 }
 
 
-
-auction_rule * 
+void
 netauct_rule_installer::handle_create_session(const string sessionId, const auction_rule *rule)
 {
 
 	LogInfo("starting handle_create_session" );
 
 	int nbrObjects = 0;
-	anslp::FastQueue *retQueue = new anslp::FastQueue("retQueue"); 
 				
 	auction_rule *auc_return = new auction_rule(*rule);
 	objectListConstIter_t i;
@@ -397,7 +269,7 @@ netauct_rule_installer::handle_create_session(const string sessionId, const auct
 		
 	LogDebug("Nbr objects to install: " << requestObjectList->size() << "in queue:" << getQueue()->get_name());
 
-	AddSessionEvent *evt = new AddSessionEvent(retQueue);
+	AddSessionEvent *evt = new AddSessionEvent(NULL);
 	evt->setSession(sessionId);
 	
 	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
@@ -410,58 +282,39 @@ netauct_rule_installer::handle_create_session(const string sessionId, const auct
 				 << " tid:" << syscall(SYS_gettid) );
 		
 	bool queued = getQueue()->enqueue(evt);
-	if ( queued ){
-			
-		if (!test){ // When testing mode, it does not wait.
-		LogInfo("it is going to create the session - procid:" << 
-				 getpid() << " - getthread_self:" << pthread_self() 
-				 << " tid:" << syscall(SYS_gettid) );
-
-			handle_response_create(sessionId, retQueue, auc_return);
-		}
-					
-	} else { // Error Queuing the event.
-			
+	if ( !queued ){
+						
 		throw auction_rule_installer_error("Process could not enqueue the anslp event",
 			msg::information_code::sc_signaling_session_failures,
 			msg::information_code::sigfail_wrong_conf_message);
 	}
-	
-	saveDelete(retQueue);
-	
+		
 	LogInfo("Finishing, put nbr objects:" << nbrObjects);
 	
-	return auc_return;
-
 }
 
-auction_rule * 
+void
 netauct_rule_installer::create(const string sessionId, const auction_rule *rule) 
 {
 
 	assert(rule != NULL);
 	
 	LogDebug("Creating auction session " << *rule);
+		
+	if (get_install_auction_rules()) {
 	
-	auction_rule *rule_return;
-	
-	if (get_install_auction_rules())
-	{
-	
-		rule_return = handle_create_session(sessionId, rule);
+		handle_create_session(sessionId, rule);
 	
 	} else {
 
 		LogDebug("NOP: installing policy rule " << *rule);
-		rule_return = rule->copy(); 		
 		
 	}
 	
-	return rule_return;		
 }
 
 
-auction_rule * 
+void 
 netauct_rule_installer::put_response(const string sessionId, const auction_rule *rule) 
 {
 

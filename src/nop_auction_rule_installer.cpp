@@ -79,61 +79,30 @@ nop_auction_rule_installer::setup() throw (auction_rule_installer_error)
 
 
 void 
-nop_auction_rule_installer::check(const string sessionId, const msg::anslp_mspec_object *object)
+nop_auction_rule_installer::check(const string sessionId, 
+								   std::vector<msg::anslp_mspec_object *> &missing_objects)
 		throw (auction_rule_installer_error) 
 {
-
+	
 	LogDebug("NOP: check()");
 }
 
 
-auction_rule * 
+void
 nop_auction_rule_installer::create(const string sessionId, const auction_rule *rule) 
 {
 
 	LogDebug("NOP: installing policy rule " << *rule);
-	auction_rule *rule_return;
 	
-	if ( rule != NULL ){
-		rule_return = rule->copy(); 
-		
-		objectListConstIter_t i;
-		for ( i = rule_return->get_request_objects()->begin(); 
-					i != rule_return->get_request_objects()->end(); i++)
-		{
-			rule_return->set_response_object((i->second)->copy());
-		}
-	}
-	else{
-		rule_return = NULL;
-	}	
-	
-	return rule_return;
 }
 
 
-auction_rule * 
+void
 nop_auction_rule_installer::put_response(const string sessionId, const auction_rule *rule) 
 {
 
 	LogDebug("NOP: put response " << *rule);
-	auction_rule *rule_return;
 	
-	if ( rule != NULL ){
-		rule_return = rule->copy(); 
-		
-		objectListConstIter_t i;
-		for ( i = rule_return->get_request_objects()->begin(); 
-					i != rule_return->get_request_objects()->end(); i++)
-		{
-			rule_return->set_response_object((i->second)->copy());
-		}
-	}
-	else{
-		rule_return = NULL;
-	}	
-	
-	return rule_return;
 }
 
 

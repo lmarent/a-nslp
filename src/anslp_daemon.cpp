@@ -40,6 +40,9 @@
 #include "benchmark_journal.h"
 #include <openssl/ssl.h>
 #include "gist_conf.h"
+#include <pthread.h>
+#include <sys/syscall.h>
+
 
 using namespace protlib;
 using namespace protlib::log;
@@ -295,15 +298,14 @@ void anslp_daemon::main_loop(uint32 thread_id) {
 					<< " no message in queue" );
 			
 		}
-		
-		LogInfo("dispatcher thread #" << thread_id
-					<< " no message in queue" );
-
 
 		LogInfo("dispatcher thread #" << thread_id
 			<< " processing received message #" << msg->get_id()
-			<< " number of messages #"<< get_fqueue()->size() );
-			
+			<< " number of messages #"<< get_fqueue()->size() 
+			<< "- procid:" <<  getpid() 
+			<< " - getthread_self:" << pthread_self() 
+			<< " tid:" << syscall(SYS_gettid));
+						
 		MP(benchmark_journal::PRE_PROCESSING);
 
 		// Analyze message and create an event from it.

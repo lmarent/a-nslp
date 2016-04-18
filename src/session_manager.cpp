@@ -123,9 +123,9 @@ ni_session *session_manager::create_ni_session()
 	s = new ni_session(create_unique_id(), config);
 	session_table[s->get_id()] = s;
 
-	LogInfo("created new NI session " << s->get_id());
+	LogInfo("created new NI session " << s->get_id().to_string());
 
-    LogInfo("it is going to create the session - procid" << getpid() <<
+    LogDebug("it is going to create the session - procid" << getpid() <<
             " - getthread_self:" << pthread_self() <<
             " tid:" <<  syscall(SYS_gettid) );
 
@@ -206,7 +206,7 @@ session *session_manager::get_session(const session_id &sid)
 	pthread_mutex_lock(&mutex);
 
 	c_iter i = session_table.find(sid);
-
+		
 	if ( i != session_table.end() )
 		s = i->second;
 

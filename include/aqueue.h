@@ -173,11 +173,11 @@ class AddAnslpSessionEvent: public AnslpEvent
 {
 	private:
 		string sessionId;
-		anslp::session_id anslpSession;
+		string anslpSession;
 		
 	public:
 	
-		AddAnslpSessionEvent( string _sessionId, anslp::session_id _anslpSession): 
+		AddAnslpSessionEvent( string _sessionId, string _anslpSession): 
 			AnslpEvent(ANSLP_CREATE_ANSLP_SESSION), sessionId(_sessionId), 
 			anslpSession(_anslpSession){}
 		
@@ -188,7 +188,7 @@ class AddAnslpSessionEvent: public AnslpEvent
 			return sessionId;
 		}
 		
-		anslp::session_id getAnslpSession()
+		string getAnslpSession()
 		{
 			return anslpSession;
 		}

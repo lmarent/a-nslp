@@ -64,9 +64,11 @@ class nf_session : public session {
 	 * States of a session.
 	 */
 	enum state_t {
-		STATE_ANSLP_CLOSE		= 0,
-		STATE_ANSLP_PENDING		= 1,
-		STATE_ANSLP_AUCTIONING	= 2
+		STATE_ANSLP_CLOSE				= 0,
+		STATE_ANSLP_PENDING_CHECK		= 1,
+		STATE_ANSLP_PENDING				= 2,
+		STATE_ANSLP_PENDING_INSTALLING	= 3,
+		STATE_ANSLP_AUCTIONING			= 4
 	};
 
 	nf_session(state_t s, const anslp_config *conf);
@@ -94,10 +96,14 @@ class nf_session : public session {
 	msg::ntlp_msg *get_last_create_message() const;
 	
 	void set_last_create_message(msg::ntlp_msg *msg);
-
+	
 	msg::ntlp_msg *get_last_refresh_message() const;
 	
 	void set_last_refresh_message(msg::ntlp_msg *msg);
+
+	void set_last_response_message(msg_event *e);
+	
+	msg_event * get_last_response_message() const;
 
 	inline bool is_proxy_mode() const { return proxy_mode; }
 	
@@ -113,7 +119,12 @@ class nf_session : public session {
 	void set_msg_bidding_sequence_number(uint32 value) { msn_bidding = value; }
 	
 	uint32 next_msg_bidding_sequence_number();
-	
+
+	bool set_auction_rule(dispatcher *d, 
+						  anslp_create *create,
+						  std::vector<msg::anslp_mspec_object *> &missing_objects);
+
+		
   private:
   
 	state_t state;
@@ -126,23 +137,26 @@ class nf_session : public session {
 	
 	uint32 lifetime;
 	
-	uint32 max_lifetime;
-	
+	uint32 max_lifetime;	
 	uint32 response_timeout;
+	uint32 create_counter; 
 	
 	timer state_timer;
-	
 	timer response_timer;
 
 	ntlp::mri_pathcoupled *ni_mri;	// the MRI to use for reaching the NI
 	ntlp::mri_pathcoupled *nr_mri;	// the MRI to use for reaching the NR
 	msg::ntlp_msg *create_message;
 	msg::ntlp_msg *refresh_message;
+	
+	msg_event *response_message;
+
 
 	state_t process_state_close(dispatcher *d, event *evt);
 	state_t handle_state_close(dispatcher *d, event *evt);
-	
+	state_t handle_state_pending_check(dispatcher *d, event *evt);
 	state_t handle_state_pending(dispatcher *d, event *evt);
+	state_t handle_state_pending_installing(dispatcher *d, event *evt);
 	
 	state_t handle_state_auctioning(dispatcher *d, event *evt);
 	
@@ -157,20 +171,18 @@ class nf_session : public session {
 	ntlp_msg *create_msg_for_ni(ntlp_msg *msg) const;
 	
 	msg::ntlp_msg *
-	build_create_message(msg_event *e, 
-						std::vector<msg::anslp_mspec_object *> & missing_objects);
+	build_create_message(anslp_create *c,
+						 std::vector<msg::anslp_mspec_object *> & missing_objects);
 							
 	msg::ntlp_msg * build_teardown_message(); 
 
 	void set_pc_mri(msg_event *evt) throw (request_error);
 	
-	void set_auction_rule(dispatcher *d, 
-						 msg_event *evt,
-						 std::vector<msg::anslp_mspec_object *> &missing_objects);
-
 	auction_rule * create_auction_rule(anslp_bidding *bidding);
 
 	uint32 create_random_number() const;
+	
+	void inc_create_counter();
 	
 	msg::ntlp_msg *build_bidding_message(api_bidding_event *e );
 	
@@ -204,6 +216,21 @@ inline msg::ntlp_msg *nf_session::get_last_refresh_message() const {
 	return refresh_message;
 }
 
+inline void nf_session::set_last_response_message(msg_event *e) 
+{
+	if (response_message != NULL)
+		delete(response_message);
+	
+	response_message = new msg_event(new anslp::session_id(*e->get_session_id()), 
+									 e->get_ntlp_msg()->copy(), 
+									 e->is_for_this_node());
+}
+
+inline msg_event *nf_session::get_last_response_message() const {
+	assert( response_message != NULL );
+	return response_message;
+}
+
 inline ntlp::mri_pathcoupled *nf_session::get_ni_mri() const {
 	assert( ni_mri != NULL );
 	return ni_mri;
@@ -222,6 +249,11 @@ inline ntlp::mri_pathcoupled *nf_session::get_nr_mri() const {
 inline void nf_session::set_nr_mri(ntlp::mri_pathcoupled *mri) {
 	delete nr_mri;
 	nr_mri = mri;
+}
+
+inline void nf_session::inc_create_counter() 
+{
+	create_counter++;
 }
 
 

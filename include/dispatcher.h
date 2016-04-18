@@ -80,15 +80,16 @@ class dispatcher {
 	
 	virtual void report_async_event(std::string msg) throw ();
 	
-	virtual bool check(const string session_id, const msg::anslp_mspec_object *object);
+	virtual bool check(const string session_id, 
+					   std::vector<msg::anslp_mspec_object *> &missing_objects);
 	
-	virtual auction_rule * install_auction_rules(const string session_id, const auction_rule *act_rule) 
+	virtual void install_auction_rules(const string session_id, const auction_rule *act_rule) 
 		throw (auction_rule_installer_error);
 	
 	virtual auction_rule * auction_interaction(const bool server, const string session_id, const auction_rule *act_rule)
 		throw (auction_rule_installer_error);
 		
-	virtual auction_rule * send_response(const string session_id, const auction_rule *act_rule) 
+	virtual void send_response(const string session_id, const auction_rule *act_rule) 
 		throw (auction_rule_installer_error);
 		
 	virtual void remove_auction_rules(const string session_id, const auction_rule *act_rule)

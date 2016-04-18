@@ -39,7 +39,9 @@ class ForwarderTest : public CppUnit::TestCase {
 	CPPUNIT_TEST_SUITE( ForwarderTest );
 
 	CPPUNIT_TEST( testClose );
+	CPPUNIT_TEST( testPendingCheck );
 	CPPUNIT_TEST( testPending );
+	CPPUNIT_TEST( testPendingInstalling );
 	CPPUNIT_TEST( testAuctioning );
 	CPPUNIT_TEST( testIntegratedStateMachine );
 
@@ -52,7 +54,9 @@ class ForwarderTest : public CppUnit::TestCase {
 	void add_fields(msg::anslp_ipap_message *mess);	
 
 	void testClose();
+	void testPendingCheck();
 	void testPending();
+	void testPendingInstalling();
 	void testAuctioning();
 	void testIntegratedStateMachine();
 
@@ -152,6 +156,7 @@ void ForwarderTest::process(nf_session_test &s, event *evt) {
 }
 
 void ForwarderTest::setUp() {
+	
 	conf = new mock_anslp_config();
 	rule_installer = new nop_auction_rule_installer(conf);
 	d = new mock_dispatcher(NULL, rule_installer, conf);
@@ -254,15 +259,14 @@ ForwarderTest::create_anslp_refresh(uint32 msn, uint32 lt) const
 
 void ForwarderTest::testClose() {
 	/*
-	 * STATE_ANSLP_CLOSE ---[rx_CREATE && CREATE(Lifetime>0) ]---> STATE_ANSLP_PENDING
+	 * STATE_ANSLP_CLOSE ---[rx_CREATE && CREATE(Lifetime>0) ]---> STATE_ANSLP_PENDING_CHECK
 	 */
 	nf_session_test s1(nf_session::STATE_ANSLP_CLOSE, conf);
-	event *e1 = new msg_event(new session_id(s1.get_id()),
-		create_anslp_create());
-		
+	
+	event *e1 = new msg_event(new session_id(s1.get_id()), create_anslp_create());
+	
 	process(s1, e1);
-	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING);
-	ASSERT_CREATE_MESSAGE_SENT(d);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_CHECK);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
 
 	
@@ -270,12 +274,12 @@ void ForwarderTest::testClose() {
 	 * STATE_ANSLP_CLOSE ---[rx_CREATE && CREATE(Lifetime > MAX) ]---> STATE_ANSLP_PENDING
 	 */
 	nf_session_test s2(nf_session::STATE_ANSLP_CLOSE, conf);
+	
 	event *e2 = new msg_event(new session_id(s2.get_id()),
 		create_anslp_create(START_MSN, 1000000)); // more than allowed
 	
 	process(s2, e2);
-	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING);
-	ASSERT_CREATE_MESSAGE_SENT(d);
+	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING_CHECK);
 	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
 
 
@@ -283,6 +287,7 @@ void ForwarderTest::testClose() {
 	 * STATE_ANSLP_CLOSE ---[rx_BIDDING ]---> STATE_ANSLP_CLOSE
 	 */
 	nf_session_test s3(nf_session::STATE_ANSLP_CLOSE, conf);
+	
 	event *e3 = new msg_event(new session_id(s3.get_id()),
 		create_anslp_bidding(START_MSN)); // more than allowed
 	
@@ -291,9 +296,125 @@ void ForwarderTest::testClose() {
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
 
-	
 }
 
+void ForwarderTest::testPendingCheck() {
+	
+
+	ntlp::mri_pathcoupled *ntlp_mri1 = new ntlp::mri_pathcoupled(
+		hostaddress("192.168.0.4"), 32, 0,
+		hostaddress("192.168.0.5"), 32, 0,
+		"tcp", 0, 0, 0, true
+	);
+
+	/*
+	 * STATE_ANSLP_PENDING_CHECK ---[rx_check]---> STATE_ANSLP_PENDING
+	 */
+	nf_session_test s1(nf_session::STATE_ANSLP_PENDING_CHECK, conf);
+	s1.set_nr_mri(ntlp_mri1);
+	s1.set_last_create_message(create_anslp_create());
+	
+	vector<msg::anslp_mspec_object *> mspec_objects;
+	mspec_objects.push_back(mess1->copy());
+	mspec_objects.push_back(mess2->copy());
+	mspec_objects.push_back(mess3->copy());
+
+	event *e1 = new api_check_event(new session_id(s1.get_id()), mspec_objects, NULL);
+
+	process(s1, e1);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+	ASSERT_CREATE_MESSAGE_SENT(d);
+	
+	/*
+	 * STATE_ANSLP_PENDING_CHECK ---[rx_CREATE && CREATE(Lifetime == 0) ]---> STATE_ANSLP_CLOSE
+	 */
+	nf_session_test s2(nf_session::STATE_ANSLP_PENDING_CHECK, conf);
+	s2.set_last_create_message(create_anslp_create());
+
+	event *e2 = new msg_event(new session_id(s2.get_id()),
+			create_anslp_create(START_MSN+1, 0));
+
+	// We must to wait for a response successful response message. 
+	process(s2, e2);
+	ASSERT_STATE(s2, nf_session::STATE_ANSLP_CLOSE);
+	ASSERT_CREATE_MESSAGE_SENT(d);
+	ASSERT_NO_TIMER(d);
+
+	/*
+	 * STATE_ANSLP_PENDING_CHECK ---[rx_CREATE && CREATE(Lifetime > 0) ]---> STATE_ANSLP_PENDING_CHECK
+	 */
+	nf_session_test s3(nf_session::STATE_ANSLP_PENDING_CHECK, conf);
+	s3.set_last_create_message(create_anslp_create());
+
+	event *e3 = new msg_event(new session_id(s3.get_id()),
+			create_anslp_create(START_MSN, 10));
+
+	// We must to wait for a response successful response message. 
+	process(s3, e3);
+	ASSERT_STATE(s3, nf_session::STATE_ANSLP_PENDING_CHECK);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_TIMER_STARTED(d, s3.get_state_timer());
+
+	/*
+	 * STATE_ANSLP_PENDING_CHECK ---[rx_CREATE && CREATE(Lifetime > 0) ]---> STATE_ANSLP_PENDING_CHECK
+	 * State changes from participating to forward because it is assumed any 
+	 * selection metering entities.
+	 */
+	nf_session_test s4(nf_session::STATE_ANSLP_PENDING_CHECK, conf);
+	s4.set_last_create_message(create_anslp_create());
+
+	event *e4 = new msg_event(new session_id(s4.get_id()),
+			create_anslp_create(START_MSN+1, 10));
+
+	// We must to wait for a response successful response message. 
+	process(s4, e4);
+	ASSERT_STATE(s4, nf_session::STATE_ANSLP_PENDING_CHECK);
+	ASSERT_TIMER_STARTED(d, s4.get_state_timer());
+	
+	/*
+	 * STATE_ANSLP_PENDING_CHECK ---[STATE_TIMEOUT]---> STATE_ANSLP_CLOSE
+	 */
+	nf_session_test s5(nf_session::STATE_ANSLP_PENDING_CHECK, conf);
+
+	s5.get_state_timer().set_id(47);
+	s5.set_last_create_message(create_anslp_create());
+	timer_event *e5 = new timer_event(NULL, 47);
+
+	process(s5, e5);
+	ASSERT_STATE(s5, nf_session::STATE_ANSLP_CLOSE);
+	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_permanent_failure);
+	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_PENDING_CHECK ---[STATE_TIMEOUT]---> STATE_ANSLP_PENDING_CHECK
+	 */
+	nf_session_test s6(nf_session::STATE_ANSLP_PENDING_CHECK, conf);
+	s6.set_last_create_message(create_anslp_create());
+
+	timer_event *e6 = new timer_event(NULL, 5);
+
+	// We must to wait for a response successful response message. 
+	process(s6, e6);
+	ASSERT_STATE(s6, nf_session::STATE_ANSLP_PENDING_CHECK);
+	ASSERT_NO_TIMER(d);
+
+	/*
+	 * STATE_ANSLP_PENDING_CHECK ---[rx_BIDDING ]---> STATE_ANSLP_PENDING_CHECK
+	 */
+	nf_session_test s7(nf_session::STATE_ANSLP_PENDING_CHECK, conf);
+	s6.set_last_create_message(create_anslp_create());
+
+	event *e7 = new msg_event(new session_id(s7.get_id()),
+		create_anslp_bidding(START_MSN)); // more than allowed
+	
+	process(s7, e7);
+	ASSERT_STATE(s7, nf_session::STATE_ANSLP_PENDING_CHECK);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+	
+}
 
 void ForwarderTest::testPending() {
 	
@@ -306,7 +427,7 @@ void ForwarderTest::testPending() {
 
 
 	/*
-	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_AUCTIONING
+	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_PENDING_INSTALLING
 	 */
 	nf_session_test s1(nf_session::STATE_ANSLP_PENDING, conf);
 	s1.set_ni_mri(ntlp_mri1);
@@ -319,9 +440,10 @@ void ForwarderTest::testPending() {
 	event *e1 = new msg_event(new session_id(s1.get_id()), resp1);
 
 	process(s1, e1);
-	ASSERT_STATE(s1, nf_session::STATE_ANSLP_AUCTIONING);
-	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_INSTALLING);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+	CPPUNIT_ASSERT(s1.get_last_response_message() != NULL);
+	
 
 	/*
 	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(ERROR,CREATE)]---> STATE_ANSLP_CLOSE
@@ -372,8 +494,7 @@ void ForwarderTest::testPending() {
 
 	/*
 	 * STATE_ANSLP_PENDING ---[rx_CREATE && CREATE(Lifetime > 0) ]---> STATE_ANSLP_PENDING
-	 * State changes from participating to forward because it is assumed any 
-	 * selection metering entities.
+	 * State changes from pending to resubmit from the close state.
 	 */
 	nf_session_test s5(nf_session::STATE_ANSLP_PENDING, conf);
 	s5.set_last_create_message(create_anslp_create());
@@ -383,8 +504,8 @@ void ForwarderTest::testPending() {
 
 	// We must to wait for a response successful response message. 
 	process(s5, e5);
-	ASSERT_STATE(s5, nf_session::STATE_ANSLP_PENDING);
-	ASSERT_CREATE_MESSAGE_SENT(d);
+	ASSERT_STATE(s5, nf_session::STATE_ANSLP_PENDING_CHECK);
+	ASSERT_NO_MESSAGE(d);
 	ASSERT_TIMER_STARTED(d, s5.get_state_timer());
 	
 	/*
@@ -429,8 +550,188 @@ void ForwarderTest::testPending() {
 	ASSERT_STATE(s8, nf_session::STATE_ANSLP_PENDING);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
-
+	
 }
+
+
+void ForwarderTest::testPendingInstalling() 
+{
+		
+	nf_session_test s1(nf_session::STATE_ANSLP_CLOSE, conf);
+	event *e1 = new msg_event(new session_id(s1.get_id()), create_anslp_create());
+	
+	process(s1, e1);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_CHECK);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+	
+ 	vector<msg::anslp_mspec_object *> mspec_objects;
+	mspec_objects.push_back(mess1->copy());
+	mspec_objects.push_back(mess2->copy());
+	mspec_objects.push_back(mess3->copy());
+
+	event *e2 = new api_check_event(new session_id(s1.get_id()), mspec_objects, NULL);
+
+	process(s1, e2);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+	ASSERT_CREATE_MESSAGE_SENT(d); 
+ 
+	ntlp_msg *resp1 = create_anslp_response(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none, START_MSN);
+
+	event *e3 = new msg_event(new session_id(s1.get_id()), resp1);
+	process(s1, e3);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+	
+	// objects installed.
+	vector<msg::anslp_mspec_object *> mspec_objects2;
+	mspec_objects2.push_back(mess1->copy());
+	mspec_objects2.push_back(mess2->copy());
+	mspec_objects2.push_back(mess3->copy());
+
+	event *e4 = new api_install_event(new session_id(s1.get_id()), mspec_objects2, NULL);
+	
+	process(s1, e4);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_AUCTIONING);
+	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[tg_install(SUCCESS)]---> STATE_ANSLP_CLOSE
+	 */
+	nf_session_test s2(nf_session::STATE_ANSLP_CLOSE, conf);
+	event *e12 = new msg_event(new session_id(s2.get_id()),	create_anslp_create());
+		
+	process(s2, e12);
+	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING_CHECK);
+	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
+    
+ 	vector<msg::anslp_mspec_object *> mspec_objects21;
+	mspec_objects21.push_back(mess1->copy());
+	mspec_objects21.push_back(mess2->copy());
+	mspec_objects21.push_back(mess3->copy());
+	
+	event *e22 = new api_check_event(new session_id(s2.get_id()), mspec_objects21, NULL);
+
+	process(s2, e22);
+	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING);
+	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
+	ASSERT_CREATE_MESSAGE_SENT(d); 
+
+	ntlp_msg *resp12 = create_anslp_response(information_code::sc_success,
+		information_code::suc_successfully_processed,
+		information_code::obj_none, START_MSN);
+
+	event *e23 = new msg_event(new session_id(s2.get_id()), resp12);
+	process(s2, e23);
+	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
+		
+	// objects installed.
+	vector<msg::anslp_mspec_object *> mspec_objects22;
+	mspec_objects22.push_back(mess1->copy());
+	mspec_objects22.push_back(mess2->copy());
+
+	event *e24 = new api_install_event(new session_id(s2.get_id()), mspec_objects22, NULL);
+
+	process(s2, e24);
+	ASSERT_STATE(s2, nf_session::STATE_ANSLP_CLOSE);
+	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_permanent_failure);
+	ASSERT_NO_TIMER(d);
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[rx_CREATE && CREATE(Lifetime == 0) ]---> STATE_ANSLP_CLOSE
+	 */
+	nf_session_test s3(nf_session::STATE_ANSLP_PENDING_INSTALLING, conf);
+	s3.set_last_create_message(create_anslp_create());
+
+	event *e5 = new msg_event(new session_id(s3.get_id()),
+			create_anslp_create(START_MSN+1, 0));
+
+	// We must to wait for a response successful response message. 
+	process(s3, e5);
+	ASSERT_STATE(s3, nf_session::STATE_ANSLP_CLOSE);
+	ASSERT_CREATE_MESSAGE_SENT(d);
+	ASSERT_NO_TIMER(d);
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[rx_CREATE && CREATE(Lifetime > 0) ]---> STATE_ANSLP_PENDING_INSTALLING
+	 */
+	nf_session_test s4(nf_session::STATE_ANSLP_PENDING_INSTALLING, conf);
+	s4.set_last_create_message(create_anslp_create());
+
+	event *e6 = new msg_event(new session_id(s4.get_id()),
+			create_anslp_create(START_MSN, 10));
+
+	// We must to wait for a response successful response message. 
+	process(s4, e6);
+	ASSERT_STATE(s4, nf_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_CREATE_MESSAGE_SENT(d);
+	ASSERT_TIMER_STARTED(d, s4.get_state_timer());
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[rx_CREATE && CREATE(Lifetime > 0) ]---> STATE_ANSLP_CLOSE
+	 * State changes from participating to forward because it is assumed any 
+	 * selection metering entities.
+	 */
+	nf_session_test s5(nf_session::STATE_ANSLP_PENDING_INSTALLING, conf);
+	s5.set_last_create_message(create_anslp_create());
+
+	event *e7 = new msg_event(new session_id(s5.get_id()),
+			create_anslp_create(START_MSN+1, 10));
+
+	// We must to wait for a response successful response message. 
+	process(s5, e7);
+	ASSERT_STATE(s5, nf_session::STATE_ANSLP_PENDING_CHECK);
+	ASSERT_TIMER_STARTED(d, s5.get_state_timer());
+	
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[STATE_TIMEOUT]---> STATE_ANSLP_CLOSE
+	 */
+	nf_session_test s6(nf_session::STATE_ANSLP_PENDING_INSTALLING, conf);
+
+	s6.get_state_timer().set_id(47);
+	s6.set_last_create_message(create_anslp_create());
+	timer_event *e8 = new timer_event(NULL, 47);
+
+	process(s6, e8);
+	ASSERT_STATE(s6, nf_session::STATE_ANSLP_CLOSE);
+	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_permanent_failure);
+	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[bidding]---> STATE_ANSLP_PENDING_INSTALLING
+	 */
+	nf_session_test s7(nf_session::STATE_ANSLP_PENDING_INSTALLING, conf);
+	s7.set_last_create_message(create_anslp_create());
+
+	event *e9 = new msg_event(new session_id(s7.get_id()),
+			create_anslp_bidding(START_MSN+1));
+
+	// We must to wait for a response successful response message. 
+	process(s7, e9);
+	ASSERT_STATE(s7, nf_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_NO_TIMER(d);
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLING ---[rx_BIDDING ]---> STATE_ANSLP_PENDING_INSTALLING
+	 */
+	nf_session_test s8(nf_session::STATE_ANSLP_PENDING_INSTALLING, conf);
+	s8.set_last_create_message(create_anslp_create());
+
+	event *e10 = new msg_event(new session_id(s8.get_id()),
+		create_anslp_bidding(START_MSN)); // more than allowed
+	
+	process(s8, e10);
+	ASSERT_STATE(s8, nf_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+	
+}
+
 
 void ForwarderTest::testAuctioning() {
 	
@@ -572,25 +873,50 @@ ForwarderTest::testIntegratedStateMachine()
 	 * STATE_ANSLP_CLOSE ---[rx_CREATE && CREATE(Lifetime>0) ]---> STATE_ANSLP_PENDING
 	 */
 	nf_session_test s1(nf_session::STATE_ANSLP_CLOSE, conf);
-	event *e1 = new msg_event(new session_id(s1.get_id()),
-		create_anslp_create());
+	event *e1 = new msg_event(new session_id(s1.get_id()), create_anslp_create());
 
 	process(s1, e1);
-	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING);
-	ASSERT_CREATE_MESSAGE_SENT(d);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_CHECK);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+	
+ 	vector<msg::anslp_mspec_object *> mspec_objects;
+	mspec_objects.push_back(mess1->copy());
+	mspec_objects.push_back(mess2->copy());
+	mspec_objects.push_back(mess3->copy());
 
+	event *e2 = new api_check_event(new session_id(s1.get_id()), mspec_objects, NULL);
+
+	process(s1, e2);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+	ASSERT_CREATE_MESSAGE_SENT(d); 
 
 	/*
-	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_AUCTIONING
+	 * STATE_ANSLP_PENDING ---[rx_RESPONSE(SUCCESS,CREATE)]---> STATE_ANSLP_PENDING_INSTALLING
 	 */
 	ntlp_msg *resp = create_anslp_response(information_code::sc_success,
 		information_code::suc_successfully_processed,
 		information_code::obj_none, START_MSN);
 
-	event *e2 = new msg_event(new session_id(s1.get_id()), resp);
+	event *e3 = new msg_event(new session_id(s1.get_id()), resp);
 
-	process(s1, e2);
+	process(s1, e3);
+	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_INSTALLING);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+
+	/*
+	 * STATE_ANSLP_PENDING_INSTALLATION ---[rx_CREATE && CREATE(Lifetime>0) ]---> STATE_ANSLP_AUCTIONING
+	 */
+
+	// objects installed.
+	vector<msg::anslp_mspec_object *> mspec_objects2;
+	mspec_objects2.push_back(mess1->copy());
+	mspec_objects2.push_back(mess2->copy());
+	mspec_objects2.push_back(mess3->copy());
+
+	event *e4 = new api_install_event(new session_id(s1.get_id()), mspec_objects2, NULL);
+
+	process(s1, e4);
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
@@ -598,10 +924,10 @@ ForwarderTest::testIntegratedStateMachine()
     /*
      * STATE_ANSLP_AUCTIONING ---[ && REFRESH(Lifetime == 0) ]---> STATE_AUCTIONING
 	 */
-	event *e3 = new msg_event(new session_id(s1.get_id()),
+	event *e5 = new msg_event(new session_id(s1.get_id()),
 							create_anslp_refresh(START_MSN+1, 0));
 
-	process(s1, e3);
+	process(s1, e5);
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s1.get_response_timer());
@@ -614,12 +940,11 @@ ForwarderTest::testIntegratedStateMachine()
 		information_code::suc_successfully_processed,
 		information_code::obj_none, START_MSN+1);
 
-	event *e4 = new msg_event(new session_id(s1.get_id()), resp2);
+	event *e6 = new msg_event(new session_id(s1.get_id()), resp2);
 
-	process(s1, e4);
+	process(s1, e6);
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_CLOSE);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
 
-	
 }

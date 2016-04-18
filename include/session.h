@@ -45,6 +45,7 @@ namespace anslp
 class dispatcher;
 class event;
 class msg_event;
+class api_install_event;
 
 
 /**
@@ -174,6 +175,8 @@ class session {
 	 * executes.
 	 */
 	virtual void process_event(dispatcher *d, event *evt) = 0;
+
+	void set_reponse_objects(anslp::api_install_event *install, auction_rule *act_rule);
 
 	auction_rule *rule;
 

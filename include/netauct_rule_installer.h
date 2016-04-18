@@ -61,14 +61,15 @@ class netauct_rule_installer : public auction_rule_installer
 	void setup() throw (auction_rule_installer_error);
 
 	//! Verifies that the session request is complete to create the session request.
-	virtual void check(const string sessionId, const msg::anslp_mspec_object *object)
+	virtual void check(const string sessionId, 
+					   std::vector<msg::anslp_mspec_object *> &missing_objects)
 		throw (auction_rule_installer_error);
 
 	//! Create a new auction session in an auction manager server.
-	virtual auction_rule * create(const string sessionId, const auction_rule *mt_object);
+	virtual void create(const string sessionId, const auction_rule *mt_object);
 
 	//! put the responses that come to the client.
-	virtual auction_rule * put_response(const string sessionId, const auction_rule * mt_object);
+	virtual void put_response(const string sessionId, const auction_rule * mt_object);
 
 	//! This method is used every time that any actor wants to post or push
 	//! Information for an auction.
@@ -84,7 +85,7 @@ class netauct_rule_installer : public auction_rule_installer
 
 	//! This function puts the objects in rule for processing in an auctioning server or 
 	//! auctioner user agent.
-	auction_rule * handle_create_session(const string sessionId, const auction_rule *rule);
+	void handle_create_session(const string sessionId, const auction_rule *rule);
 
 	//! This function puts the objects in rule for removing in an auctioning server or 
 	//! auctioner user agent.
@@ -95,10 +96,6 @@ class netauct_rule_installer : public auction_rule_installer
 	void handle_response_check(anslp::FastQueue *waitqueue) 
 			throw (auction_rule_installer_error);
   
-	//! This function throws an exception when there is not an event in queue 
-	//! (update auc_return with the number of objects installed).
-    void handle_response_create(const string sessiondId, anslp::FastQueue *queue, auction_rule *auc_return);
-
 	//! This function throws an exception when there is not an event in queue 
 	//! (update auc_return with the number of objects installed).
 	void

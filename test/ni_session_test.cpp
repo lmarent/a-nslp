@@ -456,7 +456,7 @@ void InitiatorTest::testPending()
 void InitiatorTest::testPendingInstalling() 
 {
 	
-	string sessionIdIn = "12345678901223";
+	string sessionIdIn = "1273247635.1388378322.2492646105.2893599821";
 		
 	/*
 	 * STATE_ANSLP_PENDING_INSTALLING ---[tg_install(NBR_OBJECTS = NBR_OBJECTS)]---> STATE_ANSLP_AUCTIONING
@@ -473,9 +473,9 @@ void InitiatorTest::testPendingInstalling()
 	mspec_objects.push_back(mess1->copy());
 	mspec_objects.push_back(mess2->copy());
 	mspec_objects.push_back(mess3->copy());
-		
-	event *e1 = new api_install_event(sessionIdIn, mspec_objects, NULL);
-
+	
+	event *e1 = new api_install_event(new session_id(s1.get_id()), mspec_objects, NULL);
+	
 	process(s1, e1);
 	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
@@ -497,7 +497,7 @@ void InitiatorTest::testPendingInstalling()
 	mspec_objects2.push_back(mess1->copy());
 	mspec_objects2.push_back(mess2->copy());
 
-	event *e2 = new api_install_event(sessionIdIn, mspec_objects2, NULL);
+	event *e2 = new api_install_event(new session_id(sessionIdIn), mspec_objects2, NULL);
     
 	process(s2, e2);
 	ASSERT_STATE(s2, ni_session::STATE_ANSLP_CLOSE);
@@ -733,7 +733,7 @@ void InitiatorTest::testAuctioning()
 void InitiatorTest::testIntegratedStateMachine()
 {
 	
-	string sessionIdIn = "1232342343";
+	string sessionIdIn = "1273247635.1388378322.2492646105.2893599821";
 		
 	vector<msg::anslp_mspec_object *> mspec_objects;
 	mspec_objects.push_back(mess1->copy());
@@ -787,7 +787,7 @@ void InitiatorTest::testIntegratedStateMachine()
 	mspec_objects2.push_back(mess2->copy());
 	mspec_objects2.push_back(mess3->copy());
 		
-	event *e3 = new api_install_event(sessionIdIn, mspec_objects2, NULL);
+	event *e3 = new api_install_event(new session_id(sessionIdIn), mspec_objects2, NULL);
 
 	process(s1, e3);
 	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);

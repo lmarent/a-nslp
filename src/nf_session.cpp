@@ -63,7 +63,7 @@ nf_session::nf_session(const session_id &id, const anslp_config *conf)
 		  proxy_mode(false), msn_bidding(0), lifetime(0), max_lifetime(0),
 		  response_timeout(0), state_timer(this), response_timer(this),
 		  ni_mri(NULL), nr_mri(NULL), create_message(NULL), 
-		  refresh_message(NULL)
+		  refresh_message(NULL), response_message(NULL)
 {
 	set_session_type(st_forwarder);
 	set_msg_bidding_sequence_number(create_random_number());
@@ -81,7 +81,7 @@ nf_session::nf_session(nf_session::state_t s, const anslp_config *conf)
 		  proxy_mode(false), msn_bidding(0), lifetime(0), max_lifetime(60),
 		  response_timeout(0), state_timer(this), response_timer(this),
 		  ni_mri(NULL), nr_mri(NULL), create_message(NULL),
-		  refresh_message(NULL)
+		  refresh_message(NULL), response_message(NULL)
 {
 	set_session_type(st_forwarder);
 	set_msg_bidding_sequence_number(create_random_number());
@@ -105,7 +105,10 @@ nf_session::~nf_session()
 	
 	if (refresh_message != NULL)
 		delete refresh_message;
-		
+	
+	if (response_message != NULL)
+		delete response_message;
+	
 }
 
 /**
@@ -123,8 +126,10 @@ uint32 nf_session::create_random_number() const
 
 std::ostream &anslp::operator<<(std::ostream &out, const nf_session &s) {
 	static const char *const names[] = { "CLOSE", 
-										 "PENDING", 
-										 "METERING" };
+										 "PENDING_CHECK", 
+										 "PENDING",
+										 "PENDING_INSTALLING",
+										 "AUCTIONING" };
 
 	return out << "[nf_session: id=" << s.get_id()
 		<< ", state=" << names[s.get_state()] << "]";
@@ -202,50 +207,26 @@ void nf_session::set_pc_mri(msg_event *evt) throw (request_error)
  * If we receive a successful response later, we will activate the rule.
  * In case we don't support the requested policy rule, an exception is thrown.
  */
-void nf_session::set_auction_rule(dispatcher *d, 
-								 msg_event *evt,
+bool nf_session::set_auction_rule(dispatcher *d, 
+								 anslp_create *create,
 								 std::vector<msg::anslp_mspec_object *> &missing_objects) 
 {
 	
 	LogDebug( "Begin set_auction_rule()");
-	string session_id;
-	
-	std::vector<msg::anslp_mspec_object *> objects;
-	assert( evt != NULL );
-	anslp_create *create = evt->get_create();
+		
 	assert( create != NULL );
-	create->get_mspec_objects(objects);
+	create->get_mspec_objects(missing_objects);
 	
-	LogDebug( "Nbr objects to check:" << objects.size() 
+	LogDebug( "Nbr objects to check:" << missing_objects.size() 
 			   << "sel auct entities:" << create->get_selection_auctioning_entities() );
 	
 	// Check which metering object could be installed in this node.
-	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
-	for ( it_objects = objects.begin(); it_objects != objects.end(); it_objects++)
+	if (check_participating(create->get_selection_auctioning_entities()))
 	{
-		const anslp_mspec_object *object = *it_objects;
-		if (check_participating( create->get_selection_auctioning_entities()))
-		{
-			try 
-			{
-				session_id = get_id().to_string();
-
-				LogDebug( "Checking element:" );
-				
-				if (d->check(session_id, object)) {
-				   rule->set_request_object(object->copy());
-				   missing_objects.push_back(object->copy());
-				} else {
-				   missing_objects.push_back(object->copy());
-				}
-			} catch(std::invalid_argument &e) {
-				missing_objects.push_back(object->copy());
-			}
-		}
-		else {
-			missing_objects.push_back(object->copy());
-		}
+		return d->check(get_id().to_string(), missing_objects);
 	}
+
+	return false;
 	
 	LogDebug("End set_auction_rule - objects inserted:" 
 					<< rule->get_request_objects()->size());
@@ -354,7 +335,7 @@ msg::ntlp_msg *nf_session::build_bidding_message(api_bidding_event *e )
 
 
 msg::ntlp_msg *
-nf_session::build_create_message(msg_event *e, 
+nf_session::build_create_message(anslp_create *c,
 								std::vector<msg::anslp_mspec_object *> & missing_objects) 
 {
 	using namespace anslp::msg;
@@ -362,8 +343,8 @@ nf_session::build_create_message(msg_event *e,
 	LogDebug( "Begin build_create_message");
 		
 	assert( get_nr_mri() != NULL );
-	
-	anslp_create *c = e->get_create();
+
+	assert(c != NULL );
 
 	/*
 	 * Build a ANSLP Create message.
@@ -450,30 +431,49 @@ nf_session::process_state_close(dispatcher *d, event *evt)
 				
 		set_pc_mri(e);
 		
-		set_auction_rule(d, e, missing_objects);
-
-		mri_pathcoupled *mri_pc
+		bool participating = set_auction_rule(d, c, missing_objects);
+		
+		if (participating){
+			
+			LogDebug( "Ending process State Close New state PENDING CHECK");
+			
+			mri_pathcoupled *mri_pc
 						= dynamic_cast<mri_pathcoupled *>(msg->get_mri());
-		assert( mri_pc != NULL );
+			assert( mri_pc != NULL );
 
-		hostaddress ni_address = e->get_mri()->get_sourceaddress();
+			hostaddress ni_address = e->get_mri()->get_sourceaddress();
+			
+			state_timer.start(d, get_lifetime());
+			
+			return STATE_ANSLP_PENDING_CHECK;
+		}
+		else{
 
-		// Create the new message to send foreward.
-		d->send_message( build_create_message(e, missing_objects) );
+			LogDebug( "Ending process State Close New state PENDING");
+			
+			mri_pathcoupled *mri_pc
+							= dynamic_cast<mri_pathcoupled *>(msg->get_mri());
+			assert( mri_pc != NULL );
 
-		state_timer.start(d, get_lifetime());
+			hostaddress ni_address = e->get_mri()->get_sourceaddress();
 
+			// Create the new message to send foreward.
+			d->send_message( build_create_message(c, missing_objects) );
+
+			state_timer.start(d, get_lifetime());
+
+			return STATE_ANSLP_PENDING;
+		}
+		
 		// Release the memory allocated to the missing objects vector
 		std::vector<msg::anslp_mspec_object *>::iterator it_objects;
 		for ( it_objects = missing_objects.begin(); 
-				it_objects != missing_objects.end(); it_objects++)
+			it_objects != missing_objects.end(); it_objects++)
 		{
 			delete(*it_objects);
 		}
 		missing_objects.clear();
 		
-		LogDebug( "Ending process State Close New state PENDING");		
-		return STATE_ANSLP_PENDING;
 	}	
 	catch ( auction_rule_installer_error &exc ) {
 		LogError("auction rule not supported: " << exc);
@@ -546,6 +546,166 @@ nf_session::handle_state_close(dispatcher *d, event *evt)
 	}
 	
 }
+
+/*
+ * state: STATE_ANSLP_PENDING_CHECK
+ */
+nf_session::state_t 
+nf_session::handle_state_pending_check(dispatcher *d, event *evt) {
+
+	using namespace anslp::msg;
+	using ntlp::mri_pathcoupled;
+	
+	string session_id;
+
+	LogDebug("begin handle_state_pending_check(): " << *this);
+	
+	/*
+	 * Another CREATE from the upstream peer arrived.
+	 *
+	 * Either the NI wants to shut down the session even before it started,
+	 * or we didn't respond fast enough and the NI resends its CREATE.
+	 *
+	 * TODO: What if this is a new CREATE with lifetime > 0? Discard?
+	 * Accept and even save policy rules?
+	 */
+	if ( is_anslp_create(evt) ) {
+		msg_event *e = dynamic_cast<msg_event *>(evt);
+		ntlp_msg *msg = e->get_ntlp_msg();
+		anslp_create *create = e->get_create();
+
+		anslp_create *previous = dynamic_cast<anslp_create *>(
+			get_last_create_message()->get_anslp_create());
+		assert( previous != NULL );
+
+		try {
+			check_authorization(d, e);
+		}
+		catch ( request_error &e ) {
+			LogError(e);
+			d->send_message( msg->create_error_response(e) );
+			return STATE_ANSLP_PENDING_CHECK; // no change
+		}
+
+		if ( create->get_msg_sequence_number() >
+				previous->get_msg_sequence_number()
+				&& create->get_session_lifetime() == 0 ) {
+
+			LogDebug("terminating session.");
+
+			state_timer.stop();
+
+			d->send_message( msg->copy_for_forwarding() );
+
+			return STATE_ANSLP_CLOSE;
+		}
+		else if ( create->get_msg_sequence_number()
+				== previous->get_msg_sequence_number() ) {
+
+			LogWarn("NI resent the initial CREATE. Passing it on.");
+
+			state_timer.start(d, get_response_timeout());
+
+			return STATE_ANSLP_PENDING_CHECK; // no change
+		}
+		else {
+			LogWarn("Replacing CREATE message."); 
+									
+			set_lifetime(create->get_session_lifetime());
+			set_msg_sequence_number(create->get_msg_sequence_number());
+
+			return process_state_close(d, e);
+		}
+	}
+	
+	/*
+	 * Either GIST can't reach the destination or we waited long enough
+	 * for the downstream peer to respond. Anyway, send a RESPONSE.
+	 */
+	else if ( is_no_next_node_found_event(evt)
+			|| is_timer(evt, state_timer) ) {
+
+		LogInfo("cannot reach destination");
+
+		ntlp_msg *latest = get_last_create_message();
+		ntlp_msg *resp = latest->create_response(
+			information_code::sc_permanent_failure,
+			information_code::fail_nr_not_reached);
+
+		d->send_message( resp );
+
+		// TODO: ReportAsyncEvent() ?
+
+		return STATE_ANSLP_CLOSE;
+	}
+	/*
+	 * Outdated timer event, discard and don't log.
+	 */
+	else if ( is_timer(evt) ) {
+		return STATE_ANSLP_PENDING_CHECK; // no change
+	}
+
+	/*
+	 * A msg_event arrived which contains a ANSLP api check message.
+	 */
+	else if ( is_api_check(evt) ) {
+				
+		api_check_event *e = dynamic_cast<api_check_event *>(evt);
+		
+		ntlp_msg *msg = get_last_create_message();
+
+		anslp_create *previous = dynamic_cast<anslp_create *>(
+			get_last_create_message()->get_anslp_create());
+			
+		assert( previous != NULL );
+		
+		std::vector<msg::anslp_mspec_object *> missing_objects;
+		
+		previous->get_mspec_objects(missing_objects);
+				
+		LogInfo("responder session installed. 1");
+		
+		std::vector<msg::anslp_mspec_object *>::const_iterator itc_objects;
+		for ( itc_objects = e->getObjects().begin(); itc_objects != e->getObjects().end(); itc_objects++)
+		{
+			const anslp_mspec_object *object = *itc_objects;
+			rule->set_request_object(object->copy());
+		}
+		
+		// Create the new message to send foreward.
+		d->send_message( build_create_message(previous, missing_objects) );
+		
+		LogInfo("responder session installed. 2");
+		
+		// Release the memory allocated to the missing objects vector
+		std::vector<msg::anslp_mspec_object *>::iterator it_objects;
+		for ( it_objects = missing_objects.begin(); 
+			it_objects != missing_objects.end(); it_objects++)
+		{
+			delete(*it_objects);
+		}
+		missing_objects.clear();
+		
+		LogInfo("responder session installed. 3");
+						
+		state_timer.start(d, get_lifetime());
+						
+		return STATE_ANSLP_PENDING;
+	}
+
+	
+	/*
+	 * Unexpected event.
+	 */
+	else {
+		LogInfo("discarding unexpected event " << *evt);
+		return STATE_ANSLP_PENDING_CHECK; // no change
+	}
+
+	LogDebug("Ending handle_state_pending(): " << *this);
+
+}
+
 
 /*
  * state: STATE_ANSLP_PENDING
@@ -663,70 +823,19 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 		if ( resp->is_success() ) 
 		{
 			
-			LogDebug("initiated session " << get_id());
+			LogDebug("Installing rules for session " << get_id());
+			
+			response_timer.start(d, get_response_timeout());
+
 			session_id = get_id().to_string();
-			auction_rule * result = d->install_auction_rules(session_id, rule);
 
-			LogDebug("After Session Installation, requested objects:" << rule->get_number_mspec_request_objects()
-						<< "installed objects:" << result->get_number_mspec_response_objects());
-
+			set_last_response_message(e);
 			
-			// Verify that every rule that passed the checking process could be installed.
-			if (rule->get_number_mspec_request_objects() 
-					== result->get_number_mspec_response_objects() )
-			{
+			d->install_auction_rules(session_id, rule );
 			
-				// free the space allocated to the rule to be installed.
-				delete(rule);
-				// Assign the response as the rule installed.
-				rule = result;
-				
-				anslp_response *response = resp->copy();
-				
-				// Copy the messages that comes from routers in the path.
-				objectListIter_t iter;
-				for (iter = result->get_response_objects()->begin(); 
-						iter != result->get_response_objects()->end(); ++iter){
-					response->set_mspec_object((iter->second)->copy());
-				}
-				
-				/*
-				* Wrap the Response inside an ntlp_msg and add session ID and MRI.
-				*/
-				
-				ntlp_msg *msgRsp = new ntlp_msg(get_id(), response, msg->get_mri()->copy(), 0);
-				
-				LogDebug("Before sending response to previous hop " << get_id());
-				LogDebug("response SourceAddress:" << msg->get_mri()->get_sourceaddress() 
-									<< "DestinationAddress:" << msg->get_mri()->get_destaddress());
-				
-				d->send_message( msgRsp );
-				state_timer.start(d, get_lifetime());
-				return STATE_ANSLP_AUCTIONING;
-			}
-			else
-			{
-				set_lifetime(0);
-
-				// Assign the response as the rule installed.
-				delete(rule);
-				rule = result;
-				
-				// Uninstall the previous rules.
-				if (rule->get_number_mspec_response_objects() > 0){
-					session_id = get_id().to_string();
-					d->remove_auction_rules(session_id, rule);
-				}
-				// Create message towards nr to teardown what we have done before 
-				ntlp_msg * tear_down = build_teardown_message();
-				d->send_message( tear_down );
-
-				// Send an error message to the ni.
-				d->send_message( msg->create_response(
-								 information_code::sc_permanent_failure, 
-								 information_code::fail_internal_error));
-				return STATE_ANSLP_CLOSE;
-			}
+			state_timer.start(d, get_response_timeout());
+			
+			return STATE_ANSLP_PENDING_INSTALLING;
 		}
 		else {
 			LogDebug("forwarding error msg from upstream peer");
@@ -749,6 +858,189 @@ nf_session::handle_state_pending(dispatcher *d, event *evt) {
 	}
 
 	LogDebug("Ending handle_state_pending(): " << *this);
+
+}
+
+
+/*
+ * state: STATE_ANSLP_PENDING_INSTALLING
+ */
+nf_session::state_t 
+nf_session::handle_state_pending_installing(dispatcher *d, event *evt) {
+
+	using namespace anslp::msg;
+	string session_id;
+
+	LogDebug("begin handle_state_pending_installing(): " << *this);
+	
+	/*
+	 * Another CREATE from the upstream peer arrived.
+	 *
+	 * Either the NI wants to shut down the session even before it started,
+	 * or we didn't respond fast enough and the NI resends its CREATE.
+	 *
+	 * TODO: What if this is a new CREATE with lifetime > 0? Discard?
+	 * Accept and even save policy rules?
+	 */
+	if ( is_anslp_create(evt) ) {
+		msg_event *e = dynamic_cast<msg_event *>(evt);
+		ntlp_msg *msg = e->get_ntlp_msg();
+		anslp_create *create = e->get_create();
+
+		anslp_create *previous = dynamic_cast<anslp_create *>(
+			get_last_create_message()->get_anslp_create());
+		assert( previous != NULL );
+
+		try {
+			check_authorization(d, e);
+		}
+		catch ( request_error &e ) {
+			LogError(e);
+			d->send_message( msg->create_error_response(e) );
+			return STATE_ANSLP_PENDING_INSTALLING; // no change
+		}
+
+		if ( create->get_msg_sequence_number() >
+				previous->get_msg_sequence_number()
+				&& create->get_session_lifetime() == 0 ) {
+
+			LogDebug("terminating session.");
+
+			state_timer.stop();
+
+			d->send_message( msg->copy_for_forwarding() );
+
+			return STATE_ANSLP_CLOSE;
+		}
+		else if ( create->get_msg_sequence_number()
+				== previous->get_msg_sequence_number() ) {
+
+			LogWarn("NF resent the initial CREATE. Passing it on.");
+
+			d->send_message( msg->copy_for_forwarding() );
+
+			state_timer.start(d, get_response_timeout());
+
+			return STATE_ANSLP_PENDING_INSTALLING; // no change
+		}
+		else {
+			LogWarn("Replacing CREATE message."); 
+									
+			set_lifetime(create->get_session_lifetime());
+			set_msg_sequence_number(create->get_msg_sequence_number());
+
+			return process_state_close(d, e);
+		}
+	}
+	
+	/*
+	 * Either GIST can't reach the destination or we waited long enough
+	 * for the downstream peer to respond. Anyway, send a RESPONSE.
+	 */
+	else if ( is_no_next_node_found_event(evt)
+			|| is_timer(evt, state_timer) ) {
+
+		LogInfo("cannot reach destination");
+
+		ntlp_msg *latest = get_last_create_message();
+		ntlp_msg *resp = latest->create_response(
+			information_code::sc_permanent_failure,
+			information_code::fail_nr_not_reached);
+				
+		d->send_message( resp );
+
+		// TODO: ReportAsyncEvent() ?
+
+		return STATE_ANSLP_CLOSE;
+	}
+	/*
+	 * Outdated timer event, discard and don't log.
+	 */
+	else if ( is_timer(evt) ) {
+		return STATE_ANSLP_PENDING_INSTALLING; // no change
+	}
+
+	/*
+	 * A msg_event arrived which contains a A-NSLP api installing message.
+	 */
+	else if ( is_api_install(evt) ) {
+				
+		api_install_event *e = dynamic_cast<api_install_event *>(evt);
+		ntlp_msg *msg = get_last_response_message()->get_ntlp_msg();
+		anslp_response *resp = get_last_response_message()->get_response();
+		
+		LogInfo("received install event ");
+		
+		// Verify that every rule that passed the checking process could be installed.
+		if (rule->get_number_mspec_request_objects() 
+				== e->get_auctioning_objects().size() )
+		{
+			
+			state_timer.stop();
+						
+			// Assign as the rule installed the response. 
+			set_reponse_objects(e, rule);
+			
+			// Build the response messsage with rules installed in other router plus 
+			// rules installed in this router.
+			anslp_response *response = resp->copy();
+			
+			// Copy the messages that comes from routers in the path.
+			objectListIter_t iter;
+			for (iter = rule->get_response_objects()->begin(); 
+					iter != rule->get_response_objects()->end(); ++iter){
+				response->set_mspec_object((iter->second)->copy());
+			}
+				
+			/*
+			* Wrap the Response inside an ntlp_msg and add session ID and MRI.
+			*/
+				
+			ntlp_msg *msgRsp = new ntlp_msg(get_id(), response, 
+											msg->get_mri()->copy(), 0);
+					
+			LogDebug("Before sending response to previous hop " << get_id());
+			LogDebug("response SourceAddress:" << msg->get_mri()->get_sourceaddress() 
+							<< "DestinationAddress:" << msg->get_mri()->get_destaddress());
+				
+			d->send_message( msgRsp );
+			state_timer.start(d, get_lifetime());
+			return STATE_ANSLP_AUCTIONING;
+		}
+		else
+		{
+			state_timer.stop();
+			
+			set_lifetime(0);
+			
+			// Uninstall the previous rules.
+			if (rule->get_number_mspec_response_objects() > 0){
+				session_id = get_id().to_string();
+				d->remove_auction_rules(session_id, rule->copy());
+			}
+
+			// Create message towards nr to teardown what we have done before 
+			ntlp_msg * tear_down = build_teardown_message();
+			d->send_message( tear_down );
+
+			// Send an error message to the ni.
+			d->send_message( msg->create_response(
+							 information_code::sc_permanent_failure, 
+							 information_code::fail_internal_error));
+			return STATE_ANSLP_CLOSE;
+		}
+
+	}
+	
+	/*
+	 * Unexpected event.
+	 */
+	else {
+		LogInfo("discarding unexpected event " << *evt);
+		return STATE_ANSLP_PENDING_INSTALLING; // no change
+	}
+
+	LogDebug("Ending handle_state_pending_installing(): " << *this);
 
 }
 
@@ -895,7 +1187,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
 			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule);
+			d->remove_auction_rules(session_id, rule->copy());
 		}
 
 		// TODO: check the spec!
@@ -919,7 +1211,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
 			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule);
+			d->remove_auction_rules(session_id, rule->copy());
 		}
 		// TODO: ReportAsyncEvent()
 
@@ -935,7 +1227,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
 			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule);
+			d->remove_auction_rules(session_id, rule->copy());
 		}
 
 		return STATE_ANSLP_CLOSE;
@@ -975,7 +1267,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 				// Uninstall the previous rules.
 				if (rule->get_number_mspec_response_objects() > 0){
 					session_id = get_id().to_string();
-					d->remove_auction_rules(session_id, rule);	
+					d->remove_auction_rules(session_id, rule->copy());	
 				}
 				return STATE_ANSLP_CLOSE;
 			}
@@ -991,7 +1283,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0){
 				session_id = get_id().to_string();
-				d->remove_auction_rules(session_id, rule);
+				d->remove_auction_rules(session_id, rule->copy());
 			}
 			
 			d->send_message( create_msg_for_ni(msg) );
@@ -1026,8 +1318,16 @@ void nf_session::process_event(dispatcher *d, event *evt) {
 			state = handle_state_close(d, evt);
 			break;
 
+		case nf_session::STATE_ANSLP_PENDING_CHECK:
+			state = handle_state_pending_check(d, evt);
+			break;
+
 		case nf_session::STATE_ANSLP_PENDING:
 			state = handle_state_pending(d, evt);
+			break;
+
+		case nf_session::STATE_ANSLP_PENDING_INSTALLING:
+			state = handle_state_pending_installing(d, evt);
 			break;
 
 		case nf_session::STATE_ANSLP_AUCTIONING:

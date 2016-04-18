@@ -88,7 +88,8 @@ class auction_rule_installer {
 	 *
 	 * If they are not, an exception is thrown.
 	 */
-	virtual void check(const string sessionId, const msg::anslp_mspec_object *object)
+	virtual void check(const string sessionId, 
+						std::vector<msg::anslp_mspec_object *> &missing_objects)
 		throw (auction_rule_installer_error) = 0;
 
 	/**
@@ -99,7 +100,7 @@ class auction_rule_installer {
 	 * After calling this method, the auction session is created in 
 	 * the auctioning application and nodes can start the auction process.
 	 */
-	virtual auction_rule * create(const string sessionId, const auction_rule *mt_object) = 0;
+	virtual void create(const string sessionId, const auction_rule *mt_object) = 0;
 
 	/**
 	 * Remove the given auction session.
@@ -120,7 +121,7 @@ class auction_rule_installer {
 	 * local client application. 
 	 *
 	 */
-	virtual auction_rule * put_response(const string sessionId, const auction_rule * mt_object) = 0;
+	virtual void put_response(const string sessionId, const auction_rule * mt_object) = 0;
 
 	/**
 	 * executes an auction interaction between two parties.

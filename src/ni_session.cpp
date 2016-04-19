@@ -225,12 +225,11 @@ msg::ntlp_msg *ni_session::build_bidding_message(api_bidding_event *e )
 	bidding->set_msg_sequence_number(next_msg_sequence_number());
 
 	// Set the objects to install.
-	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
-	for ( it_objects = e->get_auctioning_objects().begin(); 
-			it_objects != e->get_auctioning_objects().end(); it_objects++)
+	objectListConstIter_t it_objects;
+	for ( it_objects = e->getObjects()->begin(); 
+			it_objects != e->getObjects()->end(); it_objects++)
 	{
-		anslp_mspec_object *object = *it_objects;
-		bidding->set_mspec_object(object->copy());
+		bidding->set_mspec_object(it_objects->second->copy());
 	}
 	
 
@@ -340,12 +339,11 @@ ni_session::setup_session(dispatcher *d, api_create_event *e,
 	set_response_timeout( t );
 
 	// In this node we do not install any policy.
-	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
-	for ( it_objects = e->get_auctioning_objects().begin(); 
-			it_objects != e->get_auctioning_objects().end(); it_objects++)
+	objectListConstIter_t it_objects;
+	for ( it_objects = e->getObjects()->begin(); 
+			it_objects != e->getObjects()->end(); it_objects++)
 	{
-		anslp_mspec_object *object = *it_objects;
-		missing_objects.push_back(object->copy());
+		missing_objects.push_back((it_objects->second)->copy());
 	}
 	
 	LogDebug("using lifetime: " << get_lifetime() << " seconds");
@@ -686,7 +684,7 @@ ni_session::state_t ni_session::handle_state_pending_installing(
 						
 			
 		if (get_last_auction_install_rule()->get_number_mspec_request_objects() 
-				== e->get_auctioning_objects().size() )
+				== e->getObjects()->size() )
 		{
 			// Assign the response as the rule installed.
 			saveDelete(rule);

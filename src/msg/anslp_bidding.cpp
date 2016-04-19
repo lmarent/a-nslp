@@ -261,3 +261,4 @@ void anslp_bidding::get_mspec_objects(vector<anslp_mspec_object *> &list_return)
 		}
 	}
 }
+ 

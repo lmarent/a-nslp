@@ -169,11 +169,12 @@ void NetAuctRuleInstallerTest::testCheck()
 	AnslpEvent *ret_evt = NULL;
 	
 	try{
-	
-		std::vector<msg::anslp_mspec_object *> objects;
-		objects.push_back(mess1->copy());
 		
-		installer->check( sessionId, objects);
+		objectList_t mspec_objects;
+		anslp::mspec_rule_key key;
+		mspec_objects[key] = mess1->copy();
+		
+		installer->check( sessionId, &mspec_objects);
 	
 		ret_evt = queueRet->dequeue_timedwait(1000);
 
@@ -182,7 +183,6 @@ void NetAuctRuleInstallerTest::testCheck()
 				
 		anslp::FastQueue reponse;
 		
-		mspec_rule_key key;
 		ResponseCheckSessionEvent *resCheck = new ResponseCheckSessionEvent();
 		resCheck->setObject(key, mess3->copy());
 		
@@ -202,16 +202,16 @@ void NetAuctRuleInstallerTest::testCheckException1()
 	string sessionId = "123456";
 	AnslpEvent *ret_evt = NULL;
 		
-	std::vector<msg::anslp_mspec_object *> objects;
-	objects.push_back(mess1->copy());
+	objectList_t mspec_objects;
+	anslp::mspec_rule_key key;
+	mspec_objects[key] = mess1->copy();
 
-	installer->check( sessionId, objects);
+	installer->check( sessionId, &mspec_objects );
 	
 	ret_evt = queueRet->dequeue_timedwait(1000);
 
 	anslp::FastQueue reponse;
 		
-	mspec_rule_key key;
 	ResponseCheckSessionEvent *resCheck = new ResponseCheckSessionEvent();
 		
 	reponse.enqueue(resCheck);
@@ -226,10 +226,11 @@ void NetAuctRuleInstallerTest::testCheckException2()
 	string sessionId = "123456";
 	AnslpEvent *ret_evt = NULL;
 		
-	std::vector<msg::anslp_mspec_object *> objects;
-	objects.push_back(mess1->copy());
+	objectList_t mspec_objects;
+	anslp::mspec_rule_key key;
+	mspec_objects[key] = mess1->copy();
 
-	installer->check( sessionId, objects);
+	installer->check( sessionId, &mspec_objects );
 	
 	ret_evt = queueRet->dequeue_timedwait(1000);
 

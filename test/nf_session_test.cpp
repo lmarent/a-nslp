@@ -314,12 +314,12 @@ void ForwarderTest::testPendingCheck() {
 	s1.set_nr_mri(ntlp_mri1);
 	s1.set_last_create_message(create_anslp_create());
 	
-	vector<msg::anslp_mspec_object *> mspec_objects;
-	mspec_objects.push_back(mess1->copy());
-	mspec_objects.push_back(mess2->copy());
-	mspec_objects.push_back(mess3->copy());
+	api_check_event *e1 = new api_check_event(new session_id(s1.get_id()), NULL);
 
-	event *e1 = new api_check_event(new session_id(s1.get_id()), mspec_objects, NULL);
+	mspec_rule_key key1, key2, key3;
+	e1->setObject( key1, mess1->copy());
+	e1->setObject( key2, mess2->copy());
+	e1->setObject( key3, mess3->copy());
 
 	process(s1, e1);
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING);
@@ -564,12 +564,13 @@ void ForwarderTest::testPendingInstalling()
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_CHECK);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
 	
- 	vector<msg::anslp_mspec_object *> mspec_objects;
-	mspec_objects.push_back(mess1->copy());
-	mspec_objects.push_back(mess2->copy());
-	mspec_objects.push_back(mess3->copy());
+	api_check_event *e2 = new api_check_event(new session_id(s1.get_id()), NULL);
 
-	event *e2 = new api_check_event(new session_id(s1.get_id()), mspec_objects, NULL);
+	objectListIter_t iter;
+	for (iter = (s1.rule)->get_request_objects()->begin(); 
+				iter != (s1.rule)->get_request_objects()->end(); ++iter){
+		e2->setObject( mspec_rule_key(iter->first), (iter->second)->copy());  	
+	}
 
 	process(s1, e2);
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING);
@@ -585,13 +586,13 @@ void ForwarderTest::testPendingInstalling()
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_INSTALLING);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
 	
-	// objects installed.
-	vector<msg::anslp_mspec_object *> mspec_objects2;
-	mspec_objects2.push_back(mess1->copy());
-	mspec_objects2.push_back(mess2->copy());
-	mspec_objects2.push_back(mess3->copy());
+	api_install_event *e4 = new api_install_event(new session_id(s1.get_id()), NULL);
 
-	event *e4 = new api_install_event(new session_id(s1.get_id()), mspec_objects2, NULL);
+	// objects installed.
+	mspec_rule_key key4, key5, key6;
+	e4->setObject( key4, mess1->copy());
+	e4->setObject( key5, mess2->copy());
+	e4->setObject( key6, mess3->copy());
 	
 	process(s1, e4);
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_AUCTIONING);
@@ -607,13 +608,13 @@ void ForwarderTest::testPendingInstalling()
 	process(s2, e12);
 	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING_CHECK);
 	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
-    
- 	vector<msg::anslp_mspec_object *> mspec_objects21;
-	mspec_objects21.push_back(mess1->copy());
-	mspec_objects21.push_back(mess2->copy());
-	mspec_objects21.push_back(mess3->copy());
-	
-	event *e22 = new api_check_event(new session_id(s2.get_id()), mspec_objects21, NULL);
+    	
+	api_check_event *e22 = new api_check_event(new session_id(s2.get_id()), NULL);
+
+	mspec_rule_key key7, key8, key9;
+	e22->setObject( key7, mess1->copy());
+	e22->setObject( key8, mess2->copy());
+	e22->setObject( key9, mess3->copy());
 
 	process(s2, e22);
 	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING);
@@ -629,12 +630,12 @@ void ForwarderTest::testPendingInstalling()
 	ASSERT_STATE(s2, nf_session::STATE_ANSLP_PENDING_INSTALLING);
 	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
 		
-	// objects installed.
-	vector<msg::anslp_mspec_object *> mspec_objects22;
-	mspec_objects22.push_back(mess1->copy());
-	mspec_objects22.push_back(mess2->copy());
+	api_install_event *e24 = new api_install_event(new session_id(s2.get_id()), NULL);
 
-	event *e24 = new api_install_event(new session_id(s2.get_id()), mspec_objects22, NULL);
+	// objects installed.
+	mspec_rule_key key10, key11;
+	e24->setObject( key10, mess1->copy());
+	e24->setObject( key11, mess2->copy());
 
 	process(s2, e24);
 	ASSERT_STATE(s2, nf_session::STATE_ANSLP_CLOSE);
@@ -879,13 +880,14 @@ ForwarderTest::testIntegratedStateMachine()
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING_CHECK);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
 	
- 	vector<msg::anslp_mspec_object *> mspec_objects;
-	mspec_objects.push_back(mess1->copy());
-	mspec_objects.push_back(mess2->copy());
-	mspec_objects.push_back(mess3->copy());
+	api_check_event *e2 = new api_check_event(new session_id(s1.get_id()), NULL);
 
-	event *e2 = new api_check_event(new session_id(s1.get_id()), mspec_objects, NULL);
-
+	objectListIter_t iter;
+	for (iter = (s1.rule)->get_request_objects()->begin(); 
+				iter != (s1.rule)->get_request_objects()->end(); ++iter){
+		e2->setObject( mspec_rule_key(iter->first), (iter->second)->copy());  	
+	}
+		
 	process(s1, e2);
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_PENDING);
 	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
@@ -908,13 +910,13 @@ ForwarderTest::testIntegratedStateMachine()
 	 * STATE_ANSLP_PENDING_INSTALLATION ---[rx_CREATE && CREATE(Lifetime>0) ]---> STATE_ANSLP_AUCTIONING
 	 */
 
-	// objects installed.
-	vector<msg::anslp_mspec_object *> mspec_objects2;
-	mspec_objects2.push_back(mess1->copy());
-	mspec_objects2.push_back(mess2->copy());
-	mspec_objects2.push_back(mess3->copy());
+	api_install_event *e4 = new api_install_event(new session_id(s1.get_id()), NULL);
 
-	event *e4 = new api_install_event(new session_id(s1.get_id()), mspec_objects2, NULL);
+	// objects installed.
+	mspec_rule_key key4, key5, key6;
+	e4->setObject( key4, mess1->copy());
+	e4->setObject( key5, mess2->copy());
+	e4->setObject( key6, mess3->copy());
 
 	process(s1, e4);
 	ASSERT_STATE(s1, nf_session::STATE_ANSLP_AUCTIONING);

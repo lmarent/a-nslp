@@ -290,13 +290,11 @@ class api_create_event : public api_event {
   
 	api_create_event(const string _session_id, const hostaddress &source, const hostaddress &dest,
 		uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0,
-		std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(), 
-		uint32 lifetime=0, 
-		selection_auctioning_entities::selection_auctioning_entities_t sel_auct_entities = selection_auctioning_entities::sme_any,
+		uint32 lifetime=0, selection_auctioning_entities::selection_auctioning_entities_t sel_auct_entities = selection_auctioning_entities::sme_any,
 		anslp::FastQueue *rq = NULL)
 		: api_event(), session_id(_session_id), source_addr(source), dest_addr(dest),
 		  source_port(source_port), dest_port(dest_port), protocol(protocol), 
-		  mspec_objects(mspec_objects), session_lifetime(lifetime),  sel_auct_entities(sel_auct_entities),
+		  session_lifetime(lifetime),  sel_auct_entities(sel_auct_entities),
 		  return_queue(rq) { }
 
 	virtual ~api_create_event();
@@ -312,9 +310,10 @@ class api_create_event : public api_event {
 	inline uint32 get_session_lifetime() const { return session_lifetime; }
 		
 	inline uint32 get_selection_auctioning_entities()  const { return (uint32) sel_auct_entities; }
+
+	void setObject(mspec_rule_key key, msg::anslp_mspec_object *obj);
 	
-	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
-		return mspec_objects; }
+	inline objectList_t * getObjects(){ return &mspec_objects; }
 
 	inline anslp::FastQueue *get_return_queue() const { return return_queue; }
 
@@ -330,7 +329,7 @@ class api_create_event : public api_event {
 	uint16 dest_port;
 	uint8 protocol;
 
-	std::vector<msg::anslp_mspec_object *> mspec_objects;
+	objectList_t mspec_objects;
 	uint32 session_lifetime;
 	selection_auctioning_entities::selection_auctioning_entities_t sel_auct_entities;
 
@@ -339,12 +338,27 @@ class api_create_event : public api_event {
 
 inline api_create_event::~api_create_event()
 {
-	std::vector<msg::anslp_mspec_object *>::iterator it;
+	objectListIter_t it;
 	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++)
 	{
-		delete(*it);
+		if (it->second != NULL)
+			delete(it->second);
 	}
 	mspec_objects.clear();
+}
+
+inline void api_create_event::setObject(mspec_rule_key key, msg::anslp_mspec_object *obj)
+{
+	if ( obj == NULL )
+	return;
+	
+	msg::anslp_mspec_object *old = mspec_objects[key];
+
+	if ( old )
+		delete old;
+
+	mspec_objects[key] = obj;
+
 }
 
 /**
@@ -357,14 +371,14 @@ class api_check_event : public api_event {
   public:
   
 	api_check_event(session_id *sid, 
-					  std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(), 
-					  protlib::FastQueue *rq = NULL)
-		: api_event(sid), mspec_objects(mspec_objects), return_queue(rq) { }
+					protlib::FastQueue *rq = NULL)
+		: api_event(sid), return_queue(rq) { }
 
 	virtual ~api_check_event();
 	
-	inline const std::vector<msg::anslp_mspec_object *> &getObjects() const {
-		return mspec_objects; }
+	inline objectList_t * getObjects(){ return &mspec_objects; }
+	
+	void setObject(mspec_rule_key key, msg::anslp_mspec_object *obj);
 
 	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
 
@@ -373,22 +387,35 @@ class api_check_event : public api_event {
 
   private:
   
-	std::vector<msg::anslp_mspec_object *> mspec_objects;
+	objectList_t mspec_objects;
 
 	protlib::FastQueue *return_queue;
 };
 
 inline api_check_event::~api_check_event()
 {
-	std::vector<msg::anslp_mspec_object *>::iterator it;
+	objectListIter_t it;
 	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++)
 	{
-		delete(*it);
+		if (it->second != NULL)
+			delete(it->second);
 	}
 	mspec_objects.clear();
 }
 
+inline void api_check_event::setObject(mspec_rule_key key, msg::anslp_mspec_object *obj)
+{
+	if ( obj == NULL )
+	return;
+	
+	msg::anslp_mspec_object *old = mspec_objects[key];
 
+	if ( old )
+		delete old;
+
+	mspec_objects[key] = obj;
+
+}
 
 /**
  * An API response for installing objects.
@@ -400,38 +427,52 @@ class api_install_event : public api_event {
   public:
   
 	api_install_event(session_id *sid, 
-					  std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(), 
 					  protlib::FastQueue *rq = NULL)
-		: api_event(sid), mspec_objects(mspec_objects), return_queue(rq) { }
+		: api_event(sid), return_queue(rq) { }
 
 	virtual ~api_install_event();
 	
-	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
-		return mspec_objects; }
-
 	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
 
 	virtual ostream &print(ostream &out) const {
 		return out << "[api_install_event]"; }
 
+	inline objectList_t * getObjects(){ return &mspec_objects; }
+	
+	void setObject(mspec_rule_key key, msg::anslp_mspec_object *obj);
+
+
   private:
   
-	std::vector<msg::anslp_mspec_object *> mspec_objects;
+	objectList_t mspec_objects;
 
 	protlib::FastQueue *return_queue;
 };
 
 inline api_install_event::~api_install_event()
 {
-	std::vector<msg::anslp_mspec_object *>::iterator it;
+	objectListIter_t it;
 	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++)
 	{
-		delete(*it);
+		if (it->second != NULL)
+			delete(it->second);
 	}
 	mspec_objects.clear();
 }
 
+inline void api_install_event::setObject(mspec_rule_key key, msg::anslp_mspec_object *obj)
+{
+	if ( obj == NULL )
+	return;
+	
+	msg::anslp_mspec_object *old = mspec_objects[key];
 
+	if ( old )
+		delete old;
+
+	mspec_objects[key] = obj;
+
+}
 
 /**
  * An API request to send a Refresh Message.
@@ -547,10 +588,9 @@ class api_bidding_event : public api_event {
 	//! The sid must has to have his own memory, because the event class deletes the memory.
 	api_bidding_event(session_id *sid, const hostaddress &source, const hostaddress &dest,
 					  uint16 source_port=0, uint16 dest_port=0, uint8 protocol=0, 
-					  std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(),
 					  protlib::FastQueue *rq=NULL) : 
 		  api_event(sid), source_addr(source), dest_addr(dest),source_port(source_port), 
-		  dest_port(dest_port), protocol(protocol), mspec_objects(mspec_objects), return_queue(rq) { }
+		  dest_port(dest_port), protocol(protocol), return_queue(rq) { }
 
 	virtual ~api_bidding_event();
 
@@ -561,9 +601,10 @@ class api_bidding_event : public api_event {
 	inline uint16 get_destination_port() const { return dest_port; }
 
 	inline uint8 get_protocol() const { return protocol; }
-
-	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
-		return mspec_objects; }
+	
+	void setObject(mspec_rule_key key, msg::anslp_mspec_object *obj);
+	
+	inline objectList_t * getObjects(){ return &mspec_objects; }
 		
 	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
 
@@ -577,22 +618,36 @@ class api_bidding_event : public api_event {
 	uint16 source_port;
 	uint16 dest_port;
 	uint8 protocol;
-	std::vector<msg::anslp_mspec_object *> mspec_objects;
+	objectList_t mspec_objects;
 	
 	protlib::FastQueue *return_queue;
 };
 
 inline api_bidding_event::~api_bidding_event()
 {
-	std::vector<msg::anslp_mspec_object *>::iterator it;
+	objectListIter_t it;
 	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++)
 	{
-		delete(*it);
+		if (it->second != NULL)
+			delete(it->second);
 	}
 	mspec_objects.clear();
 	
 }
 
+inline void api_bidding_event::setObject(mspec_rule_key key, msg::anslp_mspec_object *obj)
+{
+	if ( obj == NULL )
+	return;
+	
+	msg::anslp_mspec_object *old = mspec_objects[key];
+
+	if ( old )
+		delete old;
+
+	mspec_objects[key] = obj;
+
+}
 
 /**
  * An API request to send a Response Message.
@@ -682,14 +737,14 @@ class api_remove_event : public api_event {
   public:
   
 	api_remove_event(session_id *sid, 
-					  std::vector<msg::anslp_mspec_object *> mspec_objects= std::vector<msg::anslp_mspec_object *>(), 
 					  protlib::FastQueue *rq = NULL)
-		: api_event(sid), mspec_objects(mspec_objects), return_queue(rq) { }
+		: api_event(sid), return_queue(rq) { }
 
 	virtual ~api_remove_event();
 	
-	inline const std::vector<msg::anslp_mspec_object *> &get_auctioning_objects() const {
-		return mspec_objects; }
+	inline objectList_t * getObjects(){ return &mspec_objects; }
+	
+	void setObject(mspec_rule_key key, msg::anslp_mspec_object *obj);
 
 	inline protlib::FastQueue *get_return_queue() const { return return_queue; }
 
@@ -698,20 +753,36 @@ class api_remove_event : public api_event {
 
   private:
   
-	std::vector<msg::anslp_mspec_object *> mspec_objects;
+	objectList_t mspec_objects;
 
 	protlib::FastQueue *return_queue;
 };
 
 inline api_remove_event::~api_remove_event()
 {
-	std::vector<msg::anslp_mspec_object *>::iterator it;
+	objectListIter_t it;
 	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++)
 	{
-		delete(*it);
+		if (it->second != NULL)
+			delete(it->second);
 	}
 	mspec_objects.clear();
 }
+
+inline void api_remove_event::setObject(mspec_rule_key key, msg::anslp_mspec_object *obj)
+{
+	if ( obj == NULL )
+	return;
+	
+	msg::anslp_mspec_object *old = mspec_objects[key];
+
+	if ( old )
+		delete old;
+
+	mspec_objects[key] = obj;
+
+}
+
 
 
 /**

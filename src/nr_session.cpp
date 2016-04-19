@@ -168,7 +168,7 @@ nr_session::get_auction_rule_copy() const {
 bool
 nr_session::save_auction_rule(dispatcher *d, 
    							   anslp_create *create,
-								std::vector<msg::anslp_mspec_object *> &missing_objects) 
+							   std::vector<msg::anslp_mspec_object *> &missing_objects) 
 			throw (request_error)
 {
 	
@@ -180,10 +180,29 @@ nr_session::save_auction_rule(dispatcher *d,
 	
 	session_id = get_id().to_string();
 	create->get_mspec_objects(missing_objects);
+
+	// Delete all posible request objects previously created by another message.
+	if (rule->get_number_mspec_request_objects() > 0){
+		objectListIter_t it;		
+		for ( it = rule->get_request_objects()->begin(); it != rule->get_request_objects()->end(); it++)
+		{
+			if (it->second != NULL)
+				delete(it->second);
+		}		
+		rule->get_request_objects()->clear();
+	}
+	
+	// Assign objects as requests.
+	std::vector<msg::anslp_mspec_object *>::iterator it;
+	for (it = missing_objects.begin(); it != missing_objects.end(); ++it){
+		mspec_rule_key key;
+		anslp_mspec_object *object = *it;
+		rule->set_request_object(key,object->copy());
+	}
 	
 	if (check_participating(create->get_selection_auctioning_entities()))
 	{
-		return d->check(session_id, missing_objects);
+		return d->check(session_id, rule->get_request_objects());
 	}
 	
 	return false;  // No participating.
@@ -254,12 +273,11 @@ msg::ntlp_msg *nr_session::build_bidding_message(api_bidding_event *e )
 	bidding->set_msg_sequence_number(next_msg_bidding_sequence_number());
 
 	// Set the objects to install.
-	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
-	for ( it_objects = e->get_auctioning_objects().begin(); 
-			it_objects != e->get_auctioning_objects().end(); it_objects++)
+	objectListConstIter_t it_objects;
+	for ( it_objects = e->getObjects()->begin(); 
+			it_objects != e->getObjects()->end(); it_objects++)
 	{
-		anslp_mspec_object *object = *it_objects;
-		bidding->set_mspec_object(object->copy());
+		bidding->set_mspec_object((it_objects->second)->copy());
 	}
 	
 
@@ -438,6 +456,7 @@ nr_session::handle_state_pending(dispatcher *d, event *evt)
 			
 			std::vector<msg::anslp_mspec_object *> missing_objects;
 
+			// Resend the check event.
 			save_auction_rule(d, c, missing_objects);
 
 			state_timer.start(d, lifetime);
@@ -466,13 +485,19 @@ nr_session::handle_state_pending(dispatcher *d, event *evt)
 						
 		LogDebug("responder session installed.");
 		
-		std::vector<msg::anslp_mspec_object *>::const_iterator itc_objects;
-		for ( itc_objects = e->getObjects().begin(); itc_objects != e->getObjects().end(); itc_objects++)
+		// We loop through spec objects and remove those not included in the check message.
+		objectListRevIter_t itc_objects;
+		for ( itc_objects = rule->get_request_objects()->rbegin(); 
+				itc_objects != rule->get_request_objects()->rend(); itc_objects++)
 		{
-			const anslp_mspec_object *object = *itc_objects;
-			rule->set_request_object(object->copy());
+			mspec_rule_key key = itc_objects->first;
+			objectListIter_t itc_objects2;
+			if ( e->getObjects()->find(key) == e->getObjects()->end()){
+				delete itc_objects->second;
+				rule->get_request_objects()->erase (key);
+			}
 		}
-		
+
 		// reinitiate create counter.
 		create_counter = 0;
 		d->install_auction_rules(session_id, rule);		
@@ -552,7 +577,7 @@ nr_session::handle_state_pending_installing(dispatcher *d, event *evt)
 				
 		// Verify that every rule that passed the checking process could be installed.
 		if (rule->get_number_mspec_request_objects() 
-				== e->get_auctioning_objects().size() ){
+				== e->getObjects()->size() ){
 						
 			// Assign as the rule installed the response. 
 			set_reponse_objects(e, rule);

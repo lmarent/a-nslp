@@ -187,7 +187,7 @@ void netauct_rule_installer::handle_response_check(anslp::FastQueue *waitqueue)
 
 void 
 netauct_rule_installer::check(const string sessionId, 
-								std::vector<msg::anslp_mspec_object *> &missing_objects)
+								objectList_t *missing_objects)
 		throw (auction_rule_installer_error) 
 {
 	LogDebug("start check()");
@@ -197,16 +197,15 @@ netauct_rule_installer::check(const string sessionId,
 		LogDebug("Installing check rule");
 		
 		anslp::FastQueue retQueue;
-		mspec_rule_key key;
 		
 		CheckEvent *evt = new CheckEvent(&retQueue);
 		evt->setSession(sessionId);
 		
-		std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
-		for ( it_objects = missing_objects.begin(); it_objects != missing_objects.end(); it_objects++)
+		objectListConstIter_t it_objects;
+		for ( it_objects = missing_objects->begin(); it_objects != missing_objects->end(); it_objects++)
 		{
-			const msg::anslp_mspec_object *object = *it_objects;
-			evt->setObject(key, object->copy());
+			evt->setObject(mspec_rule_key(it_objects->first), 
+									it_objects->second->copy());
 		}
 				
 		bool queued = getQueue()->enqueue(evt);

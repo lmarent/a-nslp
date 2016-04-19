@@ -51,8 +51,7 @@ class nop_auction_rule_installer : public auction_rule_installer
 
 	void setup() throw (auction_rule_installer_error);
 
-	virtual void check(const string sessionId, 
-						std::vector<msg::anslp_mspec_object *> &missing_objects)
+	virtual void check(const string sessionId, objectList_t *missing_objects)
 		throw (auction_rule_installer_error);
 
 	virtual void create(const string sessionId, const auction_rule *mt_object);

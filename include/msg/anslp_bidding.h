@@ -85,3 +85,4 @@ class anslp_bidding : public anslp_msg {
 } // namespace anslp
 
 #endif // ANSLP_BIDDING_H
+ 

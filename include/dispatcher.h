@@ -81,7 +81,7 @@ class dispatcher {
 	virtual void report_async_event(std::string msg) throw ();
 	
 	virtual bool check(const string session_id, 
-					   std::vector<msg::anslp_mspec_object *> &missing_objects);
+					   objectList_t *missing_objects);
 	
 	virtual void install_auction_rules(const string session_id, const auction_rule *act_rule) 
 		throw (auction_rule_installer_error);

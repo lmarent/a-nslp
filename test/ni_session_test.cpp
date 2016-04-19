@@ -278,10 +278,6 @@ void InitiatorTest::testClose()
 	 * This part tests when no queue was given, so response could not be delivered.
 	 */
 	ni_session_test s1(ni_session::STATE_ANSLP_CLOSE);
-	vector<msg::anslp_mspec_object *> mspec_objects;
-	mspec_objects.push_back(mess1->copy());
-	mspec_objects.push_back(mess2->copy());
-	mspec_objects.push_back(mess3->copy());
 		
 	event *e1 = new api_create_event(sessionIdIn, source, destination);
 
@@ -290,10 +286,14 @@ void InitiatorTest::testClose()
 	ASSERT_CREATE_MESSAGE_SENT(d);
 	ASSERT_TIMER_STARTED(d, s1.get_response_timer());
 		
-	event *e2 = new api_create_event(sessionIdIn, source,destination,(protlib::uint16) 0, 
+	api_create_event *e2 = new api_create_event(sessionIdIn, source,destination,(protlib::uint16) 0, 
 									 (protlib::uint16) 0, (protlib::uint8) 0,
-									  mspec_objects, conf->get_ni_session_lifetime(),
+									  conf->get_ni_session_lifetime(),
 									  selection_auctioning_entities::sme_any, output);
+	mspec_rule_key key1, key2, key3;
+	e2->setObject( key1, mess1->copy());
+	e2->setObject( key2, mess2->copy());
+	e2->setObject( key3, mess3->copy());
 	
 	ni_session_test s2(ni_session::STATE_ANSLP_CLOSE);
 	process(s2, e2);
@@ -309,17 +309,17 @@ void InitiatorTest::testClose()
 	
 
 	ni_session_test s3(ni_session::STATE_ANSLP_CLOSE);
-
-	vector<msg::anslp_mspec_object *> mspec_objects2;
-	mspec_objects2.push_back(mess1->copy());
-	mspec_objects2.push_back(mess2->copy());
-	mspec_objects2.push_back(mess3->copy());
 	
 	anslp::session_id *sessionId = new anslp::session_id(s3.get_id());
 		
-	event *e3 = new api_bidding_event(sessionId, source,destination,(protlib::uint16) 0, 
-									 (protlib::uint16) 0, (protlib::uint8) 0,
-									  mspec_objects2, NULL);
+	api_bidding_event *e3 = new api_bidding_event(sessionId, source,destination,(protlib::uint16) 0, 
+									 (protlib::uint16) 0, (protlib::uint8) 0, NULL);
+
+	mspec_rule_key key4, key5, key6;
+	e3->setObject( key4, mess1->copy());
+	e3->setObject( key5, mess2->copy());
+	e3->setObject( key6, mess3->copy());
+
 	
 	process(s3, e3);
 	ASSERT_STATE(s3, ni_session::STATE_ANSLP_CLOSE);
@@ -433,16 +433,15 @@ void InitiatorTest::testPending()
 	ni_session_test s7(ni_session::STATE_ANSLP_PENDING);
 	s7.set_last_create_message(create_anslp_create());
 
-	vector<msg::anslp_mspec_object *> mspec_objects2;
-	mspec_objects2.push_back(mess1->copy());
-	mspec_objects2.push_back(mess2->copy());
-	mspec_objects2.push_back(mess3->copy());
 		
 	anslp::session_id *sessionId2 = new anslp::session_id(s7.get_id());
-	event *e7 = new api_bidding_event(sessionId2, source,destination,(protlib::uint16) 0, 
-									 (protlib::uint16) 0, (protlib::uint8) 0,
-									  mspec_objects2, NULL);
+	api_bidding_event *e7 = new api_bidding_event(sessionId2, source,destination,(protlib::uint16) 0, 
+									 (protlib::uint16) 0, (protlib::uint8) 0, NULL);
 
+	mspec_rule_key key7, key8, key9;
+	e7->setObject( key7, mess1->copy());
+	e7->setObject( key8, mess2->copy());
+	e7->setObject( key9, mess3->copy());
 
 	process(s7, e7);
 		
@@ -468,14 +467,14 @@ void InitiatorTest::testPendingInstalling()
 	ni_session_test s1(ni_session::STATE_ANSLP_PENDING_INSTALLING);
 	s1.set_last_create_message(create_anslp_create());
 	s1.set_last_auction_install_rule(s1.build_auction_install_rule(resp1));
+	
+	api_install_event *e1 = new api_install_event(new session_id(s1.get_id()), NULL);
 
-	vector<msg::anslp_mspec_object *> mspec_objects;
-	mspec_objects.push_back(mess1->copy());
-	mspec_objects.push_back(mess2->copy());
-	mspec_objects.push_back(mess3->copy());
-	
-	event *e1 = new api_install_event(new session_id(s1.get_id()), mspec_objects, NULL);
-	
+	mspec_rule_key key1, key2, key3;
+	e1->setObject( key1, mess1->copy());
+	e1->setObject( key2, mess2->copy());
+	e1->setObject( key3, mess3->copy());
+		
 	process(s1, e1);
 	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
@@ -493,18 +492,18 @@ void InitiatorTest::testPendingInstalling()
 	s2.set_last_create_message(create_anslp_create());
 	s2.set_last_auction_install_rule(s2.build_auction_install_rule(resp2));
 	
-	vector<msg::anslp_mspec_object *> mspec_objects2;
-	mspec_objects2.push_back(mess1->copy());
-	mspec_objects2.push_back(mess2->copy());
+	api_install_event *e2 = new api_install_event(new session_id(sessionIdIn), NULL);
 
-	event *e2 = new api_install_event(new session_id(sessionIdIn), mspec_objects2, NULL);
+	mspec_rule_key key4, key5;
+	e2->setObject( key4, mess1->copy());
+	e2->setObject( key5, mess2->copy());
+
     
 	process(s2, e2);
 	ASSERT_STATE(s2, ni_session::STATE_ANSLP_CLOSE);
 	ASSERT_REFRESH_MESSAGE_SENT(d);
 	ASSERT_NO_TIMER(d);
 
-	
 	/*
 	 * STATE_ANSLP_PENDING_INSTALLING ---[RESPONSE_TIMEOUT, retry]---> STATE_ANSLP_PENDING_INSTALLING
 	 */
@@ -593,14 +592,13 @@ void InitiatorTest::testPendingInstalling()
 	s7.set_last_create_message(create_anslp_create());
 	s7.set_last_auction_install_rule(s7.build_auction_install_rule(resp7));
 
-	vector<msg::anslp_mspec_object *> mspec_objects3;
-	mspec_objects3.push_back(mess1->copy());
-	mspec_objects3.push_back(mess2->copy());
-
 	anslp::session_id *sessionId2 = new anslp::session_id(s7.get_id());
-	event *e7 = new api_bidding_event(sessionId2, source,destination,(protlib::uint16) 0, 
-									 (protlib::uint16) 0, (protlib::uint8) 0,
-									  mspec_objects3, NULL);
+	api_bidding_event *e7 = new api_bidding_event(sessionId2, source,destination,(protlib::uint16) 0, 
+									 (protlib::uint16) 0, (protlib::uint8) 0, NULL);
+
+	mspec_rule_key key6, key7;
+	e7->setObject( key6, mess1->copy());
+	e7->setObject( key7, mess2->copy());
 
 
 	process(s7, e7);
@@ -713,15 +711,14 @@ void InitiatorTest::testAuctioning()
 	ni_session_test s7(ni_session::STATE_ANSLP_AUCTIONING);
 	s7.set_last_refresh_message(create_anslp_refresh());
 
-	vector<msg::anslp_mspec_object *> mspec_objects2;
-	mspec_objects2.push_back(mess1->copy());
-	mspec_objects2.push_back(mess2->copy());
-	mspec_objects2.push_back(mess3->copy());
-
 	anslp::session_id *sessionId3 = new anslp::session_id(s7.get_id());
-	event *e7 = new api_bidding_event(sessionId3, source,destination,(protlib::uint16) 0, 
-									 (protlib::uint16) 0, (protlib::uint8) 0,
-									  mspec_objects2, NULL);
+	api_bidding_event *e7 = new api_bidding_event(sessionId3, source,destination,(protlib::uint16) 0, 
+									 (protlib::uint16) 0, (protlib::uint8) 0, NULL);
+
+	mspec_rule_key key1, key2, key3;
+	e7->setObject( key1, mess1->copy());
+	e7->setObject( key2, mess2->copy());
+	e7->setObject( key3, mess3->copy());
 
 
 	process(s7, e7);
@@ -734,22 +731,22 @@ void InitiatorTest::testIntegratedStateMachine()
 {
 	
 	string sessionIdIn = "1273247635.1388378322.2492646105.2893599821";
-		
-	vector<msg::anslp_mspec_object *> mspec_objects;
-	mspec_objects.push_back(mess1->copy());
-	mspec_objects.push_back(mess2->copy());
-	mspec_objects.push_back(mess3->copy());
-	
+			
 	anslp::FastQueue *installQueue = new anslp::FastQueue();
 	
-	event *e1 = new api_create_event(sessionIdIn, source,destination,
+	api_create_event *e1 = new api_create_event(sessionIdIn, source,destination,
    					    (protlib::uint16) 0, //Srcport 
 					    (protlib::uint16) 0, //Dstport
 					    (protlib::uint8) 0, // Protocol
-					    mspec_objects, // Mspec Objects
 					    conf->get_ni_session_lifetime(), 
 					    selection_auctioning_entities::sme_any,
 					    installQueue);
+
+	mspec_rule_key key1, key2, key3;
+	e1->setObject( key1, mess1->copy());
+	e1->setObject( key2, mess2->copy());
+	e1->setObject( key3, mess3->copy());
+
 
 	ni_session_test s1(ni_session::STATE_ANSLP_CLOSE);
 	process(s1, e1);
@@ -781,13 +778,14 @@ void InitiatorTest::testIntegratedStateMachine()
 		information_code::obj_none);
 
 	s1.set_last_auction_install_rule(s1.build_auction_install_rule(resp2));
-
-	vector<msg::anslp_mspec_object *> mspec_objects2;
-	mspec_objects2.push_back(mess1->copy());
-	mspec_objects2.push_back(mess2->copy());
-	mspec_objects2.push_back(mess3->copy());
 		
-	event *e3 = new api_install_event(new session_id(sessionIdIn), mspec_objects2, NULL);
+	api_install_event *e3 = new api_install_event(new session_id(sessionIdIn), NULL);
+
+	mspec_rule_key key4, key5, key6;
+	e3->setObject( key4, mess1->copy());
+	e3->setObject( key5, mess2->copy());
+	e3->setObject( key6, mess3->copy());
+
 
 	process(s1, e3);
 	ASSERT_STATE(s1, ni_session::STATE_ANSLP_AUCTIONING);

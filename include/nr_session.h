@@ -229,3 +229,4 @@ inline void nr_session::inc_create_counter()
 } // namespace anslp
 
 #endif // ANSLP_NR_SESSION_H
+ 

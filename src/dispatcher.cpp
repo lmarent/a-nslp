@@ -395,7 +395,7 @@ void dispatcher::remove_auction_rules(const string session_id, const auction_rul
 }
 
 bool dispatcher::check(const string session_id, 
-						std::vector<msg::anslp_mspec_object *> &missing_objects) {	
+						objectList_t *missing_objects) {	
 		
 	assert( rule_installer != NULL );
 	

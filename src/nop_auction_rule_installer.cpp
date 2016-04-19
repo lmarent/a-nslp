@@ -80,7 +80,7 @@ nop_auction_rule_installer::setup() throw (auction_rule_installer_error)
 
 void 
 nop_auction_rule_installer::check(const string sessionId, 
-								   std::vector<msg::anslp_mspec_object *> &missing_objects)
+								   objectList_t *missing_objects)
 		throw (auction_rule_installer_error) 
 {
 	

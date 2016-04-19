@@ -265,15 +265,14 @@ session::set_reponse_objects(api_install_event *install, auction_rule *act_rule)
 
 	assert( install != NULL );
 		
-	LogDebug( "Nbr objects installed:" << install->get_auctioning_objects().size() );
+	LogDebug( "Nbr objects installed:" << install->getObjects()->size() );
 	
 	// Check which metering object could be installed in this node.
-	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
-	for ( it_objects = install->get_auctioning_objects().begin(); 
-			it_objects != install->get_auctioning_objects().end(); it_objects++)
+	objectListConstIter_t it_objects;
+	for ( it_objects = install->getObjects()->begin(); 
+			it_objects != install->getObjects()->end(); it_objects++)
 	{
-		const anslp_mspec_object *object = *it_objects;
-		act_rule->set_response_object(object->copy());
+		act_rule->set_response_object((it_objects->second)->copy());
 	}
 	
 	LogDebug("End set_reponse_objects - objects inserted:" 

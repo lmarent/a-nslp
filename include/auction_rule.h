@@ -57,6 +57,7 @@ namespace anslp
 
 typedef std::map<mspec_rule_key, msg::anslp_mspec_object *> objectList_t;
 typedef std::map<mspec_rule_key, msg::anslp_mspec_object *>::iterator objectListIter_t;
+typedef std::map<mspec_rule_key, msg::anslp_mspec_object *>::reverse_iterator objectListRevIter_t;
 typedef std::map<mspec_rule_key, msg::anslp_mspec_object *>::const_iterator objectListConstIter_t;
 
 

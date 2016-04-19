@@ -215,7 +215,27 @@ bool nf_session::set_auction_rule(dispatcher *d,
 	LogDebug( "Begin set_auction_rule()");
 		
 	assert( create != NULL );
+	
 	create->get_mspec_objects(missing_objects);
+
+	// Delete all posible request objects previously created by another message.
+	if (rule->get_number_mspec_request_objects() > 0){
+		objectListIter_t it;		
+		for ( it = rule->get_request_objects()->begin(); it != rule->get_request_objects()->end(); it++)
+		{
+			if (it->second != NULL)
+				delete(it->second);
+		}		
+		rule->get_request_objects()->clear();
+	}
+	
+	// Assign objects as requests.	
+	std::vector<msg::anslp_mspec_object *>::iterator it;
+	for (it = missing_objects.begin(); it != missing_objects.end(); ++it){
+		mspec_rule_key key;
+		anslp_mspec_object *object = *it;
+		rule->set_request_object(key,object->copy());
+	}
 	
 	LogDebug( "Nbr objects to check:" << missing_objects.size() 
 			   << "sel auct entities:" << create->get_selection_auctioning_entities() );
@@ -223,13 +243,12 @@ bool nf_session::set_auction_rule(dispatcher *d,
 	// Check which metering object could be installed in this node.
 	if (check_participating(create->get_selection_auctioning_entities()))
 	{
-		return d->check(get_id().to_string(), missing_objects);
+		return d->check(get_id().to_string(), rule->get_request_objects());
 	}
 
 	return false;
 	
-	LogDebug("End set_auction_rule - objects inserted:" 
-					<< rule->get_request_objects()->size());
+	LogDebug("End set_auction_rule");
 }
 
 
@@ -302,11 +321,11 @@ msg::ntlp_msg *nf_session::build_bidding_message(api_bidding_event *e )
 	bidding->set_msg_sequence_number(next_msg_bidding_sequence_number());
 
 	// Set the objects to install.
-	std::vector<msg::anslp_mspec_object *>::const_iterator it_objects;
-	for ( it_objects = e->get_auctioning_objects().begin(); 
-			it_objects != e->get_auctioning_objects().end(); it_objects++)
+	objectListConstIter_t it_objects;
+	for ( it_objects = e->getObjects()->begin(); 
+			it_objects != e->getObjects()->end(); it_objects++)
 	{
-		anslp_mspec_object *object = *it_objects;
+		anslp_mspec_object *object = it_objects->second;
 		bidding->set_mspec_object(object->copy());
 	}
 	
@@ -663,19 +682,25 @@ nf_session::handle_state_pending_check(dispatcher *d, event *evt) {
 		
 		previous->get_mspec_objects(missing_objects);
 				
-		LogInfo("responder session installed. 1");
+		LogInfo("responder session checked. 1");
 		
-		std::vector<msg::anslp_mspec_object *>::const_iterator itc_objects;
-		for ( itc_objects = e->getObjects().begin(); itc_objects != e->getObjects().end(); itc_objects++)
+		// We loop through spec objects and remove those not included in the check message.
+		objectListRevIter_t itc_objects;
+		for ( itc_objects = rule->get_request_objects()->rbegin(); 
+				itc_objects != rule->get_request_objects()->rend(); itc_objects++)
 		{
-			const anslp_mspec_object *object = *itc_objects;
-			rule->set_request_object(object->copy());
+			mspec_rule_key key = itc_objects->first;
+			objectListIter_t itc_objects2;
+			if ( e->getObjects()->find(key) == e->getObjects()->end()){
+				delete itc_objects->second;
+				rule->get_request_objects()->erase (key);
+			}
 		}
 		
 		// Create the new message to send foreward.
 		d->send_message( build_create_message(previous, missing_objects) );
 		
-		LogInfo("responder session installed. 2");
+		LogInfo("responder session checked. 2");
 		
 		// Release the memory allocated to the missing objects vector
 		std::vector<msg::anslp_mspec_object *>::iterator it_objects;
@@ -973,7 +998,7 @@ nf_session::handle_state_pending_installing(dispatcher *d, event *evt) {
 		
 		// Verify that every rule that passed the checking process could be installed.
 		if (rule->get_number_mspec_request_objects() 
-				== e->get_auctioning_objects().size() )
+				== e->getObjects()->size() )
 		{
 			
 			state_timer.stop();

@@ -1141,8 +1141,8 @@ ni_session::state_t ni_session::handle_state_pending_teardown(
 void ni_session::process_event(dispatcher *d, event *evt) {
 	
 
-	LogInfo("Start process_event SessionId:" << get_id().to_string() << "state: " 
-				 << get_state()  << "- procid:" <<  getpid() 
+	LogInfo("Start process_event SessionId:" << get_id().to_string() << *this  
+				 << "- procid:" <<  getpid() 
 				 << " - getthread_self:" << pthread_self() 
 				 << " tid:" << syscall(SYS_gettid));
 
@@ -1173,8 +1173,9 @@ void ni_session::process_event(dispatcher *d, event *evt) {
 			assert( false ); // invalid state
 	}
 
-	LogInfo("En process event SessionId:" << get_id().to_string() << "state: " 
-				 << get_state()  << "- procid:" <<  getpid() 
+	LogInfo("End process event SessionId:" << get_id().to_string() 
+				 << *this  
+				 << "- procid:" <<  getpid() 
 				 << " - getthread_self:" << pthread_self() 
 				 << " tid:" << syscall(SYS_gettid));
 

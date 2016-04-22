@@ -943,7 +943,7 @@ nr_session::handle_state_pending_teardown(dispatcher *d, event *evt)
  */
 void nr_session::process_event(dispatcher *d, event *evt) 
 {
-	LogDebug("begin process_event(): " << *this);
+	LogInfo("begin process_event(): " << *this << "SessionId:" << get_id().to_string());
 	
 	switch ( get_state() ) {
 
@@ -972,5 +972,5 @@ void nr_session::process_event(dispatcher *d, event *evt)
 			assert( false ); // invalid state
 	}
 
-	LogDebug("end process_event(): " << *this);
+	LogInfo("end process_event(): " << *this << "SessionId:" << get_id().to_string());
 }

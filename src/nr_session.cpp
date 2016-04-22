@@ -613,8 +613,10 @@ nr_session::handle_state_pending_installing(dispatcher *d, event *evt)
 			d->send_message( msg->create_response(
 							information_code::sc_permanent_failure, 
 							information_code::fail_internal_error) );
+			
+			state_timer.start(d, config->get_nr_response_timeout()); 
 							
-			return STATE_ANSLP_CLOSE;
+			return STATE_ANSLP_PENDING_TEARDOWN;
 		}				
 	}
 		
@@ -700,8 +702,8 @@ nr_session::state_t nr_session::handle_state_auctioning(
 			if (rule->get_number_mspec_response_objects() > 0){
 				
 				d->remove_auction_rules(session_id, rule);
-
-				state_timer.start(d, lifetime);
+								
+				state_timer.start(d, config->get_nr_response_timeout() );
 																					
 				return STATE_ANSLP_PENDING_TEARDOWN;
 				
@@ -797,7 +799,7 @@ nr_session::state_t nr_session::handle_state_auctioning(
 
 			d->remove_auction_rules(session_id, rule);
 
-			state_timer.start(d, lifetime);
+			state_timer.start(d, config->get_nr_response_timeout() );
 																	
 			return STATE_ANSLP_PENDING_TEARDOWN;
 		} else {
@@ -854,8 +856,8 @@ nr_session::handle_state_pending_teardown(dispatcher *d, event *evt)
 			
 			d->remove_auction_rules(session_id, rule);
 
-			state_timer.start(d, lifetime);
-
+			state_timer.start(d, config->get_nr_response_timeout() ); 
+			
 			return STATE_ANSLP_PENDING_TEARDOWN; // no change
 		}
 		// Retry count exceeded, abort.

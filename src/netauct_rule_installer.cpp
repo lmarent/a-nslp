@@ -341,7 +341,7 @@ netauct_rule_installer::remove(const string sessionId, const auction_rule *rule)
 	
 	auction_rule *rule_return;
 	
-	if (get_install_auction_rules())
+	if (get_install_auction_rules() || is_auctioneer() )
 	{
 	
 		handle_remove_session(sessionId, rule);

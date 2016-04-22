@@ -1268,7 +1268,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 			d->remove_auction_rules(session_id, rule);
 
-			state_timer.start(d, lifetime);
+			state_timer.start(d, get_response_timeout());
 																	
 			return STATE_ANSLP_PENDING_TEARDOWN;
 		
@@ -1319,7 +1319,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 					d->remove_auction_rules(session_id, rule);
 
-					state_timer.start(d, lifetime);
+					state_timer.start(d, get_response_timeout());
 																			
 					return STATE_ANSLP_PENDING_TEARDOWN;
 				
@@ -1348,7 +1348,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 				d->remove_auction_rules(session_id, rule);
 
-				state_timer.start(d, lifetime);
+				state_timer.start(d, get_response_timeout());
 																		
 				return STATE_ANSLP_PENDING_TEARDOWN;
 			

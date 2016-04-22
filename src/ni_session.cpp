@@ -806,8 +806,8 @@ ni_session::state_t ni_session::handle_state_auctioning(
 			if (rule->get_number_mspec_response_objects() > 0){
 
 				d->remove_auction_rules(session_id, rule);
-
-				response_timer.start(d, lifetime);
+				
+				response_timer.start(d, get_response_timeout());
 																		
 				return STATE_ANSLP_PENDING_TEARDOWN;
 			
@@ -837,7 +837,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		// dispatcher will delete
 		d->send_message( get_last_refresh_message()->copy() );
 
-		LogDebug("Ending state metering - api teardown");
+		LogDebug("Ending state auctioning - api teardown");
 
 		return STATE_ANSLP_AUCTIONING;
 	}
@@ -925,6 +925,9 @@ ni_session::state_t ni_session::handle_state_auctioning(
 						
 			if ( get_lifetime() == 0 )
 			{
+
+				session_id = get_id().to_string();
+
 				response_timer.stop();	
 				
 				set_teardown_counter(0);
@@ -1073,6 +1076,8 @@ ni_session::state_t ni_session::handle_state_pending_teardown(
 		
 		// Retry. Send the teardown message again and start a new timer.
 		if ( get_teardown_counter() < get_max_retries() ) {
+
+			session_id = get_id().to_string();
 			
 			LogWarn("state timer timeout, restarting timer.");
 			
@@ -1080,7 +1085,7 @@ ni_session::state_t ni_session::handle_state_pending_teardown(
 			
 			d->remove_auction_rules(session_id, rule);
 
-			response_timer.start(d, lifetime);
+			response_timer.start(d, get_response_timeout());
 
 			return STATE_ANSLP_PENDING_TEARDOWN; // no change
 		}

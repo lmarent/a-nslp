@@ -157,7 +157,7 @@ void dispatcher::process(event *evt) throw () {
 	session *s = NULL;
 	session_id *id = evt->get_session_id();
 
-
+	
 	// If the event has a session ID, try to lookup the session.
 	if ( id != NULL ){
 		s = session_mgr->get_session(*id);
@@ -178,6 +178,7 @@ void dispatcher::process(event *evt) throw () {
 	 * discard it. Top candidates for discarding are obsolete timers.
 	 */
 	if ( s != NULL ) {
+		
 		try {
 			MP(benchmark_journal::PRE_SESSION);
 			s->process(this, evt);
@@ -192,7 +193,7 @@ void dispatcher::process(event *evt) throw () {
 		/*
 		 * If a session is in state FINAL after processing, delete it.
 		 */
-		if ( s->is_final() ) {
+		if ( (s != NULL) && (s->is_final()) ) {
 			session_mgr->remove_session(s->get_id());
 			delete s;
 		}

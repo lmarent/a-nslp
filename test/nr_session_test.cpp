@@ -45,6 +45,7 @@ class ResponderTest : public CppUnit::TestCase {
 	CPPUNIT_TEST( testPending );
 	CPPUNIT_TEST( testPendingInstalling );
 	CPPUNIT_TEST( testAuctioning );
+	CPPUNIT_TEST( testPendingTeardown );
 	CPPUNIT_TEST( testIntegratedStateMachine );
 
 	CPPUNIT_TEST_SUITE_END();
@@ -57,6 +58,7 @@ class ResponderTest : public CppUnit::TestCase {
 	void testPending();
 	void testPendingInstalling();
 	void testAuctioning();
+	void testPendingTeardown();
 	void testIntegratedStateMachine();
 
   private:
@@ -348,8 +350,6 @@ ResponderTest::testPending() {
 	
 }
 
-
-
 void 
 ResponderTest::testPendingInstalling() {
 	
@@ -476,9 +476,10 @@ ResponderTest::testAuctioning() {
 	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
 
 	/*
-	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0) ]--->STATE_ANSLP_CLOSE
+	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0), NBR_OBJECT = 0 ]---> STATE_ANSLP_PENDING_TEARDOWN
 	 */
 	nr_session_test s3(nr_session::STATE_ANSLP_AUCTIONING, conf, START_MSN);
+	
 	event *e3 = new msg_event(NULL,
 			create_anslp_refresh(START_MSN+1, 0), true);
 
@@ -486,6 +487,25 @@ ResponderTest::testAuctioning() {
 	ASSERT_STATE(s3, nr_session::STATE_ANSLP_CLOSE);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
 	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0), NBR_OBJECT > 0 ]---> STATE_ANSLP_PENDING_TEARDOWN
+	 */
+	nr_session_test s31(nr_session::STATE_ANSLP_AUCTIONING, conf, START_MSN);
+	
+	anslp::mspec_rule_key key10;
+	(s31.rule)->set_response_object(key10, mess1->copy());
+
+	event *e31 = new msg_event(NULL,
+			create_anslp_refresh(START_MSN+1, 0), true);
+
+	process(s31, e31);
+	
+	ASSERT_STATE(s31, nr_session::STATE_ANSLP_PENDING_TEARDOWN);
+	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
+	ASSERT_TIMER_STARTED(d, s31.get_state_timer());
+
 
 	/*
 	 * STATE_AUCTIONING_PART ---[rx_REFRESH && MSN too low ]---> STATE_AUCTIONING_PART
@@ -508,8 +528,106 @@ ResponderTest::testAuctioning() {
 	ASSERT_STATE(s5, nr_session::STATE_ANSLP_AUCTIONING);
 	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
+	
+}
+
+
+void 
+ResponderTest::testPendingTeardown() 
+{
+	
+	
+	/*
+	 * STATE_ANSLP_PENDING_TEARDOWN ---[ timer, count < max ]---> STATE_ANSLP_PENDING_TEARDOWN
+	 */
+	nr_session_test s1(nr_session::STATE_ANSLP_PENDING_TEARDOWN, conf, START_MSN);
+	s1.set_max_retries(2); 
+
+	s1.get_state_timer().set_id(47);
+	timer_event *e1 = new timer_event(NULL, 47);
+
+	process(s1, e1);
+	ASSERT_STATE(s1, nr_session::STATE_ANSLP_PENDING_TEARDOWN);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+
+	/*
+	 * STATE_ANSLP_PENDING_TEARDOWN ---[ timer, count > max ]---> STATE_ANSLP_CLOSE
+	 */
+	nr_session_test s2(nr_session::STATE_ANSLP_PENDING_TEARDOWN, conf, START_MSN);
+	s2.set_max_retries(0); 
+
+	s2.get_state_timer().set_id(47);
+	timer_event *e2 = new timer_event(NULL, 47);
+
+	process(s2, e2);
+	ASSERT_STATE(s2, nr_session::STATE_ANSLP_CLOSE);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_PENDING_TEARDOWN ---[ api_check ]---> STATE_ANSLP_PENDING_TEARDOWN
+	 */
+	nr_session_test s3(nr_session::STATE_ANSLP_PENDING_TEARDOWN, conf, START_MSN);
+
+	api_check_event *e3 = new api_check_event(new session_id(s3.get_id()), NULL);
+
+	process(s3, e3);
+	ASSERT_STATE(s3, nr_session::STATE_ANSLP_PENDING_TEARDOWN);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+	
+	/*
+	 * STATE_ANSLP_PENDING_TEARDOWN ---[ api_install ]---> STATE_ANSLP_PENDING_TEARDOWN
+	 */
+	nr_session_test s4(nr_session::STATE_ANSLP_PENDING_TEARDOWN, conf, START_MSN);
+
+	api_install_event *e4 = new api_install_event(new session_id(s4.get_id()), NULL);
+
+	process(s4, e4);
+	ASSERT_STATE(s4, nr_session::STATE_ANSLP_PENDING_TEARDOWN);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+
+	/*
+	 * STATE_ANSLP_PENDING_TEARDOWN ---[ anslp_bidding ]---> STATE_ANSLP_PENDING_TEARDOWN
+	 */
+	nr_session_test s5(nr_session::STATE_ANSLP_PENDING_TEARDOWN, conf, START_MSN);
+
+	event *e5 = new msg_event(NULL, create_anslp_bidding(START_MSN + 1), true);
+	
+	process(s5, e5);
+	ASSERT_STATE(s5, nr_session::STATE_ANSLP_PENDING_TEARDOWN);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+	
+	/*
+	 * STATE_ANSLP_PENDING_TEARDOWN ---[ api_bidding ]---> STATE_ANSLP_PENDING_TEARDOWN
+	 */
+	nr_session_test s6(nr_session::STATE_ANSLP_PENDING_TEARDOWN, conf, START_MSN);
+	event *e6 = new msg_event(NULL, create_anslp_bidding(START_MSN + 1), true);
+
+	process(s6, e6);
+	ASSERT_STATE(s6, nr_session::STATE_ANSLP_PENDING_TEARDOWN);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
+
+
+	/*
+	 * STATE_ANSLP_PENDING_TEARDOWN ---[ api_remove ]---> STATE_ANSLP_PENDING_TEARDOWN
+	 */
+	nr_session_test s7(nr_session::STATE_ANSLP_PENDING_TEARDOWN, conf, START_MSN);
+
+	api_remove_event *e7 = new api_remove_event(new session_id(s6.get_id()), NULL);
+
+	process(s7, e7);
+	ASSERT_STATE(s7, nr_session::STATE_ANSLP_CLOSE);
+	ASSERT_NO_MESSAGE(d);
+	ASSERT_NO_TIMER(d);
 		
 }
+
 
 void 
 ResponderTest::testIntegratedStateMachine()
@@ -558,14 +676,24 @@ ResponderTest::testIntegratedStateMachine()
 
 
 	/*
-	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0) ]--->STATE_ANSLP_CLOSE
+	 * STATE_ANSLP_AUCTIONING ---[rx_REFRESH && REFRESH(Lifetime == 0) ]--->STATE_ANSLP_PENDING_TEARDOWN
 	 */
 	event *e4 = new msg_event(NULL,
 			create_anslp_refresh(START_MSN+1, 0), true);
 
 	process(s1, e4);
-	ASSERT_STATE(s1, nr_session::STATE_ANSLP_CLOSE);
+	ASSERT_STATE(s1, nr_session::STATE_ANSLP_PENDING_TEARDOWN);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_success);
+	ASSERT_TIMER_STARTED(d, s1.get_state_timer());
+
+	/*
+	 * STATE_ANSLP_PENDING_TEARDOWN ---[ api_remove ]---> STATE_ANSLP_CLOSE
+	 */
+	api_remove_event *e5 = new api_remove_event(new session_id(s1.get_id()), NULL);
+
+	process(s1, e5);
+	ASSERT_STATE(s1, nr_session::STATE_ANSLP_CLOSE);
+	ASSERT_NO_MESSAGE(d);
 	ASSERT_NO_TIMER(d);
 	
 }

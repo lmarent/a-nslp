@@ -60,7 +60,7 @@ class nop_auction_rule_installer : public auction_rule_installer
 	
 	virtual auction_rule * auction_interaction(const bool server, const string sessionId, const auction_rule *mt_object);
 
-	virtual auction_rule * remove(const string sessionId, const auction_rule *mt_object);
+	virtual void remove(const string sessionId, const auction_rule *mt_object);
 
 	virtual bool remove_all();
 

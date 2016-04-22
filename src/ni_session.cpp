@@ -138,7 +138,11 @@ uint32 ni_session::create_random_number() const
 
 std::ostream &anslp::operator<<(std::ostream &out, const ni_session &s) 
 {
-	static const char *const names[] = { "CLOSE", "PENDING", "METERING" };
+	static const char *const names[] = { "CLOSE", 
+										 "PENDING", 
+										 "PENDING_INSTALLING",
+										 "AUCTIONING",
+										 "PENDING_TEARDOWN" };
 
 	return out << "[ni_session: id=" << s.get_id()
 			   << ", state=" << names[s.get_state()] << "]";
@@ -207,13 +211,6 @@ msg::ntlp_msg *ni_session::build_bidding_message(api_bidding_event *e )
 	 * Create the message routing information (MRI) which we're going to
 	 * use for all messages.
 	 */
-	uint8 src_prefix = 32;
-	uint8 dest_prefix = 32;
-	uint16 flow_label = 0;
-	uint16 traffic_class = 0;		// DiffServ CodePoint
-	uint32 ipsec_spi = 0;			// IPsec SPI
-	bool downstream = true;
-
 	ntlp::mri *nslp_mri = get_mri()->copy();
 
 
@@ -581,6 +578,7 @@ ni_session::state_t ni_session::handle_state_pending(
 			return STATE_ANSLP_PENDING_INSTALLING;
 										  
 		}
+
 		else {
 			d->report_async_event("cannot initiate Create session");
 			return STATE_ANSLP_CLOSE;
@@ -743,6 +741,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 	using namespace anslp::msg;
 	
 	LogDebug("Initiating state auctioning");
+
 	string session_id;
 
 	/*
@@ -796,16 +795,29 @@ ni_session::state_t ni_session::handle_state_auctioning(
 			return STATE_ANSLP_AUCTIONING; // no change
 		}
 		// Retry count exceeded, abort.
-		else {
+		else {			
+			LogDebug("no response to our REFRESH message");
+			
+			d->report_async_event("got no response to our REFRESH message");
+			
+			set_teardown_counter(0);
+			
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0){
-				session_id = get_id().to_string();
+
 				d->remove_auction_rules(session_id, rule);
-			}
+
+				response_timer.start(d, lifetime);
+																		
+				return STATE_ANSLP_PENDING_TEARDOWN;
 			
-			LogDebug("no response to our REFRESH message");
-			d->report_async_event("got no response to our REFRESH message");
-			return STATE_ANSLP_CLOSE;
+			} else {
+								
+				response_timer.stop();
+				
+				return STATE_ANSLP_CLOSE;
+			}
+
 		}
 	}
 	
@@ -813,21 +825,21 @@ ni_session::state_t ni_session::handle_state_auctioning(
 	 * API teardown event received. The user wants to end the session.
 	 */
 	else if ( is_api_teardown(evt) ) {
+		
 		LogDebug("received API teardown event");
 
 		// Send a CREATE message with a session lifetime of 0.
 		set_lifetime(0);
-		set_last_refresh_message(NULL);
 
-		// Uninstall the previous rules.
-		if (rule->get_number_mspec_response_objects() > 0){ 
-			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule);
-		}
+		// Build a new REFRESH message, it stores a copy for refreshing.
+		set_last_refresh_message( build_refresh_message() );
 
-		d->send_message( build_refresh_message() );
+		// dispatcher will delete
+		d->send_message( get_last_refresh_message()->copy() );
+
 		LogDebug("Ending state metering - api teardown");
-		return STATE_ANSLP_CLOSE;
+
+		return STATE_ANSLP_AUCTIONING;
 	}
 	
 	/*
@@ -855,7 +867,6 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		
 		try{
 			msg_event *e = dynamic_cast<msg_event *>(evt);
-			ntlp_msg *msg = e->get_ntlp_msg();
 			anslp_bidding *bidding = e->get_bidding();
 							
 			// The message is for us, so we send it to the install policy
@@ -897,7 +908,7 @@ ni_session::state_t ni_session::handle_state_auctioning(
 	else if ( is_anslp_response(evt, get_last_refresh_message() ) ) {
 		msg_event *e = dynamic_cast<msg_event *>(evt);
 		anslp_response *resp = e->get_response();
-
+				
 		LogDebug("received RESPONSE: " << *resp);
 
 		/*
@@ -911,24 +922,62 @@ ni_session::state_t ni_session::handle_state_auctioning(
 
 		if ( resp->is_success() ) {
 			d->report_async_event("REFRESH successful");
+						
+			if ( get_lifetime() == 0 )
+			{
+				response_timer.stop();	
+				
+				set_teardown_counter(0);
+								
+				// Uninstall the previous rules.
+				if (rule->get_number_mspec_response_objects() > 0){
+					
+					d->remove_auction_rules(session_id, rule);
+					
+					response_timer.start(d, lifetime);
+																			
+					return STATE_ANSLP_PENDING_TEARDOWN;
+				
+				} else {
+									
+					response_timer.stop();
+					
+					return STATE_ANSLP_CLOSE;
+				}
 
-			response_timer.stop();
-			refresh_timer.start(d, get_refresh_interval());
+			}
+			else {
 
-			set_refresh_counter(0);
+				response_timer.stop();
+				refresh_timer.start(d, get_refresh_interval());
 
-			return STATE_ANSLP_AUCTIONING; // no change
+				set_refresh_counter(0);
+
+				return STATE_ANSLP_AUCTIONING; // no change
+			}
 		}
 		else {
 
+			d->report_async_event("REFRESH session died");
+			
+			set_teardown_counter(0);
+			
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0){
-				session_id = get_id().to_string();
+
 				d->remove_auction_rules(session_id, rule);
+
+				response_timer.start(d, lifetime);
+																			
+				return STATE_ANSLP_PENDING_TEARDOWN;
+				
+			} else {
+									
+				response_timer.stop();
+					
+				return STATE_ANSLP_CLOSE;
 			}
 
-			d->report_async_event("REFRESH session died");
-			return STATE_ANSLP_CLOSE;
 		}
 
 	}
@@ -940,6 +989,148 @@ ni_session::state_t ni_session::handle_state_auctioning(
 		return STATE_ANSLP_AUCTIONING; // no change
 	}
 }
+
+
+/*
+ * state: STATE_ANSLP_PENDING_TEARDOWN.
+ */
+ni_session::state_t ni_session::handle_state_pending_teardown(
+		dispatcher *d, event *evt) {
+
+	using namespace anslp::msg;
+	string session_id;
+  
+	LogDebug("Begining handle_STATE_ANSLP_PENDING_TEARDOWN(): " << *this);
+  
+	/*
+	 * A msg_event arrived which contains a A-NSLP REFRESH message. Discard.
+	 */
+	if ( is_anslp_refresh(evt) ) 
+	{
+		LogWarn("discarding refresh message.");
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+	}
+
+	/*
+	 * API bidding event received. The user wants to send an object to the auction server.
+	 */
+	else if ( is_api_bidding(evt) ) {
+		LogDebug("received API bidding event, this message does not wait response.");
+				
+		api_bidding_event *e = dynamic_cast<api_bidding_event *>(evt);
+		
+		// Build the bidding message.
+		d->send_message( build_bidding_message(e) );
+				
+		LogDebug("Ending state handle_state_auctioning - api bidding event ");
+		
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+		
+	}
+
+	/*
+	 * API bidding event received. The user wants to receive an object from the auction server.
+	 */
+	else if ( is_anslp_bidding(evt) ) {
+		LogDebug("received anslp bidding event");
+		
+		try{
+			msg_event *e = dynamic_cast<msg_event *>(evt);
+			anslp_bidding *bidding = e->get_bidding();
+							
+			// The message is for us, so we send it to the install policy
+			// These messages are without any response. 
+			// As it is implemented, we delegate the upper layer to retry to send them again.
+
+			session_id = get_id().to_string();
+				
+			std::vector<msg::anslp_mspec_object *> missing_objects;
+				
+			auction_rule * to_post = create_auction_rule(bidding);
+			
+			auction_rule * result = d->auction_interaction(false, session_id, to_post);
+			
+			saveDelete(to_post);
+				
+			saveDelete(result);
+		
+		} catch (auction_rule_installer_error &e){
+			LogError(e.get_msg());
+		}
+		
+		LogDebug("Ending state handle_state_auctioning - bidding event ");
+		
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+			
+	}
+
+		
+	/*
+	 * The timer for remove the policy is over, so we need to resend the message or terminate the session.
+	 */
+	else if ( is_timer(evt, response_timer) ) 
+	{		
+		
+		// Retry. Send the teardown message again and start a new timer.
+		if ( get_teardown_counter() < get_max_retries() ) {
+			
+			LogWarn("state timer timeout, restarting timer.");
+			
+			inc_teardown_counter();
+			
+			d->remove_auction_rules(session_id, rule);
+
+			response_timer.start(d, lifetime);
+
+			return STATE_ANSLP_PENDING_TEARDOWN; // no change
+		}
+		// Retry count exceeded, abort.
+		else {
+			
+			return STATE_ANSLP_CLOSE;
+		}
+	}
+	/*
+	 * GIST detected that one of our routes is no longer usable. This
+	 * could be the route to the NI or to the NR.
+	 */
+	else if ( is_route_changed_bad_event(evt) ) {
+		LogError("route to the NI or to the NR is no longer usable");
+
+		return STATE_ANSLP_PENDING_TEARDOWN;
+	}	
+	/*
+	 * Outdated timer event, discard and don't log.
+	 */
+	else if ( is_timer(evt) ) {
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+	}
+
+	/*
+	 * A msg_event arrived which contains a ANSLP api install message.
+	 */
+	else if ( is_api_remove(evt) ) {
+						
+		api_remove_event *e = dynamic_cast<api_remove_event *>(evt);
+																			
+		response_timer.stop();
+			
+		return STATE_ANSLP_CLOSE;
+
+	}	
+		
+	/*
+	 * Received unexpected event.
+	 */
+	else {
+		LogInfo("discarding unexpected event " << *evt);
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+	}
+
+	LogDebug("Ending handle_STATE_ANSLP_PENDING_TEARDOWN(): " << *this);
+	
+}
+
 
 
 /**
@@ -972,6 +1163,10 @@ void ni_session::process_event(dispatcher *d, event *evt) {
 
 		case ni_session::STATE_ANSLP_AUCTIONING:
 			state = handle_state_auctioning(d, evt);
+			break;
+
+		case ni_session::STATE_ANSLP_PENDING_TEARDOWN:
+			state = handle_state_pending_teardown(d, evt);
 			break;
 
 		default:

@@ -126,7 +126,8 @@ std::ostream &anslp::operator<<(std::ostream &out, const nr_session &s)
 	static const char *const names[] = { "CLOSE", 
 										 "PENDING",
 										 "PENDING_INSTALLING",
-										 "AUCTIONING"};
+										 "AUCTIONING",
+										 "PENDING_TEARDOWN"};
 
 	return out << "[nr_session: id=" << s.get_id()
 		<< ", state=" << names[s.get_state()] << "]";
@@ -683,24 +684,38 @@ nr_session::state_t nr_session::handle_state_auctioning(
 			state_timer.restart(d, lifetime);
 
 			return STATE_ANSLP_AUCTIONING; // no change
+
 		} else if ( lifetime == 0 ) {
 
 			LogInfo("terminating session on NI request.");
-		
+					
 			session_id = get_id().to_string();
-			
-			// Uninstall the previous rules.
-			if (rule->get_number_mspec_response_objects() > 0)
-				d->remove_auction_rules(session_id, rule);
-			
+
+			// Respond success for the requester.
 			ntlp_msg *resp = msg->create_success_response(lifetime);
 		
 			d->send_message(resp);
 			
-			state_timer.stop();
+			// Uninstall the previous rules.
+			if (rule->get_number_mspec_response_objects() > 0){
+				
+				d->remove_auction_rules(session_id, rule);
 
-			return STATE_ANSLP_CLOSE;
+				state_timer.start(d, lifetime);
+																					
+				return STATE_ANSLP_PENDING_TEARDOWN;
+				
+			} else {
+							
+				state_timer.stop();
+
+				LogInfo("session terminated on NI request.");
+			
+				return STATE_ANSLP_CLOSE;
+			}
+		
 		} else {
+		
 			LogWarn("invalid lifetime.");
 
 			return STATE_ANSLP_AUCTIONING; // no change
@@ -775,12 +790,23 @@ nr_session::state_t nr_session::handle_state_auctioning(
 		
 		session_id = get_id().to_string();
 		
+		d->report_async_event("session timed out");
+
 		// Uninstall the previous rules.
-		if (rule->get_number_mspec_response_objects() > 0)
+		if (rule->get_number_mspec_response_objects() > 0){
+
 			d->remove_auction_rules(session_id, rule);
 
-		d->report_async_event("session timed out");
-		return STATE_ANSLP_CLOSE;
+			state_timer.start(d, lifetime);
+																	
+			return STATE_ANSLP_PENDING_TEARDOWN;
+		} else {
+							
+			state_timer.stop();
+			
+			return STATE_ANSLP_CLOSE;
+		}
+		
 	}
 	
 	/*
@@ -797,6 +823,115 @@ nr_session::state_t nr_session::handle_state_auctioning(
 		LogInfo("discarding unexpected event " << *evt);
 
 		return STATE_ANSLP_AUCTIONING; // no change
+	}
+}
+
+
+
+/*
+ * state: STATE_ANSLP_PENDING_TEARDOWN
+ */
+nr_session::state_t 
+nr_session::handle_state_pending_teardown(dispatcher *d, event *evt) 
+{
+	using namespace msg;
+
+	LogDebug("Starting handle_state_pending_teardown ");
+	
+	string session_id = get_id().to_string();
+
+	/*
+	 * A response timeout was triggered.
+	 */
+	if ( is_timer(evt, state_timer) ) {
+
+		// Retry. Send the Create message again and start a new timer.
+		if ( get_create_counter() < get_max_retries() ) {
+			
+			LogWarn("response timeout, restarting timer.");
+			
+			inc_create_counter();
+			
+			d->remove_auction_rules(session_id, rule);
+
+			state_timer.start(d, lifetime);
+
+			return STATE_ANSLP_PENDING_TEARDOWN; // no change
+		}
+		// Retry count exceeded, abort.
+		else {
+			
+			return STATE_ANSLP_CLOSE;
+		}
+	}	
+
+	/*
+	 * A msg_event arrived which contains an outdated ANSLP api check message.
+	 */
+	else if ( is_api_check(evt) ) {
+		return STATE_ANSLP_PENDING_TEARDOWN;
+	}
+	
+	/*
+	 * A msg_event arrived which contains an outdated ANSLP api install message.
+	 */	
+	else if ( is_api_install(evt) ) {
+		return STATE_ANSLP_PENDING_TEARDOWN;
+	}
+
+	/*
+	 * API bidding event received. The user wants to send an object to the auction server.
+	 * it is discarded.
+	 */
+	else if ( is_anslp_bidding(evt) ) {
+		
+		LogDebug("received anslp bidding event");
+
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+		
+	}
+
+	/*
+	 * API bidding event received. The user wants to send an object from the auction server.
+	 */
+	else if ( is_api_bidding(evt) ) {
+		
+		LogDebug("received API bidding event");
+				
+		api_bidding_event *e = dynamic_cast<api_bidding_event *>(evt);
+		
+		// Build the bidding message based on those objects not installed.
+		d->send_message( build_bidding_message(e) );
+		
+		// Send the response saying that an event was processed for the
+		// session id.
+		if ( e->get_return_queue() != NULL ) {
+			message *m = new anslp_event_msg(get_id(), NULL);
+			e->get_return_queue()->enqueue(m);
+		}
+		
+		LogDebug("Ending state handle_state_auctioning - bidding event ");
+		
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+		
+	}
+
+	/*
+	 * A msg_event arrived which contains a ANSLP api install message.
+	 */
+	else if ( is_api_remove(evt) ) {
+						
+		api_remove_event *e = dynamic_cast<api_remove_event *>(evt);
+																			
+		state_timer.stop();
+			
+		return STATE_ANSLP_CLOSE;
+
+	}	
+		
+	else {
+		LogInfo("discarding unexpected event " << *evt);
+		return STATE_ANSLP_PENDING_TEARDOWN;
 	}
 }
 
@@ -828,7 +963,12 @@ void nr_session::process_event(dispatcher *d, event *evt)
 			state = handle_state_auctioning(d, evt);
 			break;
 
+		case nr_session::STATE_ANSLP_PENDING_TEARDOWN:
+			state = handle_state_pending_teardown(d, evt);
+			break;
+
 		default:
+			LogError("Invalid State(): " << get_state());
 			assert( false ); // invalid state
 	}
 

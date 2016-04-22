@@ -845,6 +845,12 @@ inline bool is_api_teardown(const event *evt)
 	return dynamic_cast<const api_teardown_event *>(evt) != NULL;
 }
 
+inline bool is_api_remove(const event *evt) 
+{
+	return dynamic_cast<const api_remove_event *>(evt) != NULL;
+}
+
+
 inline bool is_routing_state_check(const event *evt) 
 {
 	return dynamic_cast<const routing_state_check_event *>(evt) != NULL;

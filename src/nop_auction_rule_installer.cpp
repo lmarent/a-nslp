@@ -106,20 +106,12 @@ nop_auction_rule_installer::put_response(const string sessionId, const auction_r
 }
 
 
-auction_rule * nop_auction_rule_installer::remove(const string sessionId, const auction_rule *rule) 
+void 
+nop_auction_rule_installer::remove(const string sessionId, const auction_rule *rule) 
 {
 
 	LogDebug("NOP: removing auction rule " << *rule);
-	auction_rule *rule_return;
 	
-	if ( rule != NULL ){
-		rule_return = rule->copy(); 
-	}
-	else{
-		rule_return = NULL;
-	}	
-
-	return rule_return;
 }
 
 bool nop_auction_rule_installer::remove_all() 

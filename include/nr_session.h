@@ -73,7 +73,8 @@ class nr_session : public session {
 		STATE_ANSLP_CLOSE				= 0,
 		STATE_ANSLP_PENDING				= 1,
 		STATE_ANSLP_PENDING_INSTALLING	= 2,
-		STATE_ANSLP_AUCTIONING			= 3
+		STATE_ANSLP_AUCTIONING			= 3,
+		STATE_ANSLP_PENDING_TEARDOWN    = 4
 	};
 
 	void process_event(dispatcher *d, event *evt);
@@ -133,6 +134,7 @@ class nr_session : public session {
 	state_t handle_state_pending(dispatcher *d, event *evt);
 	state_t handle_state_pending_installing(dispatcher *d, event *evt);
 	state_t handle_state_auctioning(dispatcher *d, event *e);	
+	state_t handle_state_pending_teardown(dispatcher *d, event *evt);
 	
 
 	msg::ntlp_msg *build_trace_response(ntlp_msg *msg) const;

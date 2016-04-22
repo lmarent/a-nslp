@@ -75,7 +75,7 @@ class netauct_rule_installer : public auction_rule_installer
 	virtual auction_rule * auction_interaction(const bool server, const string sessionId, const auction_rule *mt_object);
 
 	//! Remove an auction session in an auction server.
-	virtual auction_rule * remove(const string sessionId, const auction_rule *mt_object);
+	virtual void remove(const string sessionId, const auction_rule *mt_object);
 
 	//! Remove all auction sessions in an auction server.
 	virtual bool remove_all();
@@ -88,18 +88,13 @@ class netauct_rule_installer : public auction_rule_installer
 
 	//! This function puts the objects in rule for removing in an auctioning server or 
 	//! auctioner user agent.
-	auction_rule * handle_remove_session(const string sessionId, const auction_rule *rule);
+	void handle_remove_session(const string sessionId, const auction_rule *rule);
 
 	//! This function throws an exception when there are not returning objects 
 	//! (there is not any auction satisfaying given criteria).
 	void handle_response_check(anslp::FastQueue *waitqueue) 
 			throw (auction_rule_installer_error);
   
-	//! This function throws an exception when there is not an event in queue 
-	//! (update auc_return with the number of objects installed).
-	void
-	handle_response_remove(anslp::FastQueue *waitqueue, auction_rule *auc_return);
-
   private:
 	
 	//! Cast the object to the ipap_message.

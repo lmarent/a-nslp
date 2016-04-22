@@ -110,7 +110,7 @@ class auction_rule_installer {
 	 * Note that this is the reverse operation to create(). Only previously
 	 * created auction sessions may be deleted!. 
 	 */
-	virtual auction_rule * remove(const string sessionId, const auction_rule * mt_object) = 0;
+	virtual void remove(const string sessionId, const auction_rule * mt_object) = 0;
 
 	
 	/**

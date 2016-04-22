@@ -381,17 +381,11 @@ void dispatcher::remove_auction_rules(const string session_id, const auction_rul
 
 	assert( rule_installer != NULL );
 
-	if ( act_rule != NULL )
+	if ( act_rule != NULL ){
 		LogDebug("removing ANSLP policy rule " << *act_rule);
-
-	auction_rule * result = rule_installer->remove(session_id, act_rule);
-	
-	if (result->get_number_mspec_request_objects() != 
-			act_rule->get_number_mspec_response_objects() )
-			throw auction_rule_installer_error("Invalid ipap message",
-				msg::information_code::sc_signaling_session_failures,
-				msg::information_code::sigfail_wrong_conf_message); 
-				
+		rule_installer->remove(session_id, act_rule);
+	}
+					
 }
 
 bool dispatcher::check(const string session_id, 

@@ -129,7 +129,8 @@ std::ostream &anslp::operator<<(std::ostream &out, const nf_session &s) {
 										 "PENDING_CHECK", 
 										 "PENDING",
 										 "PENDING_INSTALLING",
-										 "AUCTIONING" };
+										 "AUCTIONING",
+										 "PENDING_TEARDOWN" };
 
 	return out << "[nf_session: id=" << s.get_id()
 		<< ", state=" << names[s.get_state()] << "]";
@@ -303,13 +304,6 @@ msg::ntlp_msg *nf_session::build_bidding_message(api_bidding_event *e )
 	 * Create the message routing information (MRI) which we're going to
 	 * use for all messages.
 	 */
-	uint8 src_prefix = 32;
-	uint8 dest_prefix = 32;
-	uint16 flow_label = 0;
-	uint16 traffic_class = 0;		// DiffServ CodePoint
-	uint32 ipsec_spi = 0;			// IPsec SPI
-	bool downstream = false;
-
 	ntlp::mri *nslp_mri = get_ni_mri()->copy();
 	nslp_mri->invertDirection();
 
@@ -1119,6 +1113,7 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		 * All preconditions have been checked.
 		 */
 		set_lifetime(lifetime); // could be a new lifetime!
+		
 		if ( lifetime > 0 ) {
 			LogDebug("forwarder session refreshed.");
 
@@ -1211,8 +1206,18 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
-			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule->copy());
+
+			d->remove_auction_rules(session_id, rule);
+
+			state_timer.start(d, lifetime);
+																	
+			return STATE_ANSLP_PENDING_TEARDOWN;
+		
+		} else {
+							
+			state_timer.stop();
+			
+			return STATE_ANSLP_CLOSE;
 		}
 
 		// TODO: check the spec!
@@ -1235,27 +1240,44 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
-			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule->copy());
-		}
-		// TODO: ReportAsyncEvent()
 
-		return STATE_ANSLP_CLOSE;
+			d->remove_auction_rules(session_id, rule);
+
+			state_timer.start(d, lifetime);
+																	
+			return STATE_ANSLP_PENDING_TEARDOWN;
+		
+		} else {
+							
+			state_timer.stop();
+			
+			return STATE_ANSLP_CLOSE;
+		}
+
 	}
 	/*
 	 * GIST detected that one of our routes is no longer usable. This
 	 * could be the route to the NI or to the NR.
 	 */
 	else if ( is_route_changed_bad_event(evt) ) {
+		
 		LogUnimp("route to the NI or to the NR is no longer usable");
 
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
-			session_id = get_id().to_string();
-			d->remove_auction_rules(session_id, rule->copy());
-		}
 
-		return STATE_ANSLP_CLOSE;
+			d->remove_auction_rules(session_id, rule);
+
+			state_timer.start(d, lifetime);
+																	
+			return STATE_ANSLP_PENDING_TEARDOWN;
+		
+		} else {
+							
+			state_timer.stop();
+			
+			return STATE_ANSLP_CLOSE;
+		}
 	}	
 	/*
 	 * Outdated timer event, discard and don't log.
@@ -1285,16 +1307,29 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		if ( response->is_success() ) {
 			
 			LogDebug("upstream peer sent successful response.");
+			
 			d->send_message( create_msg_for_ni(msg) );
+			
 			if ( get_lifetime() == 0 )
 			{
 				state_timer.stop();	
+
 				// Uninstall the previous rules.
 				if (rule->get_number_mspec_response_objects() > 0){
-					session_id = get_id().to_string();
-					d->remove_auction_rules(session_id, rule->copy());	
+
+					d->remove_auction_rules(session_id, rule);
+
+					state_timer.start(d, lifetime);
+																			
+					return STATE_ANSLP_PENDING_TEARDOWN;
+				
+				} else {
+									
+					state_timer.stop();
+					
+					return STATE_ANSLP_CLOSE;
 				}
-				return STATE_ANSLP_CLOSE;
+
 			}
 			else
 			{
@@ -1305,15 +1340,25 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		else {
 			LogWarn("error message received.");
 			state_timer.stop();
-			// Uninstall the previous rules.
-			if (rule->get_number_mspec_response_objects() > 0){
-				session_id = get_id().to_string();
-				d->remove_auction_rules(session_id, rule->copy());
-			}
 			
 			d->send_message( create_msg_for_ni(msg) );
+			
+			// Uninstall the previous rules.
+			if (rule->get_number_mspec_response_objects() > 0){
 
-			return STATE_ANSLP_CLOSE;
+				d->remove_auction_rules(session_id, rule);
+
+				state_timer.start(d, lifetime);
+																		
+				return STATE_ANSLP_PENDING_TEARDOWN;
+			
+			} else {
+								
+				state_timer.stop();
+				
+				return STATE_ANSLP_CLOSE;
+			}
+			
 		}
 	}
 	/*
@@ -1327,6 +1372,119 @@ nf_session::state_t nf_session::handle_state_auctioning(
 	LogDebug("Ending handle_STATE_ANSLP_AUCTIONING(): " << *this);
 	
 }
+
+
+/*
+ * state: STATE_ANSLP_PENDING_TEARDOWN.
+ */
+nf_session::state_t nf_session::handle_state_pending_teardown(
+		dispatcher *d, event *evt) {
+
+	using namespace anslp::msg;
+	string session_id;
+  
+	LogDebug("Begining handle_STATE_ANSLP_PENDING_TEARDOWN(): " << *this);
+  
+	/*
+	 * A msg_event arrived which contains a A-NSLP REFRESH message. Discard.
+	 */
+	if ( is_anslp_refresh(evt) ) 
+	{
+		LogWarn("discarding refresh message.");
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+	}
+
+	/*
+	 * API bidding event received. The user wants to send an object to the auction server.
+	 */
+	else if ( is_anslp_bidding(evt) ) {
+		LogDebug("received API bidding event");
+
+		msg_event *e = dynamic_cast<msg_event *>(evt);
+		ntlp_msg *msg = e->get_ntlp_msg();
+		anslp_bidding *bidding = e->get_bidding();
+						
+		if (e->is_for_this_node()) {
+			// The message is for us, so we send it to the install policy
+			// These messages are without any response. 
+			// As it is implemented, we delegate the upper layer to retry to send them again.
+
+			session_id = get_id().to_string();
+			
+			std::vector<msg::anslp_mspec_object *> missing_objects;
+			
+			auction_rule * to_post = create_auction_rule(bidding);
+			
+			auction_rule * result = d->auction_interaction(true, session_id, to_post);
+			
+			saveDelete(to_post);
+			
+			saveDelete(result);
+			
+			
+		} else { // Not for this node, continue sending the message towards the following node.
+			
+			// Build the bidding message based on those objects not installed.
+			d->send_message( create_msg_for_nr(msg) );
+		
+		}
+
+		LogDebug("Ending state handle_state_auctioning - bidding event ");
+		
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+			
+	}
+
+		
+	/*
+	 * The timer for remove the policy is over, so we need to resend the message or terminate the session.
+	 */
+	else if ( is_timer(evt, state_timer) ) 
+	{		
+		// Timer go out, we just leave the session on close.
+		return STATE_ANSLP_CLOSE;
+	}
+	/*
+	 * GIST detected that one of our routes is no longer usable. This
+	 * could be the route to the NI or to the NR.
+	 */
+	else if ( is_route_changed_bad_event(evt) ) {
+		LogUnimp("route to the NI or to the NR is no longer usable");
+
+		return STATE_ANSLP_PENDING_TEARDOWN;
+	}	
+	/*
+	 * Outdated timer event, discard and don't log.
+	 */
+	else if ( is_timer(evt) ) {
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+	}
+
+	/*
+	 * A msg_event arrived which contains a ANSLP api install message.
+	 */
+	else if ( is_api_remove(evt) ) {
+						
+		api_remove_event *e = dynamic_cast<api_remove_event *>(evt);
+																			
+		state_timer.stop();
+			
+		return STATE_ANSLP_CLOSE;
+
+	}	
+		
+	/*
+	 * Received unexpected event.
+	 */
+	else {
+		LogInfo("discarding unexpected event " << *evt);
+		return STATE_ANSLP_PENDING_TEARDOWN; // no change
+	}
+
+	LogDebug("Ending handle_STATE_ANSLP_PENDING_TEARDOWN(): " << *this);
+	
+}
+
 
 /**
  * Process an event.
@@ -1357,6 +1515,10 @@ void nf_session::process_event(dispatcher *d, event *evt) {
 
 		case nf_session::STATE_ANSLP_AUCTIONING:
 			state = handle_state_auctioning(d, evt);
+			break;
+
+		case nf_session::STATE_ANSLP_PENDING_TEARDOWN:
+			state = handle_state_pending_teardown(d, evt);
 			break;
 
 		default:

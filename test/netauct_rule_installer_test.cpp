@@ -200,7 +200,6 @@ void NetAuctRuleInstallerTest::testCheckException1()
 {
 
 	string sessionId = "123456";
-	AnslpEvent *ret_evt = NULL;
 		
 	objectList_t mspec_objects;
 	anslp::mspec_rule_key key;
@@ -208,8 +207,6 @@ void NetAuctRuleInstallerTest::testCheckException1()
 
 	installer->check( sessionId, &mspec_objects );
 	
-	ret_evt = queueRet->dequeue_timedwait(1000);
-
 	anslp::FastQueue reponse;
 		
 	ResponseCheckSessionEvent *resCheck = new ResponseCheckSessionEvent();
@@ -224,7 +221,6 @@ void NetAuctRuleInstallerTest::testCheckException2()
 {
 
 	string sessionId = "123456";
-	AnslpEvent *ret_evt = NULL;
 		
 	objectList_t mspec_objects;
 	anslp::mspec_rule_key key;
@@ -232,8 +228,6 @@ void NetAuctRuleInstallerTest::testCheckException2()
 
 	installer->check( sessionId, &mspec_objects );
 	
-	ret_evt = queueRet->dequeue_timedwait(1000);
-
 	anslp::FastQueue reponse;
 		
 	ResponseAddSessionEvent *resCheck = new ResponseAddSessionEvent();
@@ -315,8 +309,6 @@ void NetAuctRuleInstallerTest::testRemove()
 		AnslpEvent *ret_evt = NULL;
 		
 		installer->handle_remove_session( sessionId, rule );
-
-		ret_evt = queueRet->dequeue_timedwait(100);
 		
 		// Verify that it creates a new remove session event, 
 		// which will be given to the auction server or auction client.
@@ -332,8 +324,6 @@ void NetAuctRuleInstallerTest::testRemove()
 		
 		reponse.enqueue(resCreate);
 		
-		CPPUNIT_ASSERT_THROW( installer->handle_response_remove(&reponse, rule), auction_rule_installer_error);
-
 
 	} catch (auction_rule_installer_error &e){
 		if (rule != NULL)

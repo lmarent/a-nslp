@@ -112,6 +112,8 @@ class auction_rule
 	
 	objectList_t * get_request_objects(void) { return &object_requests; }
 
+	const objectList_t *  get_request_objects(void) const { return &object_requests; }
+
 	objectList_t * get_response_objects(void) { return &object_responses; }
 	
 

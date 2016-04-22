@@ -82,7 +82,8 @@ class ni_session : public session {
 		STATE_ANSLP_CLOSE	= 0,
 		STATE_ANSLP_PENDING	= 1,
 		STATE_ANSLP_PENDING_INSTALLING = 2,
-		STATE_ANSLP_AUCTIONING	= 3
+		STATE_ANSLP_AUCTIONING	= 3,
+		STATE_ANSLP_PENDING_TEARDOWN = 4
 	};
 
 	ni_session(state_t s=STATE_ANSLP_CLOSE);
@@ -105,6 +106,9 @@ class ni_session : public session {
 
 	inline void set_refresh_counter(uint32 num) { refresh_counter = num; }
 	inline uint32 get_refresh_counter() const { return refresh_counter; }
+
+	inline void set_teardown_counter(uint32 num) { teardown_counter = num; }
+	inline uint32 get_teardown_counter() const { return teardown_counter; }
 
 	inline uint32 get_refresh_interval() const { return refresh_interval; }
 	inline void set_refresh_interval(uint32 sec) { refresh_interval = sec; }
@@ -169,6 +173,7 @@ class ni_session : public session {
 	uint32 create_counter; 
 	uint32 refresh_counter; 
 	uint32 max_retries;
+	uint32 teardown_counter; 
 
 	bool proxy_session;
 
@@ -186,6 +191,7 @@ class ni_session : public session {
 	state_t handle_state_pending(dispatcher *d, event *evt);
 	state_t handle_state_pending_installing(dispatcher *d, event *evt);
 	state_t handle_state_auctioning(dispatcher *d, event *evt);
+	state_t handle_state_pending_teardown(dispatcher *d, event *evt);
 
 	/*
 	 * Utility methods:
@@ -204,6 +210,7 @@ class ni_session : public session {
 	uint32 create_random_number() const;
 	void inc_create_counter();
 	void inc_refresh_counter();
+	void inc_teardown_counter();
 
 	auction_rule * create_auction_rule(anslp_bidding *bidding);
 
@@ -226,6 +233,11 @@ inline void ni_session::inc_create_counter()
 inline void ni_session::inc_refresh_counter() 
 {
 	refresh_counter++;
+}
+
+inline void ni_session::inc_teardown_counter() 
+{
+	teardown_counter++;
 }
 
 inline msg::ntlp_msg *ni_session::get_last_create_message() const 

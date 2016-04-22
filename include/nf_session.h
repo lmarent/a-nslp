@@ -68,7 +68,8 @@ class nf_session : public session {
 		STATE_ANSLP_PENDING_CHECK		= 1,
 		STATE_ANSLP_PENDING				= 2,
 		STATE_ANSLP_PENDING_INSTALLING	= 3,
-		STATE_ANSLP_AUCTIONING			= 4
+		STATE_ANSLP_AUCTIONING			= 4,
+		STATE_ANSLP_PENDING_TEARDOWN    = 5
 	};
 
 	nf_session(state_t s, const anslp_config *conf);
@@ -157,6 +158,7 @@ class nf_session : public session {
 	state_t handle_state_pending_check(dispatcher *d, event *evt);
 	state_t handle_state_pending(dispatcher *d, event *evt);
 	state_t handle_state_pending_installing(dispatcher *d, event *evt);
+	state_t handle_state_pending_teardown(dispatcher *d, event *evt);
 	
 	state_t handle_state_auctioning(dispatcher *d, event *evt);
 	

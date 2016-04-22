@@ -226,35 +226,6 @@ netauct_rule_installer::check(const string sessionId,
 
 
 void
-netauct_rule_installer::handle_response_remove(anslp::FastQueue *waitqueue, auction_rule *auc_return)
-{
-
-	LogInfo("starting handle_response_remove" );
-
-	AnslpEvent *ret_evt = waitqueue->dequeue_timedwait(10000);
-	if (!is_response_removesession_event(ret_evt)){
-		throw auction_rule_installer_error("Unexpected anslp event returned, expecting response_removesession",
-			msg::information_code::sc_signaling_session_failures,
-			msg::information_code::sigfail_wrong_conf_message);			
-	}
-
-	ResponseRemoveSessionEvent *resAdd = 
-		dynamic_cast<ResponseRemoveSessionEvent *>(ret_evt);
-					
-	// Loop though the responses to see which of the them work. 
-	objectListIter_t j;
-			
-	for ( j = resAdd->getObjects()->begin(); j != resAdd->getObjects()->end(); j++){
-		auc_return->set_response_object(j->second->copy());
-	}
-
-	delete resAdd;
-	
-	LogDebug("ending handle_response_remove" );
-}
-
-
-void
 netauct_rule_installer::handle_create_session(const string sessionId, const auction_rule *rule)
 {
 
@@ -331,50 +302,35 @@ netauct_rule_installer::put_response(const string sessionId, const auction_rule 
 	}
 }
 
-
-auction_rule * 
+void
 netauct_rule_installer::handle_remove_session(const string sessionId, const auction_rule *rule)
 {
 
 	LogDebug("starting handle_remove_session" );
 
-	auction_rule *auc_return;
-
-	int nbrObjects = 0;
 	anslp::FastQueue retQueue; 
-
-	auc_return = rule->copy(); 
-
-	objectListConstIter_t i;
-	objectList_t * requestObjectList = auc_return->get_request_objects();
-	LogDebug("Nbr objects to install: " << requestObjectList->size() << "in queue:" << getQueue()->get_name());
+	
+	LogDebug("Nbr objects to remove: " << rule->get_request_objects()->size() << "in queue:" << getQueue()->get_name());
 	RemoveSessionEvent *evt = new RemoveSessionEvent( &retQueue);
 	evt->setSession(sessionId);
-			
-	for ( i = requestObjectList->begin(); i != requestObjectList->end(); i++){
-		nbrObjects++;
-		evt->setObject(i->first, i->second->copy());
+	
+	objectListConstIter_t i;			
+	for ( i = rule->get_request_objects()->begin(); i != rule->get_request_objects()->end(); i++){
+		evt->setObject(mspec_rule_key(i->first), i->second->copy());
 	}
 		
 	bool queued = getQueue()->enqueue(evt);
-	if ( queued ){
-		
-		if (!test){ // When testing mode, it does not wait.
-			handle_response_remove(&retQueue, auc_return);
-		}
-					
-	} else { // Error Queuing the event.
-				
+	if ( !queued ){
+						
 		throw auction_rule_installer_error("Process could not enqueue the anslp event",
 			msg::information_code::sc_signaling_session_failures,
 			msg::information_code::sigfail_wrong_conf_message);
-	}			
+	}
 	
-	return auc_return;
 }
 
 
-auction_rule * 
+void 
 netauct_rule_installer::remove(const string sessionId, const auction_rule *rule) 
 {
 
@@ -388,17 +344,14 @@ netauct_rule_installer::remove(const string sessionId, const auction_rule *rule)
 	if (get_install_auction_rules())
 	{
 	
-		rule_return = handle_remove_session(sessionId, rule);
+		handle_remove_session(sessionId, rule);
 	
 	} else {
 
 		LogDebug("NOP: removing policy rule " << *rule);
-		rule_return = rule->copy(); 		
 		
 	}
 	
-	return rule_return;		
-
 }
 
 bool netauct_rule_installer::remove_all() 

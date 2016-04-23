@@ -607,6 +607,9 @@ nr_session::handle_state_pending_installing(dispatcher *d, event *evt)
 
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0){
+				
+				session_id = get_id().to_string();
+				
 				d->remove_auction_rules(session_id, rule->copy());
 			}
 				
@@ -700,6 +703,8 @@ nr_session::state_t nr_session::handle_state_auctioning(
 			
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0){
+				
+				session_id = get_id().to_string();
 				
 				d->remove_auction_rules(session_id, rule);
 								
@@ -797,6 +802,8 @@ nr_session::state_t nr_session::handle_state_auctioning(
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
 
+			session_id = get_id().to_string();
+			
 			d->remove_auction_rules(session_id, rule);
 
 			state_timer.start(d, config->get_nr_response_timeout() );
@@ -853,6 +860,8 @@ nr_session::handle_state_pending_teardown(dispatcher *d, event *evt)
 			LogWarn("response timeout, restarting timer.");
 			
 			inc_create_counter();
+			
+			session_id = get_id().to_string();
 			
 			d->remove_auction_rules(session_id, rule);
 

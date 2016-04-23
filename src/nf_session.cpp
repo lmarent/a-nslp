@@ -1207,6 +1207,8 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
 
+			session_id = get_id().to_string();
+			
 			d->remove_auction_rules(session_id, rule);
 
 			state_timer.start(d, lifetime);
@@ -1241,6 +1243,8 @@ nf_session::state_t nf_session::handle_state_auctioning(
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
 
+			session_id = get_id().to_string();
+			
 			d->remove_auction_rules(session_id, rule);
 
 			state_timer.start(d, lifetime);
@@ -1265,7 +1269,9 @@ nf_session::state_t nf_session::handle_state_auctioning(
 
 		// Uninstall the previous rules.
 		if (rule->get_number_mspec_response_objects() > 0){
-
+			
+			session_id = get_id().to_string();
+			
 			d->remove_auction_rules(session_id, rule);
 
 			state_timer.start(d, get_response_timeout());
@@ -1317,6 +1323,8 @@ nf_session::state_t nf_session::handle_state_auctioning(
 				// Uninstall the previous rules.
 				if (rule->get_number_mspec_response_objects() > 0){
 
+					session_id = get_id().to_string();
+					
 					d->remove_auction_rules(session_id, rule);
 
 					state_timer.start(d, get_response_timeout());
@@ -1346,6 +1354,8 @@ nf_session::state_t nf_session::handle_state_auctioning(
 			// Uninstall the previous rules.
 			if (rule->get_number_mspec_response_objects() > 0){
 
+				session_id = get_id().to_string();
+				
 				d->remove_auction_rules(session_id, rule);
 
 				state_timer.start(d, get_response_timeout());

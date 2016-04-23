@@ -241,9 +241,26 @@ session *session_manager::remove_session(const session_id &sid)
 	session_table.erase(sid);
 
 	LogInfo("removed session " << s->get_id());
-
+	
+	store_session_asdone(s);
+	
 	pthread_mutex_unlock(&mutex);
 	uninstall_cleanup_handler();
 
 	return s; // either the session or NULL
+}
+
+
+/* -------------------- storeBidAsDone -------------------- */
+
+void session_manager::store_session_asdone(session *s)
+{
+    
+    sessionDone.push_back(s);
+
+    if (sessionDone.size() > DONE_SESSION_LIST_SIZE) {
+        // remove session
+        saveDelete(sessionDone.front());
+        sessionDone.pop_front();
+    }
 }

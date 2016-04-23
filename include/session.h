@@ -33,6 +33,7 @@
 #include "session_id.h"
 #include "address.h"
 #include "auction_rule.h"
+#include "lock.h"
 #include <vector>
 
 
@@ -150,12 +151,16 @@ class session {
 	void set_request_mspec_object(msg::anslp_mspec_object *object);
 	
 	size_t get_number_mspec_request_objects();
+
+	int acquire();
+	
+	int release();
 		
   protected:
   
-	session();
+	session(lock *lockO = NULL);
 	
-	session(const session_id &sid);
+	session(const session_id &sid, lock *lockO = NULL);
 
 	void check_lifetime(uint32 lifetime, uint32 max_lifetime)
 		const throw (override_lifetime);
@@ -185,13 +190,16 @@ class session {
 	session_id id;
 	
 	session_type_t type;
-
+	
 	uint32 msn;
 	
 	uint32 msg_hop_count;
-	
-	pthread_mutex_t	mutex;
 
+	// The locking object, it can be giving for implementing Strategized Locking Pattern
+	// if nothing is given, it creates a locking by default. 
+	// In any case the session object is the owner of this memory and delete it. 
+	lock *lock_;	
+	
 	void init();
 };
 

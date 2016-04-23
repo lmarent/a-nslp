@@ -33,6 +33,7 @@
 #include "session.h"
 #include "dispatcher.h"
 #include "msg/selection_auctioning_entities.h"
+#include "thread_mutex_lockable.h"
 #include <iostream>
 
 
@@ -51,7 +52,7 @@ using protlib::uint32;
  * A random session ID is created and the message sequence number is set to 0.
  * Additionally, the mutex is initialized.
  */
-session::session() : rule(NULL), id(), msn(0)
+session::session(lock *lockO) : rule(NULL), id(), msn(0), lock_ (lockO)
 {
 	init();
 }
@@ -65,7 +66,7 @@ session::session() : rule(NULL), id(), msn(0)
  *
  * @param sid a hopefully unique session id
  */
-session::session(const session_id &sid) : rule(NULL), id(sid), msn(0)
+session::session(const session_id &sid, lock *lockO) : rule(NULL), id(sid), msn(0), lock_ (lockO)
 {
 	init();
 }
@@ -79,13 +80,14 @@ session::~session()
 	
 	LogDebug("Starting destroy session");
 	
-	pthread_mutex_destroy(&mutex);
-	
 	
 	if (rule != NULL){
 		delete rule;
 	}
 	
+	if (lock_ != NULL){
+		delete lock_;
+	}
 	LogDebug("Ending destroy session");
 	
 }
@@ -94,22 +96,14 @@ session::~session()
 /**
  * A helper method for the constructors, to avoid code duplication.
  */
-void session::init() {
-	pthread_mutexattr_t mutex_attr;
-
-	pthread_mutexattr_init(&mutex_attr);
-
-#ifdef _DEBUG
-	pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
-#else
-	pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_NORMAL);
-#endif
-
-	pthread_mutex_init(&mutex, &mutex_attr);
-
-	pthread_mutexattr_destroy(&mutex_attr); // valid, doesn't affect mutex
-	
+void session::init() 
+{
+		
 	rule = new auction_rule();
+	
+	if (lock_ == NULL){
+		lock_ = new lock(new thread_mutex_lockable());
+	}
 }
 
 
@@ -121,18 +115,10 @@ void session::init() {
  */
 void session::process(dispatcher *d, event *evt) 
 {
-	typedef void (*cleanup_t)(void *);
-	int ret;
 
-	pthread_cleanup_push((cleanup_t) pthread_mutex_unlock, (void *) &mutex);
-	ret = pthread_mutex_lock(&mutex);
-	assert( ret == 0 );
 
 	process_event(d, evt);	// implemented by child classes
 
-	ret = pthread_mutex_unlock(&mutex);
-	assert( ret == 0 );
-	pthread_cleanup_pop(0);
 }
 
 
@@ -279,3 +265,16 @@ session::set_reponse_objects(api_install_event *install, auction_rule *act_rule)
 					<< act_rule->get_number_mspec_response_objects());
 	
 }
+
+
+int 
+session::acquire()
+{ 
+	return lock_->acquire(); 
+}
+	
+int 
+session::release() 
+{ 
+	return lock_->release(); 
+} 

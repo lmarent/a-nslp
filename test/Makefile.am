@@ -16,6 +16,7 @@ test_runner_SOURCES =  @top_srcdir@/src/benchmark_journal.cpp \
 					   @top_srcdir@/src/ni_session.cpp \
 					   @top_srcdir@/src/nr_session.cpp \
 					   @top_srcdir@/src/session_manager.cpp \
+					   @top_srcdir@/src/thread_mutex_lockable.cpp \
 					   @top_srcdir@/src/session.cpp \
 					   @top_srcdir@/src/netauct_rule_installer.cpp \
 				       @top_srcdir@/src/anslp_config.cpp \

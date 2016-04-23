@@ -35,6 +35,9 @@ pkginclude_HEADERS = $(INC_DIR)/anslp_config.h \
 					 $(INC_DIR)/nop_auction_rule_installer.h \
 					 $(INC_DIR)/benchmark_journal.h \
 					 $(INC_DIR)/nr_session.h \
+					 $(INC_DIR)/lockable.h \
+					 $(INC_DIR)/thread_mutex_lockable.h \
+					 $(INC_DIR)/lock.h \
 					 $(INC_DIR)/dispatcher.h \
 					 $(INC_DIR)/session.h \
 					 $(INC_DIR)/events.h \
@@ -69,6 +72,7 @@ libanslp_la_SOURCES = anslp_timers.cpp \
 					  ni_session.cpp \
 					  nop_auction_rule_installer.cpp \
 					  nr_session.cpp \
+					  thread_mutex_lockable.cpp \
 					  session.cpp \
 					  session_id.cpp \
 					  session_manager.cpp \

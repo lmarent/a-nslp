@@ -172,7 +172,6 @@ void dispatcher::process(event *evt) throw () {
 		s = create_session(evt);
 
 	MP(benchmark_journal::POST_SESSION_MANAGER);
-
 	/*
 	 * If we have a session now, process the event. Otherwise simply
 	 * discard it. Top candidates for discarding are obsolete timers.
@@ -181,7 +180,9 @@ void dispatcher::process(event *evt) throw () {
 		
 		try {
 			MP(benchmark_journal::PRE_SESSION);
+			s->acquire();
 			s->process(this, evt);
+			s->release();
 			MP(benchmark_journal::POST_SESSION);
 		}
 		catch ( ... ) {
@@ -191,12 +192,11 @@ void dispatcher::process(event *evt) throw () {
 		}
 
 		/*
-		 * If a session is in state FINAL after processing, delete it.
-		 */
-		if ( (s != NULL) && (s->is_final()) ) {
+		 * If a session is in state FINAL after processing, delete it. 
+		*/
+		if (s->is_final()){
 			session_mgr->remove_session(s->get_id());
-			delete s;
-		}
+		}	
 	}
 	else {
 		// Don't log obsolete timers, there are lots of them.

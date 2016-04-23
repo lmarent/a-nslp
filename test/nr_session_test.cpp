@@ -395,9 +395,9 @@ ResponderTest::testPendingInstalling() {
 	e4->setObject( key5, mess2->copy());
 
 	process(s2, e4);
-	ASSERT_STATE(s2, nr_session::STATE_ANSLP_CLOSE);
+	ASSERT_STATE(s2, nr_session::STATE_ANSLP_PENDING_TEARDOWN);
 	ASSERT_RESPONSE_MESSAGE_SENT(d, information_code::sc_permanent_failure);
-	ASSERT_NO_TIMER(d);
+	ASSERT_TIMER_STARTED(d, s2.get_state_timer());
 
 	/*
 	 * STATE_ANSLP_PENDING_INSTALLING ---[STATE_TIMEOUT && counter > max_retry]---> STATE_ANSLP_CLOSE

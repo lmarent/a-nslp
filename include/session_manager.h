@@ -42,6 +42,11 @@
 namespace anslp 
 {
 
+	//! list of done auctions
+	typedef list<session*>            sessionDone_t;
+	typedef list<session*>::iterator  sessionDoneIter_t;
+
+
 /**
  * The session manager.
  *
@@ -79,12 +84,22 @@ class session_manager
 	
 	hash_map<session_id, session *> session_table;
 	
+	sessionDone_t sessionDone;
+	
 	typedef hash_map<session_id, session *>::const_iterator c_iter;
 
 	session_id create_unique_id() const;
 
 	// Large initial size to avoid resizing of the session table.
 	static const int SESSION_TABLE_SIZE = 500000;
+	
+	static const int DONE_SESSION_LIST_SIZE = 300; 
+	
+	/*! \short add the session to the list of finished sessions
+
+       \arg \c session - session to be set as done
+    */
+    void store_session_asdone(session *s);
 };
 
 
